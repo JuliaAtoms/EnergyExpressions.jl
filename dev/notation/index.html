@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Notation · EnergyExpressions</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/><script src="../assets/latex.js"></script></head><body><nav class="toc"><h1>EnergyExpressions</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Home</a></li><li><span class="toctext">Theory</span><ul><li class="current"><a class="toctext" href>Notation</a><ul class="internal"><li class="toplevel"><a class="toctext" href="#One-body-matrix-elements-1">One-body matrix elements</a></li><li class="toplevel"><a class="toctext" href="#Two-body-matrix-elements-1">Two-body matrix elements</a></li><li class="toplevel"><a class="toctext" href="#Repulsion-potential-1">Repulsion potential</a></li></ul></li><li><a class="toctext" href="../energy_expressions/">Energy Expressions</a></li><li><a class="toctext" href="../calculus_of_variations/">Calculus of Variations</a></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Theory</li><li><a href>Notation</a></li></ul><a class="edit-page" href="https://github.com/JuliaAtoms/EnergyExpressions.jl/blob/master/docs/src/notation.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Notation</span><a class="fa fa-bars" href="#"></a></div></header><p>Throughout, <a href="https://en.wikipedia.org/wiki/Einstein_notation">Einstein notation</a> is employed, meaning that indices appearing twice on only one side of an equation are summed over, e.g.:</p><div>\[c = \braket{i}{i} \iff c \equiv \sum_i \braket{i}{i},\]</div><p>whereas</p><div>\[c_{ka} = \braket{a}{k}\]</div><p>implies no summation.</p><h1><a class="nav-anchor" id="Spin-orbitals-1" href="#Spin-orbitals-1">Spin-orbitals</a></h1><div>\[\begin{equation}
+\chi_a(\tau_i) \defd
+\psi_a(\vec{r}_i)\sigma_a(s_i),
+\end{equation}\]</div><p>where <span>$\sigma(s)$</span> is either <span>$\alpha$</span> (spin up) or <span>$\beta$</span> (spin down).</p><p>The overlap between two spin-orbitals is given by</p><div>\[\begin{equation}
+\braket{i}{j} \defd \int\diff{\tau} \conj{\chi_i}(\tau) \chi_j(\tau),
+\end{equation}\]</div><p>which, the case of orthogonal bases (this is a matter of choice), simplifies to</p><div>\[\braket{i}{j} = \delta_{ij}.\]</div><h1><a class="nav-anchor" id="One-body-matrix-elements-1" href="#One-body-matrix-elements-1">One-body matrix elements</a></h1><div>\[\begin{equation}
+I(a,b) \equiv \onebody{a}{b} \defd \matrixel{a}{\hamiltonian}{b},
+\end{equation}\]</div><p>where</p><div>\[\begin{equation}
+\hamiltonian \defd T + V
+\end{equation}\]</div><p>is the (possibly time-dependent) one-body Hamiltonian.</p><h1><a class="nav-anchor" id="Two-body-matrix-elements-1" href="#Two-body-matrix-elements-1">Two-body matrix elements</a></h1><div>\[\begin{equation}
+\twobodydx{ab}{cd} \defd
+\twobody{ab}{cd} - \twobody{ab}{dc},
+\end{equation}\]</div><p>where</p><div>\[\begin{equation}
+\begin{aligned}
+\twobody{ab}{cd} &amp;\defd
+\int\diff{\tau_1}\diff{\tau_2}
+\conj{\chi_a}(\tau_1)
+\conj{\chi_b}(\tau_2)
+\frac{1}{r_{12}}
+\chi_c(\tau_1)
+\chi_d(\tau_2) \\
+&amp;=
+\delta(\sigma_a,\sigma_c)
+\delta(\sigma_b,\sigma_d)
+\int\diff{\vec{r}_1}\diff{\vec{r}_2}
+\conj{\chi_a}(\vec{r}_1)
+\conj{\chi_b}(\vec{r}_2)
+\frac{1}{r_{12}}
+\chi_c(\vec{r}_1)
+\chi_d(\vec{r}_2).
+\end{aligned}
+\end{equation}\]</div><p>The special case</p><div>\[\begin{equation}
+F(a,b) \defd \twobody{ab}{ab}
+\end{equation}\]</div><p>is called the <em>direct interaction</em> (gives rise to the screening potential), and the other special case</p><div>\[\begin{equation}
+G(a,b) \defd \twobody{ab}{ba}
+\end{equation}\]</div><p>is called the <em>exchange interaction</em> (gives rise to the non-local potential).</p><p>NB</p><div>\[\begin{equation}
+\twobodydx{ii}{ii} = 0,
+\end{equation}\]</div><p>such that</p><div>\[\begin{equation}
+\frac{1}{2}\twobodydx{ij}{ij} \equiv
+\sum_{i,j&lt;i}\twobodydx{ij}{ij},
+\end{equation}\]</div><p>i.e. we sum over <span>$i,j$</span>, divide by two to avoid double-counting and avoid automatically the case <span>$i=j$</span>.</p><h1><a class="nav-anchor" id="Repulsion-potential-1" href="#Repulsion-potential-1">Repulsion potential</a></h1><p>We also have the repulsion potential formed from two orbitals <span>$a,b$</span>:</p><div>\[\begin{equation}
+\twobody{a}{b} \defd
+\int\diff{\tau_1}\conj{\chi_a}(\tau_1)\frac{1}{r_{12}}\chi_b(\tau_1)=
+\delta(\sigma_a,\sigma_b)\int\diff{\vec{r}_1}\conj{\chi_a}(\vec{r}_1)\frac{1}{r_{12}}\chi_b(\vec{r}_1).
+\end{equation}\]</div><footer><hr/><a class="previous" href="../"><span class="direction">Previous</span><span class="title">Home</span></a><a class="next" href="../energy_expressions/"><span class="direction">Next</span><span class="title">Energy Expressions</span></a></footer></article></body></html>
