@@ -133,7 +133,15 @@ var documenterSearchIndex = {"docs": [
     "page": "Calculus of Variations",
     "title": "Calculus of Variations",
     "category": "section",
-    "text": ""
+    "text": "Calculus of Variations is a mathematical technique for deriving differential equations, whose solutions fulfil a certain criterion. For the case at hand, we are interested in solutions whose total energy matches with the one set up by the energy expression for all the electrons in a system. The following variational rules are useful:beginequation\nvarybraabraketab = ketb\nendequationwhere the notation varybraabraketab means vary braketab with respect to braa.beginequation\nbegincases\nvarybralonebodylk =\nvarybralmatrixellhamiltoniank =\nhamiltonianketk\nvaryketkonebodylk =\nbralhamiltonian\nendcases\nendequationbeginequation\nbeginaligned\nvarybraatwobodydxabcd =\nvarybraatwobodyabcd-twobodyabdc =\nvarybraamatrixelabr_12^-1cd-matrixelabr_12^-1dc \n=\nmatrixelbr_12^-1dketc-\nmatrixelbr_12^-1cketd equiv\ntwobodybdketc-\ntwobodybcketddefd\n(directbd-exchangebd)ketc\nendaligned\nendequation"
+},
+
+{
+    "location": "calculus_of_variations/#Helium-1",
+    "page": "Calculus of Variations",
+    "title": "Helium",
+    "category": "section",
+    "text": "Returning to our helium example (now only considering the ground state):DocTestSetup = quote\n    using AtomicLevels\n    using EnergyExpressions\nendjulia> he = spin_configurations(c\"1s2\")[1]\n1s²\n\njulia> a,b = he.orbitals\n2-element Array{SpinOrbital{Orbital{Int64}},1}:\n 1s₀α\n 1s₀βFirst we find the one- and two-body energy expressions:julia> h = OneBodyEnergyExpression(he,he)\nI(1s₀α) + I(1s₀β)\n\njulia> HC = TwoBodyEnergyExpression(he,he)\n[1s₀β 1s₀α||1s₀β 1s₀α]We can now vary these expressions with respect to the different spin-orbitals; by convention, we vary the expressions with respect to the conjugate orbitals, to derive equations for the unconjugated ones (this is important for complex orbitals, which is the case when studying time-dependent problems):julia> h.integrals\n2-element Array{OneBodyIntegral{SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}}},1}:\n I(1s₀α)\n I(1s₀β)\n\njulia> diff.(h.integrals, Ref(conj(a)))\n2-element Array{OneBodyHamiltonian,1}:\n ĥ1s₀α\n ĥ0This result means that the variation of the first integral in the one-body expression yields the one-body Hamiltonian hamiltonian acting on the orbital 1s₀α, whereas the second integral, not containing the first orbital, varies to yield zero.If we instead vary with respect to the second orbital, unconjugated this time, we getjulia> diff.(h.integrals, Ref(b))\n2-element Array{OneBodyHamiltonian,1}:\n ĥ0\n 1s₀β†ĥSimilarly, for the two-body energy expression:julia> diff.(HC.integrals, Ref(conj(a)))\n1-element Array{DirectExchangePotentials{SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}}},1}:\n [1s₀β||1s₀β]1s₀αDocTestSetup = nothing"
 },
 
 ]}

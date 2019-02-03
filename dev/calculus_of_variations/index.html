@@ -1,2 +1,47 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Calculus of Variations · EnergyExpressions</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/><script src="../assets/latex.js"></script></head><body><nav class="toc"><h1>EnergyExpressions</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Home</a></li><li><span class="toctext">Theory</span><ul><li><a class="toctext" href="../notation/">Notation</a></li><li><a class="toctext" href="../energy_expressions/">Energy Expressions</a></li><li class="current"><a class="toctext" href>Calculus of Variations</a><ul class="internal"></ul></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Theory</li><li><a href>Calculus of Variations</a></li></ul><a class="edit-page" href="https://github.com/JuliaAtoms/EnergyExpressions.jl/blob/master/docs/src/calculus_of_variations.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Calculus of Variations</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Calculus-of-Variations-1" href="#Calculus-of-Variations-1">Calculus of Variations</a></h1><footer><hr/><a class="previous" href="../energy_expressions/"><span class="direction">Previous</span><span class="title">Energy Expressions</span></a></footer></article></body></html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Calculus of Variations · EnergyExpressions</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/><script src="../assets/latex.js"></script></head><body><nav class="toc"><h1>EnergyExpressions</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Home</a></li><li><span class="toctext">Theory</span><ul><li><a class="toctext" href="../notation/">Notation</a></li><li><a class="toctext" href="../energy_expressions/">Energy Expressions</a></li><li class="current"><a class="toctext" href>Calculus of Variations</a><ul class="internal"><li><a class="toctext" href="#Helium-1">Helium</a></li></ul></li></ul></li></ul></nav><article id="docs"><header><nav><ul><li>Theory</li><li><a href>Calculus of Variations</a></li></ul><a class="edit-page" href="https://github.com/JuliaAtoms/EnergyExpressions.jl/blob/master/docs/src/calculus_of_variations.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Calculus of Variations</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Calculus-of-Variations-1" href="#Calculus-of-Variations-1">Calculus of Variations</a></h1><p><a href="https://en.wikipedia.org/wiki/Calculus_of_variations">Calculus of Variations</a> is a mathematical technique for deriving differential equations, whose solutions fulfil a certain criterion. For the case at hand, we are interested in solutions whose total energy matches with the one set up by the energy expression for all the electrons in a system. The following variational rules are useful:</p><div>\[\begin{equation}
+\vary{\bra{a}}\braket{a}{b} = \ket{b},
+\end{equation}\]</div><p>where the notation <span>$\vary{\bra{a}}\braket{a}{b}$</span> means <em>vary <span>$\braket{a}{b}$</span> with respect to <span>$\bra{a}$</span></em>.</p><div>\[\begin{equation}
+\begin{cases}
+\vary{\bra{l}}\onebody{l}{k} &amp;=
+\vary{\bra{l}}\matrixel{l}{\hamiltonian}{k} =
+\hamiltonian\ket{k},\\
+\vary{\ket{k}}\onebody{l}{k} &amp;=
+\bra{l}\hamiltonian.
+\end{cases}
+\end{equation}\]</div><div>\[\begin{equation}
+\begin{aligned}
+\vary{\bra{a}}\twobodydx{ab}{cd} &amp;=
+\vary{\bra{a}}\{\twobody{ab}{cd}-\twobody{ab}{dc}\} =
+\vary{\bra{a}}\{\matrixel{ab}{r_{12}^{-1}}{cd}-\matrixel{ab}{r_{12}^{-1}}{dc}\} \\
+&amp;=
+\matrixel{b}{r_{12}^{-1}}{d}\ket{c}-
+\matrixel{b}{r_{12}^{-1}}{c}\ket{d} \equiv
+\twobody{b}{d}\ket{c}-
+\twobody{b}{c}\ket{d}\defd
+(\direct{bd}-\exchange{bd})\ket{c}.
+\end{aligned}
+\end{equation}\]</div><h2><a class="nav-anchor" id="Helium-1" href="#Helium-1">Helium</a></h2><p>Returning to our helium example (now only considering the ground state):</p><pre><code class="language-julia-repl">julia&gt; he = spin_configurations(c&quot;1s2&quot;)[1]
+1s²
+
+julia&gt; a,b = he.orbitals
+2-element Array{SpinOrbital{Orbital{Int64}},1}:
+ 1s₀α
+ 1s₀β</code></pre><p>First we find the one- and two-body energy expressions:</p><pre><code class="language-julia-repl">julia&gt; h = OneBodyEnergyExpression(he,he)
+I(1s₀α) + I(1s₀β)
+
+julia&gt; HC = TwoBodyEnergyExpression(he,he)
+[1s₀β 1s₀α||1s₀β 1s₀α]</code></pre><p>We can now vary these expressions with respect to the different spin-orbitals; by convention, we vary the expressions with respect to the <em>conjugate</em> orbitals, to derive equations for the <em>unconjugated</em> ones (this is important for complex orbitals, which is the case when studying time-dependent problems):</p><pre><code class="language-julia-repl">julia&gt; h.integrals
+2-element Array{OneBodyIntegral{SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}}},1}:
+ I(1s₀α)
+ I(1s₀β)
+
+julia&gt; diff.(h.integrals, Ref(conj(a)))
+2-element Array{OneBodyHamiltonian,1}:
+ ĥ1s₀α
+ ĥ0</code></pre><p>This result means that the variation of the first integral in the one-body expression yields the one-body Hamiltonian <span>$\hamiltonian$</span> acting on the orbital <code>1s₀α</code>, whereas the second integral, not containing the first orbital, varies to yield zero.</p><p>If we instead vary with respect to the second orbital, <em>unconjugated</em> this time, we get</p><pre><code class="language-julia-repl">julia&gt; diff.(h.integrals, Ref(b))
+2-element Array{OneBodyHamiltonian,1}:
+ ĥ0
+ 1s₀β†ĥ</code></pre><p>Similarly, for the two-body energy expression:</p><pre><code class="language-julia-repl">julia&gt; diff.(HC.integrals, Ref(conj(a)))
+1-element Array{DirectExchangePotentials{SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}}},1}:
+ [1s₀β||1s₀β]1s₀α</code></pre><footer><hr/><a class="previous" href="../energy_expressions/"><span class="direction">Previous</span><span class="title">Energy Expressions</span></a></footer></article></body></html>
