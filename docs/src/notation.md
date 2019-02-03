@@ -1,5 +1,17 @@
-# Spin-orbitals
+Throughout, [Einstein
+notation](https://en.wikipedia.org/wiki/Einstein_notation) is
+employed, meaning that indices appearing twice on only one side of an
+equation are summed over, e.g.:
 
+$$c = \braket{i}{i} \iff c \equiv \sum_i \braket{i}{i},$$
+
+whereas
+
+$$c_{ka} = \braket{a}{k}$$
+
+implies no summation.
+
+# Spin-orbitals
 
 $$\begin{equation}
 \chi_a(\tau_i) \defd
@@ -8,6 +20,17 @@ $$\begin{equation}
 
 where $\sigma(s)$ is either $\alpha$ (spin up) or $\beta$
 (spin down).
+
+The overlap between two spin-orbitals is given by
+
+$$\begin{equation}
+\braket{i}{j} \defd \int\diff{\tau} \conj{\chi_i}(\tau) \chi_j(\tau),
+\end{equation}$$
+
+which, the case of orthogonal bases (this is a matter of choice),
+simplifies to
+
+$$\braket{i}{j} = \delta_{ij}.$$
 
 # One-body matrix elements
 
