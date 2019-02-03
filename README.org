@@ -1,0 +1,23 @@
+#+TITLE: EnergyExpressions.jl
+#+AUTHOR: Stefanos Carlström
+#+EMAIL: stefanos.carlstrom@gmail.com
+
+[[https://travis-ci.org/JuliaAtoms/EnergyExpressions.jl][https://travis-ci.org/JuliaAtoms/EnergyExpressions.jl.svg?branch=master]]
+[[https://ci.appveyor.com/project/jagot/energyexpressions-jl][https://img.shields.io/appveyor/ci/jagot/energyexpressions-jl.svg?logo=appveyor]]
+[[https://codecov.io/gh/JuliaAtoms/EnergyExpressions.jl][https://codecov.io/gh/JuliaAtoms/EnergyExpressions.jl/branch/master/graph/badge.svg]]
+
+Small library for setting up energy expressions for electronic systems
+that can be used to derive differential equations via calculus of
+variations. The mathematics are not tied to atomic systems (which are
+spherically symmetrical), and most of the code in this library could
+be used to derive equations for e.g. molecules. However, the
+=AbstractOrbital= and =SpinOrbital= types are taken from the
+[[https://github.com/JuliaAtoms/AtomicLevels.jl][AtomicLevels.jl]] library at present.
+
+When dealing with configurations of spin-orbitals, where /all/ quantum
+numbers are specified, it is trivial to derive the energy
+expression. For e.g. configuration state functions (CSFs), which are
+spin-averaged linear combinations of multiple Slater determinants, the
+problem is much more involved and requires dealing with angular
+momentum coupling and tensor algebra. This library could be used as a
+basis for building such functionality.
