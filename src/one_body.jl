@@ -7,7 +7,7 @@ Base.:(==)(a::OneBodyHamiltonian, b::OneBodyHamiltonian) = a.orb == b.orb
 function Base.show(io::IO, h::OneBodyHamiltonian)
     h.orb isa Conjugate && show(io, h.orb)
     write(io, "ĥ")
-    !(h.orb isa Conjugate) || show(io, h.orb)
+    h.orb isa Conjugate || show(io, h.orb)
 end
 
 Base.iszero(h::OneBodyHamiltonian) = h.orb == 0
