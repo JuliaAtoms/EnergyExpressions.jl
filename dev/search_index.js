@@ -144,4 +144,124 @@ var documenterSearchIndex = {"docs": [
     "text": "Returning to our helium example (now only considering the ground state):DocTestSetup = quote\n    using AtomicLevels\n    using EnergyExpressions\nendjulia> he = spin_configurations(c\"1s2\")[1]\n1s²\n\njulia> a,b = he.orbitals\n2-element Array{SpinOrbital{Orbital{Int64}},1}:\n 1s₀α\n 1s₀βFirst we find the one- and two-body energy expressions:julia> h = OneBodyEnergyExpression(he,he)\nI(1s₀α) + I(1s₀β)\n\njulia> HC = TwoBodyEnergyExpression(he,he)\n[1s₀β 1s₀α||1s₀β 1s₀α]We can now vary these expressions with respect to the different spin-orbitals; by convention, we vary the expressions with respect to the conjugate orbitals, to derive equations for the unconjugated ones (this is important for complex orbitals, which is the case when studying time-dependent problems):julia> h.integrals\n2-element Array{OneBodyIntegral{SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}}},1}:\n I(1s₀α)\n I(1s₀β)\n\njulia> diff.(h.integrals, Ref(conj(a)))\n2-element Array{OneBodyHamiltonian,1}:\n ĥ1s₀α\n ĥ0This result means that the variation of the first integral in the one-body expression yields the one-body Hamiltonian hamiltonian acting on the orbital 1s₀α, whereas the second integral, not containing the first orbital, varies to yield zero.If we instead vary with respect to the second orbital, unconjugated this time, we getjulia> diff.(h.integrals, Ref(b))\n2-element Array{OneBodyHamiltonian,1}:\n ĥ0\n 1s₀β†ĥSimilarly, for the two-body energy expression:julia> diff.(HC.integrals, Ref(conj(a)))\n1-element Array{DirectExchangePotentials{SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}}},1}:\n [1s₀β||1s₀β]1s₀αDocTestSetup = nothing"
 },
 
+{
+    "location": "slater_determinants/#",
+    "page": "Slater determinants",
+    "title": "Slater determinants",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "slater_determinants/#Slater-determinants-1",
+    "page": "Slater determinants",
+    "title": "Slater determinants",
+    "category": "section",
+    "text": "Slater determinants are wavefunctions constructed from anti-symmetrized one-particle states.CurrentModule = EnergyExpressions"
+},
+
+{
+    "location": "slater_determinants/#EnergyExpressions.SlaterDeterminant",
+    "page": "Slater determinants",
+    "title": "EnergyExpressions.SlaterDeterminant",
+    "category": "type",
+    "text": "SlaterDeterminant(orbitals::Vector{O})\n\nConstructs a Slater determinant from a set of spin-orbitals.\n\nExamples\n\njulia> SlaterDeterminant([:a, :b])\na(1)b(2) - a(2)b(1)\n\njulia> SlaterDeterminant([:a, :b, :c])\na(1)b(2)c(3) - a(1)b(3)c(2) - a(2)b(1)c(3) + a(2)b(3)c(1) + a(3)b(1)c(2) - a(3)b(2)c(1)\n\n\n\n\n\n"
+},
+
+{
+    "location": "slater_determinants/#EnergyExpressions.SlaterDeterminant-Tuple{Configuration{#s1} where #s1<:SpinOrbital}",
+    "page": "Slater determinants",
+    "title": "EnergyExpressions.SlaterDeterminant",
+    "category": "method",
+    "text": "SlaterDeterminant(configuration::Configuration{<:SpinOrbital})\n\nConstructs a Slater determinant from the spin-orbitals of the spin-configuration configuration.\n\nExamples\n\njulia> SlaterDeterminant(spin_configurations(c\"1s2\")[1])\n1s₀α(1)1s₀β(2) - 1s₀α(2)1s₀β(1)\n\n\n\n\n\n"
+},
+
+{
+    "location": "slater_determinants/#Base.length-Tuple{SlaterDeterminant}",
+    "page": "Slater determinants",
+    "title": "Base.length",
+    "category": "method",
+    "text": "length(slater_determinant)\n\nReturn the number of spin-orbitals in the Slater determinant.\n\n\n\n\n\n"
+},
+
+{
+    "location": "slater_determinants/#EnergyExpressions.AdjointSlaterDeterminant",
+    "page": "Slater determinants",
+    "title": "EnergyExpressions.AdjointSlaterDeterminant",
+    "category": "type",
+    "text": "AdjointSlaterDeterminant(slater_determinant)\n\nRepresentation of the Hermitian conjugate (dual vector) of a Slater determinant. Constructed via the usual adjoint operator.\n\n\n\n\n\n"
+},
+
+{
+    "location": "slater_determinants/#Base.adjoint-Tuple{SlaterDeterminant}",
+    "page": "Slater determinants",
+    "title": "Base.adjoint",
+    "category": "method",
+    "text": "adjoint(slater_determinant)\n\nConstruct the adjoint of slater_determinant\n\nExamples\n\njulia> SlaterDeterminant([:a, :b])\'\n[a(1)b(2) - a(2)b(1)]†\n\n\n\n\n\n"
+},
+
+{
+    "location": "slater_determinants/#Base.length-Tuple{EnergyExpressions.AdjointSlaterDeterminant}",
+    "page": "Slater determinants",
+    "title": "Base.length",
+    "category": "method",
+    "text": "length(adjoint_slater_determinant)\n\nReturn the number of spin-orbitals in the adjoint Slater determinant.\n\n\n\n\n\n"
+},
+
+{
+    "location": "slater_determinants/#Construction-of-Slater-determinants-1",
+    "page": "Slater determinants",
+    "title": "Construction of Slater determinants",
+    "category": "section",
+    "text": "SlaterDeterminant\nSlaterDeterminant(::Configuration{<:SpinOrbital})\nlength(::SlaterDeterminant)\nAdjointSlaterDeterminant\nadjoint(::SlaterDeterminant)\nlength(::AdjointSlaterDeterminant)"
+},
+
+{
+    "location": "slater_determinants/#EnergyExpressions.NBodyOperator",
+    "page": "Slater determinants",
+    "title": "EnergyExpressions.NBodyOperator",
+    "category": "type",
+    "text": "NBodyOperator{N}\n\nN-body operator coupling N bodies each between two Slater determinants\n\nExamples\n\njulia> ZeroBodyOperator\nΩ₀\n\njulia> OneBodyOperator\nΩ₁\n\njulia> TwoBodyOperator\nΩ₂\n\njulia> NBodyOperator{6}\nΩ₆\n\n\n\n\n\n"
+},
+
+{
+    "location": "slater_determinants/#EnergyExpressions.NBodyTermFactor",
+    "page": "Slater determinants",
+    "title": "EnergyExpressions.NBodyTermFactor",
+    "category": "type",
+    "text": "NBodyTermFactor\n\nAbstract type for a factor in a term in a N-body matrix element expansion\n\n\n\n\n\n"
+},
+
+{
+    "location": "slater_determinants/#EnergyExpressions.OrbitalOverlap",
+    "page": "Slater determinants",
+    "title": "EnergyExpressions.OrbitalOverlap",
+    "category": "type",
+    "text": "OrbitalOverlap(a,b)\n\nRepresents the overlap between the orbitals a and b in a N-body matrix element expansion.\n\nExamples\n\njulia> EnergyExpressions.OrbitalOverlap(:a,:b)\n⟨a|b⟩\n\n\n\n\n\n"
+},
+
+{
+    "location": "slater_determinants/#EnergyExpressions.OrbitalMatrixElement",
+    "page": "Slater determinants",
+    "title": "EnergyExpressions.OrbitalMatrixElement",
+    "category": "type",
+    "text": "OrbitalMatrixElement(a,o,b)\n\nRepresents the N-body matrix element between the sets of orbitals a and b.\n\nExamples\n\njulia> EnergyExpressions.OrbitalMatrixElement((:a,:b), TwoBodyOperator, (:c,:d))\n⟨a b|Ω₂|c d⟩\n\n\n\n\n\n"
+},
+
+{
+    "location": "slater_determinants/#N-body-operators-1",
+    "page": "Slater determinants",
+    "title": "N-body operators",
+    "category": "section",
+    "text": "NBodyOperator\nNBodyTermFactor\nOrbitalOverlap\nOrbitalMatrixElement"
+},
+
+{
+    "location": "slater_determinants/#Example-usage-1",
+    "page": "Slater determinants",
+    "title": "Example usage",
+    "category": "section",
+    "text": "julia> sa = SlaterDeterminant([:l, :a])\nl(1)a(2) - l(2)a(1)\n\njulia> sb = SlaterDeterminant([:k, :b])\nk(1)b(2) - k(2)b(1)\n\njulia> sa\'ZeroBodyOperator*sb\n+ ⟨l|k⟩⟨a|b⟩ - ⟨l|b⟩⟨a|k⟩ - ⟨a|k⟩⟨l|b⟩ + ⟨a|b⟩⟨l|k⟩\n\njulia> sa\'OneBodyOperator*sb\n+ ⟨l|Ω₁|k⟩⟨a|b⟩ + ⟨l|k⟩⟨a|Ω₁|b⟩ - ⟨l|Ω₁|b⟩⟨a|k⟩ - ⟨l|b⟩⟨a|Ω₁|k⟩ - ⟨a|Ω₁|k⟩⟨l|b⟩ - ⟨a|k⟩⟨l|Ω₁|b⟩ + ⟨a|Ω₁|b⟩⟨l|k⟩ + ⟨a|b⟩⟨l|Ω₁|k⟩"
+},
+
 ]}
