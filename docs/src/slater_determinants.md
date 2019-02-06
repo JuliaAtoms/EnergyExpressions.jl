@@ -6,6 +6,10 @@ wavefunctions constructed from anti-symmetrized one-particle states.
 
 ```@meta
 CurrentModule = EnergyExpressions
+DocTestSetup = quote
+    using EnergyExpressions
+    using AtomicLevels
+end
 ```
 
 ## Construction of Slater determinants
@@ -40,4 +44,8 @@ julia> sa'ZeroBodyOperator*sb
 
 julia> sa'OneBodyOperator*sb
 + ⟨l|Ω₁|k⟩⟨a|b⟩ + ⟨l|k⟩⟨a|Ω₁|b⟩ - ⟨l|Ω₁|b⟩⟨a|k⟩ - ⟨l|b⟩⟨a|Ω₁|k⟩ - ⟨a|Ω₁|k⟩⟨l|b⟩ - ⟨a|k⟩⟨l|Ω₁|b⟩ + ⟨a|Ω₁|b⟩⟨l|k⟩ + ⟨a|b⟩⟨l|Ω₁|k⟩
+```
+
+```@meta
+DocTestSetup = nothing
 ```
