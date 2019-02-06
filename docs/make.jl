@@ -1,5 +1,4 @@
 using Documenter
-import EnergyExpressions
 using EnergyExpressions
 using AtomicLevels
 
