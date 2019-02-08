@@ -305,6 +305,30 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "nbody_matrix_elements/#EnergyExpressions.overlap_matrix",
+    "page": "N-body matrix elements",
+    "title": "EnergyExpressions.overlap_matrix",
+    "category": "function",
+    "text": "overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant[, overlaps=[]])\n\nGenerate the single-particle orbital overlap matrix, between the orbitals in the Slater determinants a and b. All orbitals are assumed to be orthogonal, except for those which are given in overlaps.\n\nExamples\n\nFirst we define two Slater determinants that have some orbitals in common:\n\njulia> sa = SlaterDeterminant([:i, :j, :l,:k̃])\ni(1)j(2)l(3)k̃(4) - i(1)j(2)l(4)k̃(3) - i(1)j(3)l(2)k̃(4) + i(1)j(3)l(4)k̃(2) + …  + i(4)j(1)l(3)k̃(2) + i(4)j(2)l(1)k̃(3) - i(4)j(2)l(3)k̃(1) - i(4)j(3)l(1)k̃(2) + i(4)j(3)l(2)k̃(1)\n\njulia> sb = SlaterDeterminant([:i, :j, :k, :l̃])\ni(1)j(2)k(3)l̃(4) - i(1)j(2)k(4)l̃(3) - i(1)j(3)k(2)l̃(4) + i(1)j(3)k(4)l̃(2) + …  + i(4)j(1)k(3)l̃(2) + i(4)j(2)k(1)l̃(3) - i(4)j(2)k(3)l̃(1) - i(4)j(3)k(1)l̃(2) + i(4)j(3)k(2)l̃(1)\n\nThe orbital overlap matrix by default is\n\njulia> overlap_matrix(sa, sb)\n4×4 SparseArrays.SparseMatrixCSC{EnergyExpressions.NBodyTerm,Int64} with 2 stored entries:\n  [1, 1]  =  1\n  [2, 2]  =  1\n\nwhich has only two non-zero entries, since only two of the orbitals are common between the Slater determinants sa and sb.\n\nWe can then define that the orbitals k̃ and l̃ are non-orthogonal:\n\njulia> overlap_matrix(sa, sb, [OrbitalOverlap(:k̃,:l̃)])\n4×4 SparseArrays.SparseMatrixCSC{EnergyExpressions.NBodyTerm,Int64} with 3 stored entries:\n  [1, 1]  =  1\n  [2, 2]  =  1\n  [4, 4]  =  ⟨k̃|l̃⟩\n\nWe can even specify that the orbital k̃ is non-orthogonal to itself (this can be useful when the k̃ is a linear combination of orthogonal orbitals):\n\njulia> overlap_matrix(sa, sa, [OrbitalOverlap(:k̃,:k̃)])\n4×4 SparseArrays.SparseMatrixCSC{EnergyExpressions.NBodyTerm,Int64} with 4 stored entries:\n  [1, 1]  =  1\n  [2, 2]  =  1\n  [3, 3]  =  1\n  [4, 4]  =  ⟨k̃|k̃⟩\n\nNotice that this overlap matrix was calculated between the Slater determinant sa and itself. \n\n\n\n\n\n"
+},
+
+{
+    "location": "nbody_matrix_elements/#Base.Matrix",
+    "page": "N-body matrix elements",
+    "title": "Base.Matrix",
+    "category": "type",
+    "text": "Matrix(op::QuantumOperator, slater_determinants[, overlaps])\n\nGenerate the matrix corresponding to the quantum operator op, between the different slater_determinants. It is possible to specify non-orthogonalities between single-particle orbitals in overlaps.\n\n\n\n\n\n"
+},
+
+{
+    "location": "nbody_matrix_elements/#N-body-matrix-elements-1",
+    "page": "N-body matrix elements",
+    "title": "N-body matrix elements",
+    "category": "section",
+    "text": "CurrentModule = EnergyExpressions\nDocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendThe matrix element of an N-body operator between two Slater determinants may be expanded according to the Löwdin rules (which reduce to the Slater–Condon rules if all single-particle orbitals are orthogonal):beginequation\nlabeleqnmatrix-element-expansion\nmatrixelPhi_AOmega_nPhi_B =\nfrac1nsum_p (-)^p\nmatrixelk_1k_2k_nOmega_nl_1l_2l_n\nD^AB(k_1k_2k_nl_1l_2l_n)\nendequationwhere D^AB(k_1k_2k_nl_1l_2l_n) is the determinant minor of the orbital overlap determinant D^AB with the rows k_1k_2k_n and columns l_1l_2l_n stricken out, and p runs over all permutations.In general, a term in the expansion is thus of the formbeginequation\nalphamatrixelk_1k_2k_nOmega_nl_1l_2l_nbraketabbraketcddotsbraketyz\nendequationwhere alpha is a scalar. This is represented by NBodyTerm type.NBodyTermFactor\nOrbitalOverlap\nOrbitalMatrixElement\nNBodyTerm\nNBodyMatrixElement\noverlap_matrix\nMatrix"
+},
+
+{
     "location": "nbody_matrix_elements/#EnergyExpressions.isabovediagonal",
     "page": "N-body matrix elements",
     "title": "EnergyExpressions.isabovediagonal",
@@ -361,27 +385,11 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "nbody_matrix_elements/#EnergyExpressions.overlap_matrix",
+    "location": "nbody_matrix_elements/#Calculation-of-determinants-1",
     "page": "N-body matrix elements",
-    "title": "EnergyExpressions.overlap_matrix",
-    "category": "function",
-    "text": "overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant[, overlaps=[]])\n\nGenerate the single-particle orbital overlap matrix, between the orbitals in the Slater determinants a and b. All orbitals are assumed to be orthogonal, except for those which are given in overlaps.\n\nExamples\n\nFirst we define two Slater determinants that have some orbitals in common:\n\njulia> sa = SlaterDeterminant([:i, :j, :l,:k̃])\ni(1)j(2)l(3)k̃(4) - i(1)j(2)l(4)k̃(3) - i(1)j(3)l(2)k̃(4) + i(1)j(3)l(4)k̃(2) + …  + i(4)j(1)l(3)k̃(2) + i(4)j(2)l(1)k̃(3) - i(4)j(2)l(3)k̃(1) - i(4)j(3)l(1)k̃(2) + i(4)j(3)l(2)k̃(1)\n\njulia> sb = SlaterDeterminant([:i, :j, :k, :l̃])\ni(1)j(2)k(3)l̃(4) - i(1)j(2)k(4)l̃(3) - i(1)j(3)k(2)l̃(4) + i(1)j(3)k(4)l̃(2) + …  + i(4)j(1)k(3)l̃(2) + i(4)j(2)k(1)l̃(3) - i(4)j(2)k(3)l̃(1) - i(4)j(3)k(1)l̃(2) + i(4)j(3)k(2)l̃(1)\n\nThe orbital overlap matrix by default is\n\njulia> overlap_matrix(sa, sb)\n4×4 SparseArrays.SparseMatrixCSC{EnergyExpressions.NBodyTerm,Int64} with 2 stored entries:\n  [1, 1]  =  1\n  [2, 2]  =  1\n\nwhich has only two non-zero entries, since only two of the orbitals are common between the Slater determinants sa and sb.\n\nWe can then define that the orbitals k̃ and l̃ are non-orthogonal:\n\njulia> overlap_matrix(sa, sb, [OrbitalOverlap(:k̃,:l̃)])\n4×4 SparseArrays.SparseMatrixCSC{EnergyExpressions.NBodyTerm,Int64} with 3 stored entries:\n  [1, 1]  =  1\n  [2, 2]  =  1\n  [4, 4]  =  ⟨k̃|l̃⟩\n\nWe can even specify that the orbital k̃ is non-orthogonal to itself (this can be useful when the k̃ is a linear combination of orthogonal orbital):\n\njulia> overlap_matrix(sa, sa, [OrbitalOverlap(:k̃,:k̃)])\n4×4 SparseArrays.SparseMatrixCSC{EnergyExpressions.NBodyTerm,Int64} with 4 stored entries:\n  [1, 1]  =  1\n  [2, 2]  =  1\n  [3, 3]  =  1\n  [4, 4]  =  ⟨k̃|k̃⟩\n\nNotice that this overlap matrix was calculated between the Slater determinant sa and itself. \n\n\n\n\n\n"
-},
-
-{
-    "location": "nbody_matrix_elements/#Base.Matrix",
-    "page": "N-body matrix elements",
-    "title": "Base.Matrix",
-    "category": "type",
-    "text": "Matrix(op::QuantumOperator, slater_determinants[, overlaps])\n\nGenerate the matrix corresponding to the quantum operator op, between the different slater_determinants. It is possible to specify non-orthogonalities between single-particle orbitals in overlaps.\n\n\n\n\n\n"
-},
-
-{
-    "location": "nbody_matrix_elements/#N-body-matrix-elements-1",
-    "page": "N-body matrix elements",
-    "title": "N-body matrix elements",
+    "title": "Calculation of determinants",
     "category": "section",
-    "text": "CurrentModule = EnergyExpressions\nDocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendThe matrix element of an N-body operator between two Slater determinants may be expanded according to the Löwdin rules (which reduce to the Slater–Condon rules if all single-particle orbitals are orthogonal):beginequation\nmatrixelPhi_AOmega_nPhi_B =\nsum_p (-)^p\nmatrixelk_1k_2k_nOmega_nl_1l_2l_n\nD^AB(k_1k_2k_nl_1l_2l_n)\nendequationwhere D^AB(k_1k_2k_nl_1l_2l_n) is the determinant minor of the orbital overlap determinant D^AB with the rows k_1k_2k_n and columns l_1l_2l_n stricken out, and p runs over all permutations.In general, a term in the expansion is thus of the formbeginequation\ncmatrixelk_1k_2k_nOmega_nl_1l_2l_nbraketabbraketcddotsbraketyz\nendequationwhere c is a scalar. This is represented by NBodyTerm type.NBodyTermFactor\nOrbitalOverlap\nOrbitalMatrixElement\nNBodyTerm\nNBodyMatrixElement\nisabovediagonal\nisdiagonal\ndetaxis\ndetminor\n# indexsum\ncofactor\ndet\npermutation_sign\noverlap_matrix\nMatrix DocTestSetup = nothing"
+    "text": "Actually computing the matrix element expansion eqrefeqnmatrix-element-expansion is a combinatorial problem, that grows factorially with the amount of non-orthogonal orbital pairs. Furthermore, of the (n)^2 terms generated from the expansion, only n are distinct, due to the integrals being symmetric with respect to interchange of the coordinates [hence the normalization factor (n)^-1]. Thankfully, there are few symmetries that can be employed, to generate only the distinct permutations.We use Julia\'s built in CartesianIndex iterators to span the space of all possible choices of orbitals for the overlap determinant. If two or more indices in the CartesianIndex are the same, the overlap is trivially zero (the “Fermi hole”). To avoid double-counting, we also only consider those indices that are above the hyper-diagonal.isabovediagonal\nisdiagonal\ndetaxis\ndetminor\n# indexsum\ncofactor\ndet\npermutation_sign DocTestSetup = nothing"
 },
 
 {
@@ -405,7 +413,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Common N-body operators",
     "title": "EnergyExpressions.FieldFreeOneBodyHamiltonian",
     "category": "type",
-    "text": "FieldFreeOneBodyHamiltonian\n\nThe one-body Hamiltonian, with no external fields. Is diagonal in the orbitals, i.e. does not couple unequal orbitals.\n\nExamples\n\njulia> EnergyExpressions.OrbitalMatrixElement((:a,:b), CoulombInteraction(), (:c,:d))\n[a b|c d]\n\n\n\n\n\n"
+    "text": "FieldFreeOneBodyHamiltonian\n\nThe one-body Hamiltonian, with no external fields. Is diagonal in the orbitals, i.e. does not couple unequal orbitals.\n\nExamples\n\njulia> EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:a,))\n⟨a|ĥ₀|a⟩\n\njulia> iszero(EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:a,)))\nfalse\n\njulia> EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:b,))\n⟨a|ĥ₀|b⟩\n\njulia> iszero(EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:b,)))\ntrue\n\n\n\n\n\n"
 },
 
 {
@@ -413,7 +421,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Common N-body operators",
     "title": "EnergyExpressions.CoulombInteraction",
     "category": "type",
-    "text": "CoulombInteraction\n\nTwo-body Hamiltonian, representing the mutual Coulombic repulsion between two electrons. Is diagonal in spin, i.e. the spin of the orbitals associated with the same coordinate must be the same.\n\nExamples\n\njulia> EnergyExpressions.OrbitalMatrixElement((:a,:b), CoulombInteraction(), (:c,:d))\n[a b|c d]\n\n\n\n\n\n"
+    "text": "CoulombInteraction\n\nTwo-body Hamiltonian, representing the mutual Coulombic repulsion between two electrons. Is diagonal in spin, i.e. the spin of the orbitals associated with the same coordinate must be the same.\n\nExamples\n\njulia> EnergyExpressions.OrbitalMatrixElement((:a,:b), CoulombInteraction(), (:c,:d))\n[a b|c d]\n\njulia> EnergyExpressions.OrbitalMatrixElement((:a,:b), CoulombInteraction(), (:b,:a))\nG(a,b)\n\n\n\n\n\n"
 },
 
 {
@@ -429,7 +437,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Common N-body operators",
     "title": "Common N-body operators",
     "category": "section",
-    "text": "DocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendA few N-body operators that are common in quantum mechanics. It is possible to form a composite Hamiltonian thus:julia> H = OneBodyHamiltonian() + CoulombInteraction()\nĥ + ĝIf then define a set of Slater determinants, we can easily form the energy expression:julia> slaters = SlaterDeterminant.([[:a, :b], [:c, :d], [:a, :c]])\n3-element Array{SlaterDeterminant{Symbol},1}:\n a(1)b(2) - a(2)b(1)\n c(1)d(2) - c(2)d(1)\n a(1)c(2) - a(2)c(1)\n\njulia> Matrix(H, slaters)\n3×3 Array{EnergyExpressions.NBodyMatrixElement,2}:\n (a|a) + (b|b) - [a b|b a] + [a b|a b]  - [a b|d c] + [a b|c d]                (b|c) - [a b|c a] + [a b|a c]\n - [c d|b a] + [c d|a b]                (c|c) + (d|d) - [c d|d c] + [c d|c d]  - (d|a) - [c d|c a] + [c d|a c]\n (c|b) - [a c|b a] + [a c|a b]          - (a|d) - [a c|d c] + [a c|c d]        (a|a) + (c|c) - [a c|c a] + [a c|a c]We can also specify that e.g. the orbitals b and c are non-orthogonal, and thus derive a slightly different energy expression, that takes this into account:julia> Matrix(H, slaters, [OrbitalOverlap(:b,:c)])\n3×3 Array{EnergyExpressions.NBodyMatrixElement,2}:\n (a|a) + (b|b) - [a b|b a] + [a b|a b]       - ⟨b|c⟩(a|d) - [a b|d c] + [a b|c d]   ⟨b|c⟩(a|a) + (b|c) - [a b|c a] + [a b|a c]\n - ⟨c|b⟩(d|a) - [c d|b a] + [c d|a b]        (c|c) + (d|d) - [c d|d c] + [c d|c d]  - (d|a) - [c d|c a] + [c d|a c]\n ⟨c|b⟩(a|a) + (c|b) - [a c|b a] + [a c|a b]  - (a|d) - [a c|d c] + [a c|c d]        (a|a) + (c|c) - [a c|c a] + [a c|a c]Beware that the computational complexity grows factorially with the amount of non-orthogonal orbitals!OneBodyHamiltonian\nFieldFreeOneBodyHamiltonian\nCoulombInteraction\niszero DocTestSetup = nothing"
+    "text": "DocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendA few N-body operators that are common in quantum mechanics. It is possible to form a composite Hamiltonian thus:julia> H = OneBodyHamiltonian() + CoulombInteraction()\nĥ + ĝIf then define a set of Slater determinants, we can easily form the energy expression:julia> slaters = SlaterDeterminant.([[:a, :b], [:c, :d], [:a, :c]])\n3-element Array{SlaterDeterminant{Symbol},1}:\n a(1)b(2) - a(2)b(1)\n c(1)d(2) - c(2)d(1)\n a(1)c(2) - a(2)c(1)\n\njulia> Matrix(H, slaters)\n3×3 Array{EnergyExpressions.NBodyMatrixElement,2}:\n (a|a) + (b|b) - G(a,b) + F(a,b)  - [a b|d c] + [a b|c d]          (b|c) - [a b|c a] + [a b|a c]\n - [c d|b a] + [c d|a b]          (c|c) + (d|d) - G(c,d) + F(c,d)  - (d|a) - [c d|c a] + [c d|a c]\n (c|b) - [a c|b a] + [a c|a b]    - (a|d) - [a c|d c] + [a c|c d]  (a|a) + (c|c) - G(a,c) + F(a,c)An energy expression like this can then be used to derive the multi-configurational Hartree–Fock equations for the orbitals a,b,c,d.We can also specify that e.g. the orbitals b and c are non-orthogonal, and thus derive a slightly different energy expression, that takes this into account:julia> Matrix(H, slaters, [OrbitalOverlap(:b,:c)])\n3×3 Array{EnergyExpressions.NBodyMatrixElement,2}:\n (a|a) + (b|b) - G(a,b) + F(a,b)             - ⟨b|c⟩(a|d) - [a b|d c] + [a b|c d]  ⟨b|c⟩(a|a) + (b|c) - [a b|c a] + [a b|a c]\n - ⟨c|b⟩(d|a) - [c d|b a] + [c d|a b]        (c|c) + (d|d) - G(c,d) + F(c,d)       - (d|a) - [c d|c a] + [c d|a c]\n ⟨c|b⟩(a|a) + (c|b) - [a c|b a] + [a c|a b]  - (a|d) - [a c|d c] + [a c|c d]       (a|a) + (c|c) - G(a,c) + F(a,c)Beware that the computational complexity grows factorially with the amount of non-orthogonal orbitals!OneBodyHamiltonian\nFieldFreeOneBodyHamiltonian\nCoulombInteraction\niszero DocTestSetup = nothing"
 },
 
 ]}
