@@ -41,7 +41,7 @@ end
 First, we find all configurations possible for two configurations of
 helium:
 
-```jldoctest helium
+``` # jldoctest helium
 julia> he = spin_configurations(c"1s2")
 1-element Array{Configuration{SpinOrbital{Orbital{Int64}}},1}:
  1s²
@@ -68,24 +68,24 @@ The Slater–Condon rules state that the one-body energy expression between two
 configurations is
 
 - in case the configurations are identical, $\onebody{\Phi_A}{\Phi_B} = \onebody{i}{i}$:
-  ```jldoctest helium
+  ``` # jldoctest helium
   julia> OneBodyEnergyExpression(he[1],he[1])
   I(1s₀α) + I(1s₀β)
   ```
 - in case the configurations differ by one orbital, $\onebody{\Phi_A}{\Phi_B} = \onebody{i}{j}$:
-  ```jldoctest helium
+  ``` # jldoctest helium
   julia> OneBodyEnergyExpression(he[1],he_exc[1])
   I(1s₀β, 2p₋₁α)
   ```
 - in case the configurations differ by more than one orbital, $\onebody{\Phi_A}{\Phi_B} = 0$:
-  ```jldoctest helium
+  ``` # jldoctest helium
   julia> OneBodyEnergyExpression(he_exc[1],he_exc[9])
   0
   ```
 
 We can easily generate the full one-body matrix:
 
-```jldoctest helium
+``` # jldoctest helium
 julia> one_body_hamiltonian_matrix(SpinOrbital, he_exc)
 12×12 Array{OneBodyEnergyExpression{SpinOrbital,SpinOrbital},2}:
  I(1s₀α) + I(2p₋₁α)  I(2p₋₁α, 2p₋₁β)     I(2p₋₁α, 2p₀α)     I(2p₋₁α, 2p₀β)     I(2p₋₁α, 2p₁α)     I(2p₋₁α, 2p₁β)     I(1s₀α, 1s₀β)       0                   0                  0                  0                  0
@@ -108,7 +108,7 @@ Similar considerations apply for the two-body energy terms between two
 configurations. To make it more interesting, we consider lithium
 which has three electrons:
 
-```jldoctest lithium
+``` # jldoctest lithium
 julia> li = spin_configurations(c"1s2 2s")
 2-element Array{Configuration{SpinOrbital{Orbital{Int64}}},1}:
  1s² 2s₀α
@@ -143,30 +143,30 @@ julia> li_exc = spin_configurations(c"1s 2s 2p")
 ```
 
 - in case the configurations are identical, $\twobodydx{\Phi_A}{\Phi_B} = \twobodydx{ij}{ij}$:
-  ```jldoctest lithium
+  ``` # jldoctest lithium
   julia> TwoBodyEnergyExpression(li[1],li[1])
   [1s₀β 1s₀α||1s₀β 1s₀α] + [2s₀α 1s₀α||2s₀α 1s₀α] + [2s₀α 1s₀β||2s₀α 1s₀β]
   ```
 - in case the configurations differ by one orbital, $\twobodydx{\Phi_A}{\Phi_B} = \twobodydx{ik}{jk}$:
-  ```jldoctest lithium
+  ``` # jldoctest lithium
   julia> TwoBodyEnergyExpression(li[1],li[2])
   [2s₀α 1s₀α||2s₀β 1s₀α] + [2s₀α 1s₀β||2s₀β 1s₀β]
   ```
 - in case the configurations differ by two orbitals, $\twobodydx{\Phi_A}{\Phi_B} = \twobodydx{ij}{kl}$:
-  ```jldoctest lithium
+  ``` # jldoctest lithium
   julia> TwoBodyEnergyExpression(li[1],li_exc[end])
   [1s₀α 2s₀α||2s₀β 2p₁β]
   ```
   
 - in case the configurations differ by more than two orbital, $\twobodydx{\Phi_A}{\Phi_B} = 0$:
-  ```jldoctest lithium
+  ``` # jldoctest lithium
   julia> TwoBodyEnergyExpression(li_exc[1],li_exc[end])
   0
   ```
 
 Again, we can generate the full two-body matrix:
 
-```jldoctest lithium
+``` # jldoctest lithium
 julia> two_body_hamiltonian_matrix(SpinOrbital, li_exc)
 24×24 Array{TwoBodyEnergyExpression{SpinOrbital,SpinOrbital,SpinOrbital,SpinOrbital},2}:
  [2s₀α 1s₀α||2s₀α 1s₀α] + … + [2p₋₁α 2s₀α||2p₋₁α 2s₀α]  [2p₋₁α 1s₀α||2p₋₁β 1s₀α] + [2p₋₁α 2s₀α||2p₋₁β 2s₀α]    …  0
@@ -210,7 +210,7 @@ where $D^{AB}_{ji}$ is the determinant minor.
 The implementation is only correct for two-electron configurations at
 the moment:
 
-```jldoctest helium
+``` # jldoctest helium
 julia> OneBodyEnergyExpression{SpinOrbital,SpinOrbital}(he[1],he[1],orthogonal=false)
 I(1s₀α) - I(1s₀α, 1s₀β) - I(1s₀β, 1s₀α) + I(1s₀β)
 ```

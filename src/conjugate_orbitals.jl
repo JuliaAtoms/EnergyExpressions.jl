@@ -1,6 +1,6 @@
 import AtomicLevels: AbstractOrbital
 
-struct Conjugate{O<:AbstractOrbital}
+struct Conjugate{O}
     orbital::O
 end
 function Base.show(io::IO, co::Conjugate{O}) where O

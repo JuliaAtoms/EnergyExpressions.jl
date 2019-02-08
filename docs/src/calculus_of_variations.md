@@ -50,7 +50,7 @@ DocTestSetup = quote
 end
 ```
 
-```jldoctest helium
+``` # jldoctest helium
 julia> he = spin_configurations(c"1s2")[1]
 1s²
 
@@ -62,7 +62,7 @@ julia> a,b = he.orbitals
 
 First we find the one- and two-body energy expressions:
 
-```jldoctest helium
+``` # jldoctest helium
 julia> h = OneBodyEnergyExpression(he,he)
 I(1s₀α) + I(1s₀β)
 
@@ -76,7 +76,7 @@ the _conjugate_ orbitals, to derive equations for the _unconjugated_
 ones (this is important for complex orbitals, which is the case when
 studying time-dependent problems):
 
-```jldoctest helium
+``` # jldoctest helium
 julia> h.integrals
 2-element Array{OneBodyIntegral{SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}}},1}:
  I(1s₀α)
@@ -96,7 +96,7 @@ containing the first orbital, varies to yield zero.
 If we instead vary with respect to the second orbital, _unconjugated_
 this time, we get
 
-```jldoctest helium
+``` # jldoctest helium
 julia> diff.(h.integrals, Ref(b))
 2-element Array{OneBodyHamiltonian,1}:
  ĥ0
@@ -105,7 +105,7 @@ julia> diff.(h.integrals, Ref(b))
 
 Similarly, for the two-body energy expression:
 
-```jldoctest helium
+``` # jldoctest helium
 julia> diff.(HC.integrals, Ref(conj(a)))
 1-element Array{DirectExchangePotentials{SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}}},1}:
  [1s₀β||1s₀β]1s₀α

@@ -6,6 +6,10 @@ wavefunctions constructed from anti-symmetrized one-particle states.
 
 ```@meta
 CurrentModule = EnergyExpressions
+DocTestSetup = quote
+    using EnergyExpressions
+    using AtomicLevels
+end
 ```
 
 ## Construction of Slater determinants
@@ -18,14 +22,6 @@ adjoint(::SlaterDeterminant)
 length(::AdjointSlaterDeterminant)
 ```
 
-## N-body operators
-```@docs
-NBodyOperator
-NBodyTermFactor
-OrbitalOverlap
-OrbitalMatrixElement
-```
-
 ## Example usage
 
 ```jldoctest
@@ -35,9 +31,12 @@ l(1)a(2) - l(2)a(1)
 julia> sb = SlaterDeterminant([:k, :b])
 k(1)b(2) - k(2)b(1)
 
-julia> sa'ZeroBodyOperator*sb
-+ ⟨l|k⟩⟨a|b⟩ - ⟨l|b⟩⟨a|k⟩ - ⟨a|k⟩⟨l|b⟩ + ⟨a|b⟩⟨l|k⟩
+julia> using AtomicLevels
 
-julia> sa'OneBodyOperator*sb
-+ ⟨l|Ω₁|k⟩⟨a|b⟩ + ⟨l|k⟩⟨a|Ω₁|b⟩ - ⟨l|Ω₁|b⟩⟨a|k⟩ - ⟨l|b⟩⟨a|Ω₁|k⟩ - ⟨a|Ω₁|k⟩⟨l|b⟩ - ⟨a|k⟩⟨l|Ω₁|b⟩ + ⟨a|Ω₁|b⟩⟨l|k⟩ + ⟨a|b⟩⟨l|Ω₁|k⟩
+julia> SlaterDeterminant(spin_configurations(c"1s2")[1])
+1s₀α(1)1s₀β(2) - 1s₀α(2)1s₀β(1)
+```
+
+```@meta
+ DocTestSetup = nothing
 ```

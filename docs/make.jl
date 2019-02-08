@@ -1,5 +1,4 @@
 using Documenter
-import EnergyExpressions
 using EnergyExpressions
 using AtomicLevels
 
@@ -13,7 +12,10 @@ makedocs(
             "Energy Expressions" => "energy_expressions.md",
             "Calculus of Variations" => "calculus_of_variations.md"
         ],
-        "Slater determinants" => "slater_determinants.md"
+        "Slater determinants" => "slater_determinants.md",
+        "N-body operators" => "nbody_operators.md",
+        "N-body matrix elements" => "nbody_matrix_elements.md",
+        "Common N-body operators" => "common_operators.md",
     ],
     assets = ["assets/latex.js"],
 )
