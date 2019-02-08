@@ -28,8 +28,17 @@ orbitals, i.e. does not couple unequal orbitals.
 # Examples
 
 ```jldoctest
-julia> EnergyExpressions.OrbitalMatrixElement((:a,:b), CoulombInteraction(), (:c,:d))
-[a b|c d]
+julia> EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:a,))
+⟨a|ĥ₀|a⟩
+
+julia> iszero(EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:a,)))
+false
+
+julia> EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:b,))
+⟨a|ĥ₀|b⟩
+
+julia> iszero(EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:b,)))
+true
 ```
 """
 struct FieldFreeOneBodyHamiltonian <: OneBodyOperator end
@@ -50,13 +59,23 @@ orbitals associated with the same coordinate must be the same.
 ```jldoctest
 julia> EnergyExpressions.OrbitalMatrixElement((:a,:b), CoulombInteraction(), (:c,:d))
 [a b|c d]
+
+julia> EnergyExpressions.OrbitalMatrixElement((:a,:b), CoulombInteraction(), (:b,:a))
+G(a,b)
 ```
 """
 struct CoulombInteraction <: TwoBodyOperator end
 
 Base.show(io::IO, ::CoulombInteraction) = write(io, "ĝ")
-Base.show(io::IO, me::EnergyExpressions.OrbitalMatrixElement{2,A,CoulombInteraction,B}) where{A,B} =
-    write(io, "[", join(string.(me.a), " "), "|", join(string.(me.b), " "), "]")
+function Base.show(io::IO, me::EnergyExpressions.OrbitalMatrixElement{2,A,CoulombInteraction,B}) where{A,B}
+    if me.a == me.b # Direct interaction
+        write(io, "F($(me.a[1]),$(me.a[2]))")
+    elseif me.a[1] == me.b[2] && me.a[2] == me.b[1] # Exchange interaction
+        write(io, "G($(me.a[1]),$(me.a[2]))")
+    else # General case
+        write(io, "[", join(string.(me.a), " "), "|", join(string.(me.b), " "), "]")
+    end
+end
 
 """
     iszero(me::EnergyExpressions.OrbitalMatrixElement{2,<:SpinOrbital,CoulombInteraction,<:SpinOrbital})

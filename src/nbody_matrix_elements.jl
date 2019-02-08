@@ -212,8 +212,9 @@ detaxis(i::Integer, n) = detaxis(CartesianIndex(i), n)
 """
     detminor(k, l, A)
 
-Calculate the determinant minor of `A`, where the rows `k` and the
-columns `l` have been stricken out.
+Calculate the [determinant
+minor](https://en.wikipedia.org/wiki/Minor_(linear_algebra)) of `A`,
+where the rows `k` and the columns `l` have been stricken out.
 """
 function detminor(k, l, A)
     n = size(A,1)
@@ -226,8 +227,9 @@ indexsum(k::CartesianIndex,l::CartesianIndex) = sum(Tuple(k)) + sum(Tuple(l))
 """
     cofactor(k, l, A)
 
-Calculate the cofactor of `A`, where the rows `k` and the
-columns `l` have been stricken out.
+Calculate the
+[cofactor](https://en.wikipedia.org/wiki/Minor_(linear_algebra)) of
+`A`, where the rows `k` and the columns `l` have been stricken out.
 """
 cofactor(k, l, A) = (-1)^indexsum(k,l)*detminor(k, l, A)
 
@@ -373,7 +375,7 @@ julia> overlap_matrix(sa, sb, [OrbitalOverlap(:k̃,:l̃)])
 ```
 We can even specify that the orbital `k̃` is non-orthogonal to _itself_
 (this can be useful when the `k̃` is a linear combination of orthogonal
-orbital):
+orbitals):
 ```jldoctest overlap_matrix
 julia> overlap_matrix(sa, sa, [OrbitalOverlap(:k̃,:k̃)])
 4×4 SparseArrays.SparseMatrixCSC{EnergyExpressions.NBodyTerm,Int64} with 4 stored entries:
