@@ -145,6 +145,38 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "conjugate_orbitals/#",
+    "page": "Conjugate orbitals",
+    "title": "Conjugate orbitals",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "conjugate_orbitals/#EnergyExpressions.Conjugate",
+    "page": "Conjugate orbitals",
+    "title": "EnergyExpressions.Conjugate",
+    "category": "type",
+    "text": "Conjugate(orbital)\n\nType representing the conjugation of an orbital.\n\nExamples\n\njulia> Conjugate(:a)\n:a†\n\n\n\n\n\n"
+},
+
+{
+    "location": "conjugate_orbitals/#Base.conj",
+    "page": "Conjugate orbitals",
+    "title": "Base.conj",
+    "category": "function",
+    "text": "conj(o::AbstractOrbital)\n\nConvenience function to conjugate an AbstractOrbital.\n\nExamples\n\njulia> conj(o\"1s\")\n1s†\n\n\n\n\n\nconj(o::Conjugate)\n\nConvenience function to unconjugate a conjugated orbital.\n\nExamples\n\njulia> conj(Conjugate(:a))\n:a\n\n\n\n\n\n"
+},
+
+{
+    "location": "conjugate_orbitals/#N-body-equations-1",
+    "page": "Conjugate orbitals",
+    "title": "N-body equations",
+    "category": "section",
+    "text": "DocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendA conjugated orbital, conjchi (often written brachi) is the dual to the unconjugated orbital chi (often written ketchi). In the code, conjugation of orbitals is denoted with a dagger (†) to avoid confusion with the multiplication operator *.Conjugate\nconj DocTestSetup = nothing"
+},
+
+{
     "location": "slater_determinants/#",
     "page": "Slater determinants",
     "title": "Slater determinants",
@@ -249,11 +281,43 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "nbody_operators/#EnergyExpressions.IdentityOperator",
+    "page": "N-body operators",
+    "title": "EnergyExpressions.IdentityOperator",
+    "category": "type",
+    "text": "IdentityOperator{N}\n\nThe N-body identity operator. Leaves the orbital(s) acted upon unchanged.\n\n\n\n\n\n"
+},
+
+{
+    "location": "nbody_operators/#EnergyExpressions.ContractedOperator",
+    "page": "N-body operators",
+    "title": "EnergyExpressions.ContractedOperator",
+    "category": "type",
+    "text": "ContractedOperator(a, o, b)\n\nAn NBodyOperator representing the contraction of the operator o over the orbital sets a and b. The lengths of a and b have to equal, and they cannot exceed the dimension of o.\n\n\n\n\n\n"
+},
+
+{
+    "location": "nbody_operators/#EnergyExpressions.contract",
+    "page": "N-body operators",
+    "title": "EnergyExpressions.contract",
+    "category": "function",
+    "text": "contract(orbital_matrix_element, i...)\n\nContract the orbital_matrix_element over all coordinates i....\n\n\n\n\n\ncontract(ome::OrbitalMatrixElement{N}, i...)\n\nContract ome over all coordinates i.... length(i) cannot be larger than N.\n\n\n\n\n\n"
+},
+
+{
+    "location": "nbody_operators/#EnergyExpressions.complement",
+    "page": "N-body operators",
+    "title": "EnergyExpressions.complement",
+    "category": "function",
+    "text": "complement(N, i...)\n\nGenerate the complement to i... in the set 1:N. Useful for contracting OrbitalMatrixElements over all coordinates except i....\n\n\n\n\n\n"
+},
+
+{
     "location": "nbody_operators/#N-body-operators-1",
     "page": "N-body operators",
     "title": "N-body operators",
     "category": "section",
-    "text": "CurrentModule = EnergyExpressions\nDocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendNBodyOperator\nLinearCombinationOperator DocTestSetup = nothing"
+    "text": "CurrentModule = EnergyExpressions\nDocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendNBodyOperator\nLinearCombinationOperator\nIdentityOperator\nContractedOperator\ncontract\ncomplement DocTestSetup = nothing"
 },
 
 {
@@ -349,7 +413,7 @@ var documenterSearchIndex = {"docs": [
     "page": "N-body matrix elements",
     "title": "EnergyExpressions.detaxis",
     "category": "function",
-    "text": "detaxis(i::CartesianIndex{N})\n\nGenerate the axis index vector for the determinant minor, whose rows or columns represented by the CartesianIndex i should be omitted.\n\n\n\n\n\n"
+    "text": "detaxis(i::CartesianIndex{N})\n\nGenerate the axis index vector for the determinant minor, whose rows or columns represented by the CartesianIndex i should be omitted. Implemented via complement.\n\n\n\n\n\n"
 },
 
 {
@@ -438,6 +502,62 @@ var documenterSearchIndex = {"docs": [
     "title": "Common N-body operators",
     "category": "section",
     "text": "DocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendA few N-body operators that are common in quantum mechanics. It is possible to form a composite Hamiltonian thus:julia> H = OneBodyHamiltonian() + CoulombInteraction()\nĥ + ĝIf then define a set of Slater determinants, we can easily form the energy expression:julia> slaters = SlaterDeterminant.([[:a, :b], [:c, :d], [:a, :c]])\n3-element Array{SlaterDeterminant{Symbol},1}:\n a(1)b(2) - a(2)b(1)\n c(1)d(2) - c(2)d(1)\n a(1)c(2) - a(2)c(1)\n\njulia> Matrix(H, slaters)\n3×3 Array{EnergyExpressions.NBodyMatrixElement,2}:\n (a|a) + (b|b) - G(a,b) + F(a,b)  - [a b|d c] + [a b|c d]          (b|c) - [a b|c a] + [a b|a c]\n - [c d|b a] + [c d|a b]          (c|c) + (d|d) - G(c,d) + F(c,d)  - (d|a) - [c d|c a] + [c d|a c]\n (c|b) - [a c|b a] + [a c|a b]    - (a|d) - [a c|d c] + [a c|c d]  (a|a) + (c|c) - G(a,c) + F(a,c)An energy expression like this can then be used to derive the multi-configurational Hartree–Fock equations for the orbitals a,b,c,d.We can also specify that e.g. the orbitals b and c are non-orthogonal, and thus derive a slightly different energy expression, that takes this into account:julia> Matrix(H, slaters, [OrbitalOverlap(:b,:c)])\n3×3 Array{EnergyExpressions.NBodyMatrixElement,2}:\n (a|a) + (b|b) - G(a,b) + F(a,b)             - ⟨b|c⟩(a|d) - [a b|d c] + [a b|c d]  ⟨b|c⟩(a|a) + (b|c) - [a b|c a] + [a b|a c]\n - ⟨c|b⟩(d|a) - [c d|b a] + [c d|a b]        (c|c) + (d|d) - G(c,d) + F(c,d)       - (d|a) - [c d|c a] + [c d|a c]\n ⟨c|b⟩(a|a) + (c|b) - [a c|b a] + [a c|a b]  - (a|d) - [a c|d c] + [a c|c d]       (a|a) + (c|c) - G(a,c) + F(a,c)Beware that the computational complexity grows factorially with the amount of non-orthogonal orbitals!OneBodyHamiltonian\nFieldFreeOneBodyHamiltonian\nCoulombInteraction\niszero DocTestSetup = nothing"
+},
+
+{
+    "location": "equations/#",
+    "page": "N-body equations",
+    "title": "N-body equations",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "equations/#EnergyExpressions.NBodyEquation",
+    "page": "N-body equations",
+    "title": "EnergyExpressions.NBodyEquation",
+    "category": "type",
+    "text": "NBodyEquation{N,O}(orbital, operator::NBodyOperator[, factor::NBodyTerm])\n\nEquation for an orbital, acted upon by an operator, which may be a single-particle operator, or an N-body operator, contracted over all coordinates but one, and optionally multiplied by an NBodyTerm, corresponding to overlaps/matrix elements between other orbitals.\n\n\n\n\n\n"
+},
+
+{
+    "location": "equations/#EnergyExpressions.LinearCombinationEquation",
+    "page": "N-body equations",
+    "title": "EnergyExpressions.LinearCombinationEquation",
+    "category": "type",
+    "text": "LinearCombinationEquation(equations)\n\nA type representing a linear combination of NBodyEquations. Typically arises when varying a multi-term energy expression.\n\n\n\n\n\n"
+},
+
+{
+    "location": "equations/#N-body-equations-1",
+    "page": "N-body equations",
+    "title": "N-body equations",
+    "category": "section",
+    "text": "DocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendThese types are used to represent the integro-differential equations that result from the variation of the energy expression with respect to an orbital. They can, in general, be written on the formbeginequation\n0 = Omega_1ketchibraketab\nendequationwhen varying with respect to a conjugated orbital, andbeginequation\n0 = brachiOmega_1braketab\nendequationwhen varying with respect to an orbital. In both cases, Omega_1 is a one-body operator, either in itself, or resulting from a contraction over all coordinates but one of a many-body operator (see ContractedOperator).NBodyEquation\nLinearCombinationEquation DocTestSetup = nothing"
+},
+
+{
+    "location": "variations/#",
+    "page": "Variation",
+    "title": "Variation",
+    "category": "page",
+    "text": ""
+},
+
+{
+    "location": "variations/#Base.diff",
+    "page": "Variation",
+    "title": "Base.diff",
+    "category": "function",
+    "text": "diff(ab::OrbitalOverlap, o::O)\n\nVary the orbital overlap ⟨a|b⟩ with respect to |o⟩.\n\n\n\n\n\ndiff(ab::OrbitalOverlap, o::Conjugate{O})\n\nVary the orbital overlap ⟨a|b⟩ with respect to ⟨o|.\n\n\n\n\n\ndiff(ome::OrbitalMatrixElement, o::O)\n\nVary the orbital overlap ⟨abc...|Ω|xyz...⟩ with respect to |o⟩.\n\n\n\n\n\ndiff(ome::OrbitalMatrixElement, o::Conjugate{O})\n\nVary the orbital overlap ⟨abc...|Ω|xyz...⟩ with respect to ⟨o|.\n\n\n\n\n\ndiff(me::NBodyMatrixElement, o::O)\n\nVary the NBodyMatrixElement me with respect to the orbital o.\n\n\n\n\n\ndiff(E::Matrix{NBodyMatrixElement}, o::O)\n\nVary the matrix of NBodyMatrixElements with respect to the orbital o.\n\nExamples\n\njulia> E = Matrix(OneBodyHamiltonian()+CoulombInteraction(),\n                  SlaterDeterminant.([[:a, :b], [:c, :d]]))\n2×2 Array{EnergyExpressions.NBodyMatrixElement,2}:\n (a|a) + (b|b) - G(a,b) + F(a,b)  - [a b|d c] + [a b|c d]\n - [c d|b a] + [c d|a b]          (c|c) + (d|d) - G(c,d) + F(c,d)\n\njulia> diff(E, :a)\n2×2 SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64} with 2 stored entries:\n  [1, 1]  =  ⟨a|ĥ + -⟨b|[a|b] + ⟨a|[b|b]\n  [2, 1]  =  -⟨d|[c|b] + ⟨c|[d|b]\n\njulia> diff(E, Conjugate(:b))\n2×2 SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64} with 2 stored entries:\n  [1, 1]  =  ĥ|b⟩ + -[a|b]|a⟩ + [a|a]|b⟩\n  [1, 2]  =  -[a|d]|c⟩ + [a|c]|d⟩\n\n\n\n\n\n"
+},
+
+{
+    "location": "variations/#Calculus-of-Variations-–-Implementation-1",
+    "page": "Variation",
+    "title": "Calculus of Variations – Implementation",
+    "category": "section",
+    "text": "DocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nenddiff DocTestSetup = nothing"
 },
 
 ]}
