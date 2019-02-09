@@ -18,9 +18,9 @@ If then define a set of Slater determinants, we can easily form the energy expre
 ```jldoctest common_operators
 julia> slaters = SlaterDeterminant.([[:a, :b], [:c, :d], [:a, :c]])
 3-element Array{SlaterDeterminant{Symbol},1}:
- a(1)b(2) - a(2)b(1)
- c(1)d(2) - c(2)d(1)
- a(1)c(2) - a(2)c(1)
+ |a b|
+ |c d|
+ |a c|
 
 julia> Matrix(H, slaters)
 3×3 Array{EnergyExpressions.NBodyMatrixElement,2}:

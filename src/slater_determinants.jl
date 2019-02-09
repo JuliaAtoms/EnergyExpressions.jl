@@ -42,7 +42,10 @@ Return the number of spin-orbitals in the Slater determinant.
 """
 Base.length(sd::SlaterDeterminant) = length(sd.orbitals)
 
-function Base.show(io::IO, sd::SlaterDeterminant)
+Base.show(io::IO, sd::SlaterDeterminant) =
+    write(io, "|",join(sd.orbitals, " "), "|")
+
+function Base.show(io::IO, ::MIME"text/plain", sd::SlaterDeterminant)
     noprintterms = 5
     n = length(sd)
     numperm = factorial(n)
