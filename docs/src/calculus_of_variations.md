@@ -50,66 +50,61 @@ DocTestSetup = quote
 end
 ```
 
-``` # jldoctest helium
-julia> he = spin_configurations(c"1s2")[1]
-1s²
+```jldoctest helium-variation
+julia> he = SlaterDeterminant.(spin_configurations(c"1s2"))
+1-element Array{SlaterDeterminant{SpinOrbital{Orbital{Int64}}},1}:
+ |1s₀α 1s₀β|
 
-julia> a,b = he.orbitals
+julia> a,b = he[1].orbitals
 2-element Array{SpinOrbital{Orbital{Int64}},1}:
  1s₀α
  1s₀β
 ```
 
-First we find the one- and two-body energy expressions:
+First we find the energy expression:
 
-``` # jldoctest helium
-julia> h = OneBodyEnergyExpression(he,he)
-I(1s₀α) + I(1s₀β)
-
-julia> HC = TwoBodyEnergyExpression(he,he)
-[1s₀β 1s₀α||1s₀β 1s₀α]
+```jldoctest helium-variation
+julia> E = Matrix(OneBodyHamiltonian() + CoulombInteraction(), he)
+1×1 Array{EnergyExpressions.NBodyMatrixElement,2}:
+ (1s₀α|1s₀α) + (1s₀β|1s₀β) + F(1s₀α,1s₀β)
 ```
 
-We can now vary these expressions with respect to the different
-spin-orbitals; by convention, we vary the expressions with respect to
+We can now vary this expression with respect to the different
+spin-orbitals; by convention, we vary the expression with respect to
 the _conjugate_ orbitals, to derive equations for the _unconjugated_
 ones (this is important for complex orbitals, which is the case when
 studying time-dependent problems):
 
-``` # jldoctest helium
-julia> h.integrals
-2-element Array{OneBodyIntegral{SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}}},1}:
- I(1s₀α)
- I(1s₀β)
+```jldoctest helium-variation
+julia> diff(E, Conjugate(a))
+1×1 SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64} with 1 stored entry:
+  [1, 1]  =  ĥ|1s₀α⟩ + [1s₀β|1s₀β]|1s₀α⟩
 
-julia> diff.(h.integrals, Ref(conj(a)))
-2-element Array{OneBodyHamiltonian,1}:
- ĥ1s₀α
- ĥ0
+julia> diff(E, Conjugate(b))
+1×1 SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64} with 1 stored entry:
+  [1, 1]  =  ĥ|1s₀β⟩ + [1s₀α|1s₀α]|1s₀β⟩
 ```
 
 This result means that the variation of the first integral in the
-one-body expression yields the one-body Hamiltonian $\hamiltonian$
-acting on the orbital `1s₀α`, whereas the second integral, not
-containing the first orbital, varies to yield zero.
+one-body part of the energy expression yields the one-body Hamiltonian
+$\hamiltonian$ acting on the orbital `1s₀α`, whereas the second
+integral, not containing the first orbital, varies to yield zero. The
+two-body energy `F(1s₀α,1s₀β)` varies to yield the two-body potential
+`[1s₀β|1s₀β]`, again acting on the orbital `1s₀α`.
 
-If we instead vary with respect to the second orbital, _unconjugated_
-this time, we get
+If we instead vary with respect to the _unconjugated_ orbitals, we get
 
-``` # jldoctest helium
-julia> diff.(h.integrals, Ref(b))
-2-element Array{OneBodyHamiltonian,1}:
- ĥ0
- 1s₀β†ĥ
+```jldoctest helium-variation
+julia> diff(E, a)
+1×1 SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64} with 1 stored entry:
+  [1, 1]  =  ⟨1s₀α|ĥ + ⟨1s₀α|[1s₀β|1s₀β]
+
+julia> diff(E, b)
+1×1 SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64} with 1 stored entry:
+  [1, 1]  =  ⟨1s₀β|ĥ + ⟨1s₀β|[1s₀α|1s₀α]
 ```
 
-Similarly, for the two-body energy expression:
-
-``` # jldoctest helium
-julia> diff.(HC.integrals, Ref(conj(a)))
-1-element Array{DirectExchangePotentials{SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}}},1}:
- [1s₀β||1s₀β]1s₀α
-```
+that is, we instead derived equations for the conjugated orbitals.
 
 ```@meta
 DocTestSetup = nothing
