@@ -40,6 +40,7 @@ OrbitalOverlap
 OrbitalMatrixElement
 NBodyTerm
 NBodyMatrixElement
+transform
 overlap_matrix
 Matrix
 ```

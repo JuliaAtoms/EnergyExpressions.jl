@@ -127,6 +127,29 @@ Base.:(*)(a::NBodyTermFactor, b::Number) =
 Base.:(*)(a::Number, b::NBodyTermFactor) =
     NBodyTerm([b], a)
 
+"""
+    transform(f::Function, nbt::NBodyTerm)
+
+Transform integrals of the the N-body matrix element expansion term
+`nbt` according to the function `f`, which should accept a single
+[`NBodyTermFactor`](@ref) as its argument.
+"""
+function transform(f::Function, nbt::NBodyTerm)
+    isempty(nbt.factors) && return NBodyMatrixElement([nbt])
+
+    # Generate the starting N-body matrix element by applying the
+    # transform function `f` on the first factor of the NBodyTerm nbt.
+    nbme = [nbt.coeff*f(first(nbt.factors))]
+
+    # Then generate successively larger expansion by multiplying all
+    # previous terms by the transformation of the current factor.
+    for fac in nbt.factors[2:end]
+        nbme[1] = sum([term*f(fac) for terms in nbme[1].terms])
+    end
+
+    nbme[1]
+end
+
 function Base.show(io::IO, term::NBodyTerm; show_sign=false)
     neg = sign(term.coeff) == -1
     (show_sign || neg) && write(io, neg ? "- " : "+ ")
@@ -318,7 +341,7 @@ function NBodyMatrixElement(a::SlaterDeterminant, op::NBodyOperator{N}, b::Slate
         isabovediagonal(k) || continue # To avoid double-counting
         for l in start:oend
             isabovediagonal(l) || continue
-            
+
             Dkl = cofactor(k, l, overlap) # Determinantal overlap of all other orbitals
             iszero(Dkl) && continue
 
@@ -330,7 +353,7 @@ function NBodyMatrixElement(a::SlaterDeterminant, op::NBodyOperator{N}, b::Slate
                 for j = start:Nend
                     isdiagonal(j) && continue
                     sj = permutation_sign([Tuple(j)...])
-                    
+
                     me = OrbitalMatrixElement((ao[getindex.(Ref(k),[Tuple(i)...])]...,), op,
                                               (bo[getindex.(Ref(l),[Tuple(j)...])]...,))
                     iszero(me) && continue
@@ -355,6 +378,20 @@ collapse to the Slater–Condon rules.
 """
 NBodyMatrixElement(a::SlaterDeterminant, op::LinearCombinationOperator, b::SlaterDeterminant, overlap) =
     sum(filter(!iszero, map(o -> NBodyMatrixElement(a, o, b, overlap), op.operators)))
+
+"""
+    transform(f::Function, nbme::NBodyMatrixElement)
+
+Transform integrals of the the N-body matrix element `nbme` according
+to the function `f`, which should accept a single
+[`NBodyTermFactor`](@ref) as its argument, and return a
+[`NBodyMatrixElement`](@ref). This is useful for adapting energy
+expressions to specific symmetries of the system under consideration.
+"""
+function transform(f::Function, nbme::NBodyMatrixElement)
+    iszero(nbme) && return nbme
+    sum(map(t -> transform(f, t), nbme.terms))
+end
 
 """
     overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant[, overlaps=[]])
@@ -403,7 +440,7 @@ julia> overlap_matrix(sa, sa, [OrbitalOverlap(:k̃,:k̃)])
   [3, 3]  =  1
   [4, 4]  =  ⟨k̃|k̃⟩
 ```
-Notice that this overlap matrix was calculated between the Slater determinant `sa` and itself. 
+Notice that this overlap matrix was calculated between the Slater determinant `sa` and itself.
 """
 function overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant, overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[])
     m = length(a)
@@ -446,4 +483,4 @@ function Base.Matrix(op::QuantumOperator, slater_determinants::VSD,
     M
 end
 
-export OrbitalOverlap, overlap_matrix
+export OrbitalOverlap, overlap_matrix, transform
