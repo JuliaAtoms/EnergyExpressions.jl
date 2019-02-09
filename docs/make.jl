@@ -12,11 +12,15 @@ makedocs(
             "Energy Expressions" => "energy_expressions.md",
             "Calculus of Variations" => "calculus_of_variations.md"
         ],
-        "Conjugate orbitals" => "conjugate_orbitals.md",
-        "Slater determinants" => "slater_determinants.md",
-        "N-body operators" => "nbody_operators.md",
-        "N-body matrix elements" => "nbody_matrix_elements.md",
-        "Common N-body operators" => "common_operators.md",
+        "Implementation" => [
+            "Conjugate orbitals" => "conjugate_orbitals.md",
+            "Slater determinants" => "slater_determinants.md",
+            "N-body operators" => "nbody_operators.md",
+            "N-body matrix elements" => "nbody_matrix_elements.md",
+            "Common N-body operators" => "common_operators.md",
+            "N-body equations" => "equations.md",
+            "Variation" => "variations.md"
+        ]
     ],
     assets = ["assets/latex.js"],
 )

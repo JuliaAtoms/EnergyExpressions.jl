@@ -78,6 +78,9 @@ function Base.show(io::IO, me::OrbitalMatrixElement{2,A,CoulombInteraction,B}) w
     end
 end
 
+Base.show(io::IO, co::ContractedOperator{1,2,1,A,CoulombInteraction,B}) where {A,B} =
+    write(io, "[$(co.a[1])|$(co.b[1])]")
+
 """
     iszero(me::EnergyExpressions.OrbitalMatrixElement{2,<:SpinOrbital,CoulombInteraction,<:SpinOrbital})
 

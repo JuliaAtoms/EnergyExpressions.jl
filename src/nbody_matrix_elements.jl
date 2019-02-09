@@ -54,6 +54,25 @@ end
 
 Base.iszero(::OrbitalMatrixElement) = false
 
+"""
+    contract(ome::OrbitalMatrixElement{N}, i...)
+
+Contract `ome` over all coordinates `i...`. `length(i)` cannot be
+larger than `N`.
+"""
+function contract(ome::OrbitalMatrixElement{N,A,O,B}, i::Integer...) where {N,A,O,B}
+    Q = N - length(i)
+
+    Q > 0 ||
+        throw(ArgumentError("Cannot contract $(N)-body orbital matrix element over $(length(i)) coordinates"))
+
+    Q == N && return ome.o
+
+    ContractedOperator(NTuple{Q,A}(ome.a[ii] for ii in i),
+                       ome.o,
+                       NTuple{Q,B}(ome.b[ii] for ii in i))
+end
+
 function Base.show(io::IO, ome::OrbitalMatrixElement{N}) where N
     write(io, "⟨", join(string.(ome.a), " "))
     N > 0 && write(io, "|")
@@ -204,18 +223,10 @@ isdiagonal(i::CartesianIndex) = !allunique(Tuple(i))
 
 Generate the axis index vector for the determinant minor, whose rows
 or columns represented by the `CartesianIndex` `i` should be omitted.
+Implemented via [`complement`](@ref).
 """
-function detaxis(i::CartesianIndex, n)
-    ii = sort([Tuple(i)...])
-    indices = [1:(ii[1]-1)]
-    for j in 2:length(ii)
-        push!(indices, (ii[j-1]+1):(ii[j]-1))
-    end
-    push!(indices, (ii[end]+1):n)
-    filter!(!isempty, indices)
-    vcat(indices...)
-end
-detaxis(i::Integer, n) = detaxis(CartesianIndex(i), n)
+detaxis(i::CartesianIndex, n) = complement(n, Tuple(i)...)
+detaxis(i::Integer, n) = complement(n, i)
 
 """
     detminor(k, l, A)

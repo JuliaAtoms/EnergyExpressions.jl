@@ -11,6 +11,10 @@ end
 ```@docs
 NBodyOperator
 LinearCombinationOperator
+IdentityOperator
+ContractedOperator
+contract
+complement
 ```
 
 ```@meta
