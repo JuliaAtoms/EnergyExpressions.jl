@@ -21,27 +21,25 @@
 \twobody{b}{c}\ket{d}\defd
 (\direct{bd}-\exchange{bd})\ket{c}.
 \end{aligned}
-\end{equation}\]</div><h2><a class="nav-anchor" id="Helium-1" href="#Helium-1">Helium</a></h2><p>Returning to our helium example (now only considering the ground state):</p><pre><code class="language-">julia&gt; he = spin_configurations(c&quot;1s2&quot;)[1]
-1s²
+\end{equation}\]</div><h2><a class="nav-anchor" id="Helium-1" href="#Helium-1">Helium</a></h2><p>Returning to our helium example (now only considering the ground state):</p><pre><code class="language-julia-repl">julia&gt; he = SlaterDeterminant.(spin_configurations(c&quot;1s2&quot;))
+1-element Array{SlaterDeterminant{SpinOrbital{Orbital{Int64}}},1}:
+ |1s₀α 1s₀β|
 
-julia&gt; a,b = he.orbitals
+julia&gt; a,b = he[1].orbitals
 2-element Array{SpinOrbital{Orbital{Int64}},1}:
  1s₀α
- 1s₀β</code></pre><p>First we find the one- and two-body energy expressions:</p><pre><code class="language-">julia&gt; h = OneBodyEnergyExpression(he,he)
-I(1s₀α) + I(1s₀β)
+ 1s₀β</code></pre><p>First we find the energy expression:</p><pre><code class="language-julia-repl">julia&gt; E = Matrix(OneBodyHamiltonian() + CoulombInteraction(), he)
+1×1 Array{EnergyExpressions.NBodyMatrixElement,2}:
+ (1s₀α|1s₀α) + (1s₀β|1s₀β) + F(1s₀α,1s₀β)</code></pre><p>We can now vary this expression with respect to the different spin-orbitals; by convention, we vary the expression with respect to the <em>conjugate</em> orbitals, to derive equations for the <em>unconjugated</em> ones (this is important for complex orbitals, which is the case when studying time-dependent problems):</p><pre><code class="language-julia-repl">julia&gt; diff(E, Conjugate(a))
+1×1 SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64} with 1 stored entry:
+  [1, 1]  =  ĥ|1s₀α⟩ + [1s₀β|1s₀β]|1s₀α⟩
 
-julia&gt; HC = TwoBodyEnergyExpression(he,he)
-[1s₀β 1s₀α||1s₀β 1s₀α]</code></pre><p>We can now vary these expressions with respect to the different spin-orbitals; by convention, we vary the expressions with respect to the <em>conjugate</em> orbitals, to derive equations for the <em>unconjugated</em> ones (this is important for complex orbitals, which is the case when studying time-dependent problems):</p><pre><code class="language-">julia&gt; h.integrals
-2-element Array{OneBodyIntegral{SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}}},1}:
- I(1s₀α)
- I(1s₀β)
+julia&gt; diff(E, Conjugate(b))
+1×1 SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64} with 1 stored entry:
+  [1, 1]  =  ĥ|1s₀β⟩ + [1s₀α|1s₀α]|1s₀β⟩</code></pre><p>This result means that the variation of the first integral in the one-body part of the energy expression yields the one-body Hamiltonian <span>$\hamiltonian$</span> acting on the orbital <code>1s₀α</code>, whereas the second integral, not containing the first orbital, varies to yield zero. The two-body energy <code>F(1s₀α,1s₀β)</code> varies to yield the two-body potential <code>[1s₀β|1s₀β]</code>, again acting on the orbital <code>1s₀α</code>.</p><p>If we instead vary with respect to the <em>unconjugated</em> orbitals, we get</p><pre><code class="language-julia-repl">julia&gt; diff(E, a)
+1×1 SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64} with 1 stored entry:
+  [1, 1]  =  ⟨1s₀α|ĥ + ⟨1s₀α|[1s₀β|1s₀β]
 
-julia&gt; diff.(h.integrals, Ref(conj(a)))
-2-element Array{OneBodyHamiltonian,1}:
- ĥ1s₀α
- ĥ0</code></pre><p>This result means that the variation of the first integral in the one-body expression yields the one-body Hamiltonian <span>$\hamiltonian$</span> acting on the orbital <code>1s₀α</code>, whereas the second integral, not containing the first orbital, varies to yield zero.</p><p>If we instead vary with respect to the second orbital, <em>unconjugated</em> this time, we get</p><pre><code class="language-">julia&gt; diff.(h.integrals, Ref(b))
-2-element Array{OneBodyHamiltonian,1}:
- ĥ0
- 1s₀β†ĥ</code></pre><p>Similarly, for the two-body energy expression:</p><pre><code class="language-">julia&gt; diff.(HC.integrals, Ref(conj(a)))
-1-element Array{DirectExchangePotentials{SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}},SpinOrbital{Orbital{Int64}}},1}:
- [1s₀β||1s₀β]1s₀α</code></pre><footer><hr/><a class="previous" href="../energy_expressions/"><span class="direction">Previous</span><span class="title">Energy Expressions</span></a><a class="next" href="../conjugate_orbitals/"><span class="direction">Next</span><span class="title">Conjugate orbitals</span></a></footer></article></body></html>
+julia&gt; diff(E, b)
+1×1 SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64} with 1 stored entry:
+  [1, 1]  =  ⟨1s₀β|ĥ + ⟨1s₀β|[1s₀α|1s₀α]</code></pre><p>that is, we instead derived equations for the conjugated orbitals.</p><footer><hr/><a class="previous" href="../energy_expressions/"><span class="direction">Previous</span><span class="title">Energy Expressions</span></a><a class="next" href="../conjugate_orbitals/"><span class="direction">Next</span><span class="title">Conjugate orbitals</span></a></footer></article></body></html>
