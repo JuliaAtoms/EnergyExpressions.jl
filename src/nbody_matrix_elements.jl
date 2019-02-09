@@ -144,7 +144,7 @@ function transform(f::Function, nbt::NBodyTerm)
     # Then generate successively larger expansion by multiplying all
     # previous terms by the transformation of the current factor.
     for fac in nbt.factors[2:end]
-        nbme[1] = sum([term*f(fac) for terms in nbme[1].terms])
+        nbme[1] = sum([term*f(fac) for term in nbme[1].terms])
     end
 
     nbme[1]
