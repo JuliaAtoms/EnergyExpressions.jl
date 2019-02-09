@@ -8,7 +8,7 @@ The one-body Hamiltonian, may include external fields. Is diagonal in spin, i.e.
 struct OneBodyHamiltonian <: OneBodyOperator end
 
 Base.show(io::IO, ::OneBodyHamiltonian) = write(io, "ĥ")
-Base.show(io::IO, me::EnergyExpressions.OrbitalMatrixElement{1,A,OneBodyHamiltonian,B}) where{A,B} =
+Base.show(io::IO, me::OrbitalMatrixElement{1,A,OneBodyHamiltonian,B}) where{A,B} =
     write(io, "(", join(string.(me.a), " "), "|", join(string.(me.b), " "), ")")
 
 """
@@ -16,7 +16,7 @@ Base.show(io::IO, me::EnergyExpressions.OrbitalMatrixElement{1,A,OneBodyHamilton
 
 The matrix element vanishes if the spin-orbitals do not have the same spin.
 """
-Base.iszero(me::EnergyExpressions.OrbitalMatrixElement{1,A,OneBodyHamiltonian,B}) where {A<:SpinOrbital,B<:SpinOrbital} =
+Base.iszero(me::OrbitalMatrixElement{1,A,OneBodyHamiltonian,B}) where {A<:SpinOrbital,B<:SpinOrbital} =
     me.a[1].spin != me.b[1].spin
 
 """
@@ -44,7 +44,7 @@ true
 struct FieldFreeOneBodyHamiltonian <: OneBodyOperator end
 
 Base.show(io::IO, ::FieldFreeOneBodyHamiltonian) = write(io, "ĥ₀")
-Base.iszero(me::EnergyExpressions.OrbitalMatrixElement{1,A,FieldFreeOneBodyHamiltonian,B}) where {A,B} =
+Base.iszero(me::OrbitalMatrixElement{1,A,FieldFreeOneBodyHamiltonian,B}) where {A,B} =
     me.a != me.b
 
 """
@@ -67,7 +67,8 @@ G(a,b)
 struct CoulombInteraction <: TwoBodyOperator end
 
 Base.show(io::IO, ::CoulombInteraction) = write(io, "ĝ")
-function Base.show(io::IO, me::EnergyExpressions.OrbitalMatrixElement{2,A,CoulombInteraction,B}) where{A,B}
+
+function Base.show(io::IO, me::OrbitalMatrixElement{2,A,CoulombInteraction,B}) where {A,B}
     if me.a == me.b # Direct interaction
         write(io, "F($(me.a[1]),$(me.a[2]))")
     elseif me.a[1] == me.b[2] && me.a[2] == me.b[1] # Exchange interaction
@@ -83,7 +84,7 @@ end
 The matrix element vanishes if the spin-orbitals associated with the
 same coordinate do not have the same spin.
 """
-Base.iszero(me::EnergyExpressions.OrbitalMatrixElement{2,A,CoulombInteraction,B}) where {A<:SpinOrbital,B<:SpinOrbital} =
+Base.iszero(me::OrbitalMatrixElement{2,A,CoulombInteraction,B}) where {A<:SpinOrbital,B<:SpinOrbital} =
     me.a[1].spin != me.b[1].spin || me.a[2].spin != me.b[2].spin
 
 export OneBodyHamiltonian, FieldFreeOneBodyHamiltonian, CoulombInteraction

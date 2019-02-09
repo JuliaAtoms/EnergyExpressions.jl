@@ -24,6 +24,11 @@ struct OrbitalOverlap{A,B} <: NBodyTermFactor
     b::B
 end
 
+# By default, we assume that all orbital overlaps are non-zero,
+# i.e. the orbitals are non-orthogonal, since we specify
+# non-orthogonality precisely by providing OrbitalOverlaps.
+Base.iszero(::OrbitalOverlap) = false
+
 Base.show(io::IO, o::OrbitalOverlap) =
     write(io, "⟨$(o.a)|$(o.b)⟩")
 
@@ -69,9 +74,12 @@ end
 
 Base.one(::Type{NBodyTerm}) = NBodyTerm(NBodyTermFactor[], 1)
 Base.one(::NBodyTerm) = one(NBodyTerm)
+Base.isone(term::NBodyTerm) = isempty(term.factors) && isone(term.coeff)
+isminusone(term::NBodyTerm) = isempty(term.factors) && isone(-term.coeff)
+
 Base.zero(::Type{NBodyTerm}) = NBodyTerm(NBodyTermFactor[], 0)
 Base.zero(::NBodyTerm) = zero(NBodyTerm)
-Base.iszero(term::NBodyTerm) = iszero(term.coeff)
+Base.iszero(term::NBodyTerm) = iszero(term.coeff) || any(iszero.(term.factors))
 
 Base.convert(::Type{NBodyTerm}, f::NBodyTermFactor) =
     NBodyTerm([f], 1)
