@@ -91,4 +91,4 @@ same coordinate do not have the same spin.
 Base.iszero(me::OrbitalMatrixElement{2,A,CoulombInteraction,B}) where {A<:SpinOrbital,B<:SpinOrbital} =
     me.a[1].spin != me.b[1].spin || me.a[2].spin != me.b[2].spin
 
-export OneBodyHamiltonian, FieldFreeOneBodyHamiltonian, CoulombInteraction
+export OneBodyHamiltonian, FieldFreeOneBodyHamiltonian, CoulombInteraction, CoulombPotential
