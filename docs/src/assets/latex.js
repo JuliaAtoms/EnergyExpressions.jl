@@ -19,6 +19,7 @@ require(['mathjax'], function(MathJax) {
                 braket: ["\\langle#1|#2\\rangle",2],
                 matrixel: ["\\langle#1|#2|#3\\rangle",3],
                 vec: ["\\mathbf{#1}",1],
+                mat: ["\\mathsf{#1}",1],
                 conj: ["#1^*",1],
                 im: "\\mathrm{i}",
                 operator : ["\\mathfrak{#1}",1],

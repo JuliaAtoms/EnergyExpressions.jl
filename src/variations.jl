@@ -92,7 +92,7 @@ julia> diff(E, Conjugate(:b))
   [1, 2]  =  -[a|d]|c⟩ + [a|c]|d⟩
 ```
 """
-function Base.diff(E::Matrix{NBodyMatrixElement}, o::O) where O
+function Base.diff(E::EM, o::O) where {EM<:EnergyExpression,O}
     m,n = size(E)
     eqm = spzeros(LinearCombinationEquation, m, n)
     for i = 1:m

@@ -18,6 +18,7 @@ include("nbody_matrix_elements.jl")
 include("common_operators.jl")
 include("equations.jl")
 include("variations.jl")
+include("multi_configurational_equations.jl")
 # include("invariant_sets.jl")
 
 end # module

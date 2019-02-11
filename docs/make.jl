@@ -19,7 +19,8 @@ makedocs(
             "N-body matrix elements" => "nbody_matrix_elements.md",
             "Common N-body operators" => "common_operators.md",
             "N-body equations" => "equations.md",
-            "Variation" => "variations.md"
+            "Variation" => "variations.md",
+            "System of equations" => "system_of_equations.md"
         ]
     ],
     assets = ["assets/latex.js"],
