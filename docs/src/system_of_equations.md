@@ -29,10 +29,11 @@ all terms of the equations can be written on the form
 
 $$\begin{equation}
 \label{eqn:equation-term}
-\operator{A}\ket{\chi}\left[
+\operator{A}\ket{\chi}
+\underbrace{\left[
 \sum_n \alpha_n \conj{c}_{i_n} c_{j_n}
 \prod_k \int_{n_k}
-\right],
+\right]}_{\textrm{Rank 0}},
 \end{equation}$$
 
 (or on its dual form with conjugated orbitals) where $\operator{A}$ is
@@ -41,7 +42,11 @@ expression, $\conj{c}_{i_n} c_{j_n}$ the coefficient due to the
 multi-configurational expansion, and finally $\int_{n_k}$ all the
 extra integrals (which are necessarily zero-body operators) that may
 appear due to non-orthogonal orbitals (and which may be shared between
-many equations).
+many equations). The operator $\operator{A}$ can have ranks 0–2;
+formally, it can only have rank 0 (multiplication by a scalar) or 2
+(multiplication by a matrix). What we somewhat sloppily to refer by
+“rank 1” is an operator of rank 2, but which is diagonal in the
+underlying coordinate, such as a local potential.
 
 Thus, to efficiently perform an iteration, one would first compute all
 common integrals $\int_k$, and then for every equation term of the
@@ -53,25 +58,29 @@ There are a few important special cases of
 $\eqref{eqn:equation-term}$:
 
 1) Field-free, one-body Hamiltonian, i.e. $\operator{A}=\hamiltonian_0$.
-   This is the contribution from the orbital $\ket{\chi}$ to itself.
+   This is the contribution from the orbital $\ket{\chi}$ to
+   itself. Rank 2.
 
 2) One-body Hamiltonian, including field, i.e. $\operator{A}=\hamiltonian$.
    This is the contribution from another orbital $\ket{\chi'}$ to
    $\ket{\chi}$ via some off-diagonal coupling, such as an external
-   field (e.g. an electro–magnetic field).
+   field (e.g. an electro–magnetic field). Rank 2.
 
 3) Direct interaction, i.e. $\operator{A}=\direct{kl}$, where two
    other orbitals $\ket{\chi_k}$ and $\ket{\chi_l}$ together form a
-   potential acting on $\ket{\chi}$.
+   potential acting on $\ket{\chi}$. “Rank 1”.
 
 4) Exchange interaction, i.e. $\operator{A}=\exchange{kl}$, where
    another orbital $\ket{\chi_k}$ and $\ket{\chi}$ together form a
-   potential acting on a third orbital $\ket{\chi_l}$.
+   potential acting on a third orbital $\ket{\chi_l}$. Rank 2.
 
 5) Source term, i.e. a contribution that does not involve $\ket{\chi}$
    in any way. This term arises from other configurations in the
    multi-configurational expansion. Case 2. is also formulated in this
-   way.
+   way. Rank 0–2. If for some reason the source orbital and/or the
+   operator acting on it is fixed, it may be possible to precompute
+   the effect of the operator on the source orbital and reduce the
+   computational complexity to a rank 0-equivalent operation.
 
 ```@meta
 CurrentModule = EnergyExpressions
