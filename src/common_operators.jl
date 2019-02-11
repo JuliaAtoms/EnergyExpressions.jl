@@ -65,6 +65,7 @@ G(a,b)
 ```
 """
 struct CoulombInteraction <: TwoBodyOperator end
+const CoulombPotential{A,B} = ContractedOperator{1,2,1,A,CoulombInteraction,B}
 
 Base.show(io::IO, ::CoulombInteraction) = write(io, "ĝ")
 
@@ -78,7 +79,7 @@ function Base.show(io::IO, me::OrbitalMatrixElement{2,A,CoulombInteraction,B}) w
     end
 end
 
-Base.show(io::IO, co::ContractedOperator{1,2,1,A,CoulombInteraction,B}) where {A,B} =
+Base.show(io::IO, co::CoulombPotential{A,B}) where {A,B} =
     write(io, "[$(co.a[1])|$(co.b[1])]")
 
 """

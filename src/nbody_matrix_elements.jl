@@ -461,6 +461,8 @@ function overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant, overlaps::Ve
     sparse(Is,Js,os,m,m)
 end
 
+const EnergyExpression = AbstractMatrix{NBodyMatrixElement}
+
 """
     Matrix(op::QuantumOperator, slater_determinants[, overlaps])
 
@@ -483,4 +485,4 @@ function Base.Matrix(op::QuantumOperator, slater_determinants::VSD,
     M
 end
 
-export OrbitalOverlap, overlap_matrix, transform
+export OrbitalOverlap, overlap_matrix, transform, EnergyExpression
