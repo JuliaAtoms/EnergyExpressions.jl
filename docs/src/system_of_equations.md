@@ -25,7 +25,7 @@ $$\begin{equation}
 \mat{H}_{ij} \defd \matrixel{\chi_i}{\Hamiltonian}{\chi_j},
 \end{equation}$$
 
-any term of the equations can be written as
+all terms of the equations can be written on the form
 
 $$\begin{equation}
 \label{eqn:equation-term}
@@ -56,9 +56,9 @@ $\eqref{eqn:equation-term}$:
    This is the contribution from the orbital $\ket{\chi}$ to itself.
 
 2) One-body Hamiltonian, including field, i.e. $\operator{A}=\hamiltonian$.
-   This is the contribution from the orbital another orbital $\ket{\chi'}$ to
+   This is the contribution from another orbital $\ket{\chi'}$ to
    $\ket{\chi}$ via some off-diagonal coupling, such as an external
-   field (e.g. an electro-magnetic field).
+   field (e.g. an electro–magnetic field).
 
 3) Direct interaction, i.e. $\operator{A}=\direct{kl}$, where two
    other orbitals $\ket{\chi_k}$ and $\ket{\chi_l}$ together form a
@@ -70,7 +70,7 @@ $\eqref{eqn:equation-term}$:
 
 5) Source term, i.e. a contribution that does not involve $\ket{\chi}$
    in any way. This term arises from other configurations in the
-   multi-configurational expansion. Case 2) is also formulated in this
+   multi-configurational expansion. Case 2. is also formulated in this
    way.
 
 ```@meta
