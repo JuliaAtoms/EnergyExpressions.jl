@@ -92,21 +92,23 @@ G(a,b) \defd \twobody{ab}{ba}
 is called the *exchange interaction* (gives rise to the non-local
 potential).
 
-NB
+!!! note
 
-$$\begin{equation}
-\twobodydx{ii}{ii} = 0,
-\end{equation}$$
+    Since
 
-such that
+    $$\begin{equation}
+    \twobodydx{ii}{ii} = 0,
+    \end{equation}$$
 
-$$\begin{equation}
-\frac{1}{2}\twobodydx{ij}{ij} \equiv
-\sum_{i,j<i}\twobodydx{ij}{ij},
-\end{equation}$$
+    we have
 
-i.e. we sum over $i,j$, divide by two to avoid double-counting
-and avoid automatically the case $i=j$.
+    $$\begin{equation}
+    \frac{1}{2}\twobodydx{ij}{ij} \equiv
+    \sum_{i,j<i}\twobodydx{ij}{ij},
+    \end{equation}$$
+
+    i.e. we sum over $i,j$, divide by two to avoid double-counting
+    and avoid automatically the case $i=j$.
 
 # Repulsion potential
 
@@ -117,4 +119,3 @@ $$\begin{equation}
 \int\diff{\tau_1}\conj{\chi_a}(\tau_1)\frac{1}{r_{12}}\chi_b(\tau_1)=
 \delta(\sigma_a,\sigma_b)\int\diff{\vec{r}_1}\conj{\chi_a}(\vec{r}_1)\frac{1}{r_{12}}\chi_b(\vec{r}_1).
 \end{equation}$$
-
