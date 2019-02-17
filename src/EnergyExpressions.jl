@@ -9,6 +9,8 @@ using UnicodeFun
 if VERSION < v"1.1-DEV"
     isnothing(::Nothing) = true
     isnothing(::Any) = false
+    Base.:(:)(I::CartesianIndex{N}, J::CartesianIndex{N}) where N =
+        CartesianIndices(map((i,j) -> i:j, Tuple(I), Tuple(J)))
 end
 
 include("conjugate_orbitals.jl")
