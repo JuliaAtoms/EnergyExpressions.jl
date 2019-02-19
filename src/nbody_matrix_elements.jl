@@ -1,4 +1,4 @@
-# * Matrix elements
+# * N-body term factors
 
 """
     NBodyTermFactor
@@ -6,6 +6,8 @@
 Abstract type for a factor in a term in a N-body matrix element expansion
 """
 abstract type NBodyTermFactor end
+
+# ** Orbital overlaps
 
 """
     OrbitalOverlap(a,b)
@@ -29,8 +31,33 @@ end
 # non-orthogonality precisely by providing OrbitalOverlaps.
 Base.iszero(::OrbitalOverlap) = false
 
+Base.adjoint(o::OrbitalOverlap{A,B}) where {A,B} = OrbitalOverlap{B,A}(o.b, o.a)
+
+"""
+    isdependent(o::OrbitalOverlap, orbital)
+
+Returns `true` if the [`OrbitalOverlap`](@ref) `o` depends on `orbital`.
+
+# Examples
+
+```jldoctest
+julia> isdependent(OrbitalOverlap(:a,:b), :a)
+false
+
+julia> isdependent(OrbitalOverlap(:a,:b), Conjugate(:a))
+true
+
+julia> isdependent(OrbitalOverlap(:a,:b), :b)
+true
+```
+"""
+isdependent(o::OrbitalOverlap, corb::Conjugate{O}) where O = o.a == corb.orbital
+isdependent(o::OrbitalOverlap, orb::O) where O = o.b == orb
+
 Base.show(io::IO, o::OrbitalOverlap) =
     write(io, "⟨$(o.a)|$(o.b)⟩")
+
+# ** Orbital matrix elements
 
 """
     OrbitalMatrixElement(a,o,b)
@@ -73,6 +100,31 @@ function contract(ome::OrbitalMatrixElement{N,A,O,B}, i::Integer...) where {N,A,
                        NTuple{Q,B}(ome.b[ii] for ii in i))
 end
 
+
+"""
+    isdependent(o::OrbitalMatrixElement, orbital)
+
+Returns `true` if the [`OrbitalMatrixElement`](@ref) `o` depends on `orbital`.
+
+# Examples
+
+```jldoctest
+julia> isdependent(EnergyExpressions.OrbitalMatrixElement((:a,), OneBodyHamiltonian(), (:b,)), :a)
+false
+
+julia> isdependent(EnergyExpressions.OrbitalMatrixElement((:a,), OneBodyHamiltonian(), (:b,)), Conjugate(:a))
+true
+
+julia> isdependent(EnergyExpressions.OrbitalMatrixElement((:a,), OneBodyHamiltonian(), (:b,)), :b)
+true
+
+julia> isdependent(EnergyExpressions.OrbitalMatrixElement((:a,:b,), CoulombInteraction(), (:c,:d)), :c)
+true
+```
+"""
+isdependent(o::OrbitalMatrixElement, corb::Conjugate{O}) where O = corb.orbital ∈ o.a
+isdependent(o::OrbitalMatrixElement, orb::O) where O = orb ∈ o.b
+
 function Base.show(io::IO, ome::OrbitalMatrixElement{N}) where N
     write(io, "⟨", join(string.(ome.a), " "))
     N > 0 && write(io, "|")
@@ -80,6 +132,8 @@ function Base.show(io::IO, ome::OrbitalMatrixElement{N}) where N
     N > 0 && write(io, "|")
     write(io, join(string.(ome.b), " "), "⟩")
 end
+
+# * N-body terms
 
 """
     NBodyTerm(factors, coeff)
@@ -128,6 +182,17 @@ Base.:(*)(a::Number, b::NBodyTermFactor) =
     NBodyTerm([b], a)
 
 """
+    isdependent(nbt::NBodyTerm, o)
+
+Returns `true` if any of the factors comprising `nbt` is dependent on
+the orbital `o`. Not that the result is dependent on whether `o` is
+conjugated or not.
+
+"""
+isdependent(nbt::NBodyTerm, o) =
+    any(isdependent.(nbt.factors, Ref(o)))
+
+"""
     transform(f::Function, nbt::NBodyTerm)
 
 Transform integrals of the the N-body matrix element expansion term
@@ -163,6 +228,8 @@ function Base.show(io::IO, term::NBodyTerm; show_sign=false)
     end
     write(io, join(string.(factors), ""))
 end
+
+# * N-body matrix elements
 
 """
     NBodyMatrixElement(terms)
@@ -218,6 +285,8 @@ function Base.show(io::IO, nbme::NBodyMatrixElement)
         end
     end
 end
+
+# ** Determinant utilities
 
 """
     isabovediagonal(i::CartesianIndex{N})
@@ -308,6 +377,8 @@ otherwise.
 permutation_sign(p) =
     iseven(Combinatorics.parity(p)) ? 1 : -1
 
+# ** N-body matrix construction
+
 """
     NBodyMatrixElement(a, op, b, overlap)
 
@@ -393,6 +464,8 @@ function transform(f::Function, nbme::NBodyMatrixElement)
     sum(map(t -> transform(f, t), nbme.terms))
 end
 
+# * Overlap matrices
+
 """
     overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant[, overlaps=[]])
 
@@ -461,6 +534,8 @@ function overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant, overlaps::Ve
     sparse(Is,Js,os,m,m)
 end
 
+# * Energy expression matrix
+
 const EnergyExpression = AbstractMatrix{NBodyMatrixElement}
 
 """
@@ -485,4 +560,4 @@ function Base.Matrix(op::QuantumOperator, slater_determinants::VSD,
     M
 end
 
-export OrbitalOverlap, overlap_matrix, transform, EnergyExpression
+export OrbitalOverlap, overlap_matrix, transform, EnergyExpression, isdependent
