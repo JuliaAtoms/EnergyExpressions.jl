@@ -193,9 +193,9 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
-    "location": "conjugate_orbitals/#N-body-equations-1",
+    "location": "conjugate_orbitals/#Conjugate-orbitals-1",
     "page": "Conjugate orbitals",
-    "title": "N-body equations",
+    "title": "Conjugate orbitals",
     "category": "section",
     "text": "DocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendA conjugated orbital, conjchi (often written brachi) is the dual to the unconjugated orbital chi (often written ketchi). In the code, conjugation of orbitals is denoted with a dagger (†) to avoid confusion with the multiplication operator *.Conjugate\nconj DocTestSetup = nothing"
 },
@@ -321,6 +321,22 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "nbody_operators/#Base.in-Union{Tuple{O}, Tuple{O,ContractedOperator}} where O",
+    "page": "N-body operators",
+    "title": "Base.in",
+    "category": "method",
+    "text": "in(orbital, co::ContractedOperator)\n\nTest if orbital is among the right set of orbitals of the ContractedOperator co. Useful to test if co is an integral operator with respect to orbital.\n\n\n\n\n\n"
+},
+
+{
+    "location": "nbody_operators/#Base.in-Union{Tuple{O}, Tuple{Conjugate{O},ContractedOperator}} where O",
+    "page": "N-body operators",
+    "title": "Base.in",
+    "category": "method",
+    "text": "in(corbital::Conjugate, co::ContractedOperator)\n\nTest if corbital is among the left set of orbitals of the ContractedOperator co. Useful to test if co is an integral operator with respect to corbital.\n\n\n\n\n\n"
+},
+
+{
     "location": "nbody_operators/#EnergyExpressions.contract",
     "page": "N-body operators",
     "title": "EnergyExpressions.contract",
@@ -341,7 +357,7 @@ var documenterSearchIndex = {"docs": [
     "page": "N-body operators",
     "title": "N-body operators",
     "category": "section",
-    "text": "CurrentModule = EnergyExpressions\nDocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendNBodyOperator\nLinearCombinationOperator\nIdentityOperator\nContractedOperator\ncontract\ncomplement DocTestSetup = nothing"
+    "text": "CurrentModule = EnergyExpressions\nDocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendNBodyOperator\nLinearCombinationOperator\nIdentityOperator\nContractedOperator\nBase.in(orbital::O, co::ContractedOperator) where O\nBase.in(corbital::Conjugate{O}, co::ContractedOperator) where O\ncontract\ncomplement DocTestSetup = nothing"
 },
 
 {
@@ -393,6 +409,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "nbody_matrix_elements/#EnergyExpressions.isdependent",
+    "page": "N-body matrix elements",
+    "title": "EnergyExpressions.isdependent",
+    "category": "function",
+    "text": "isdependent(o::OrbitalOverlap, orbital)\n\nReturns true if the OrbitalOverlap o depends on orbital.\n\nExamples\n\njulia> isdependent(OrbitalOverlap(:a,:b), :a)\nfalse\n\njulia> isdependent(OrbitalOverlap(:a,:b), Conjugate(:a))\ntrue\n\njulia> isdependent(OrbitalOverlap(:a,:b), :b)\ntrue\n\n\n\n\n\nisdependent(o::OrbitalMatrixElement, orbital)\n\nReturns true if the OrbitalMatrixElement o depends on orbital.\n\nExamples\n\njulia> isdependent(EnergyExpressions.OrbitalMatrixElement((:a,), OneBodyHamiltonian(), (:b,)), :a)\nfalse\n\njulia> isdependent(EnergyExpressions.OrbitalMatrixElement((:a,), OneBodyHamiltonian(), (:b,)), Conjugate(:a))\ntrue\n\njulia> isdependent(EnergyExpressions.OrbitalMatrixElement((:a,), OneBodyHamiltonian(), (:b,)), :b)\ntrue\n\njulia> isdependent(EnergyExpressions.OrbitalMatrixElement((:a,:b,), CoulombInteraction(), (:c,:d)), :c)\ntrue\n\n\n\n\n\nisdependent(nbt::NBodyTerm, o)\n\nReturns true if any of the factors comprising nbt is dependent on the orbital o. Not that the result is dependent on whether o is conjugated or not.\n\n\n\n\n\n"
+},
+
+{
     "location": "nbody_matrix_elements/#EnergyExpressions.transform",
     "page": "N-body matrix elements",
     "title": "EnergyExpressions.transform",
@@ -409,6 +433,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "nbody_matrix_elements/#EnergyExpressions.EnergyExpression",
+    "page": "N-body matrix elements",
+    "title": "EnergyExpressions.EnergyExpression",
+    "category": "type",
+    "text": "EnergyExpression\n\nAn energy expression is given by an energy matrix, or interaction matrix, sandwiched between a vector of mixing coefficients: E = c\'H*c, where c are the mixing coefficients and H the energy matrix.\n\n\n\n\n\n"
+},
+
+{
     "location": "nbody_matrix_elements/#Base.Matrix",
     "page": "N-body matrix elements",
     "title": "Base.Matrix",
@@ -421,7 +453,7 @@ var documenterSearchIndex = {"docs": [
     "page": "N-body matrix elements",
     "title": "N-body matrix elements",
     "category": "section",
-    "text": "CurrentModule = EnergyExpressions\nDocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendThe matrix element of an N-body operator between two Slater determinants may be expanded according to the Löwdin rules (which reduce to the Slater–Condon rules if all single-particle orbitals are orthogonal):beginequation\nlabeleqnmatrix-element-expansion\nmatrixelPhi_AOmega_nPhi_B =\nfrac1nsum_p (-)^p\nmatrixelk_1k_2k_nOmega_nl_1l_2l_n\nD^AB(k_1k_2k_nl_1l_2l_n)\nendequationwhere D^AB(k_1k_2k_nl_1l_2l_n) is the determinant minor of the orbital overlap determinant D^AB with the rows k_1k_2k_n and columns l_1l_2l_n stricken out, and p runs over all permutations.In general, a term in the expansion is thus of the formbeginequation\nalphamatrixelk_1k_2k_nOmega_nl_1l_2l_nbraketabbraketcddotsbraketyz\nendequationwhere alpha is a scalar. This is represented by NBodyTerm type.NBodyTermFactor\nOrbitalOverlap\nOrbitalMatrixElement\nNBodyTerm\nNBodyMatrixElement\ntransform\noverlap_matrix\nMatrix"
+    "text": "CurrentModule = EnergyExpressions\nDocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendThe matrix element of an N-body operator between two Slater determinants may be expanded according to the Löwdin rules (which reduce to the Slater–Condon rules if all single-particle orbitals are orthogonal):beginequation\nlabeleqnmatrix-element-expansion\nmatrixelPhi_AOmega_nPhi_B =\nfrac1nsum_p (-)^p\nmatrixelk_1k_2k_nOmega_nl_1l_2l_n\nD^AB(k_1k_2k_nl_1l_2l_n)\nendequationwhere D^AB(k_1k_2k_nl_1l_2l_n) is the determinant minor of the orbital overlap determinant D^AB with the rows k_1k_2k_n and columns l_1l_2l_n stricken out, and p runs over all permutations.In general, a term in the expansion is thus of the formbeginequation\nalphamatrixelk_1k_2k_nOmega_nl_1l_2l_nbraketabbraketcddotsbraketyz\nendequationwhere alpha is a scalar. This is represented by NBodyTerm type.NBodyTermFactor\nOrbitalOverlap\nOrbitalMatrixElement\nNBodyTerm\nNBodyMatrixElement\nisdependent\ntransform\noverlap_matrix\nEnergyExpression\nMatrix"
 },
 
 {
@@ -501,7 +533,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Common N-body operators",
     "title": "EnergyExpressions.OneBodyHamiltonian",
     "category": "type",
-    "text": "OneBodyHamiltonian\n\nThe one-body Hamiltonian, may include external fields. Is diagonal in spin, i.e.\n\n\n\n\n\n"
+    "text": "OneBodyHamiltonian\n\nThe one-body Hamiltonian, may include external fields. It is diagonal in spin, i.e. it does not couple orbitals of opposite spin.\n\n\n\n\n\n"
 },
 
 {
@@ -509,7 +541,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Common N-body operators",
     "title": "EnergyExpressions.FieldFreeOneBodyHamiltonian",
     "category": "type",
-    "text": "FieldFreeOneBodyHamiltonian\n\nThe one-body Hamiltonian, with no external fields. Is diagonal in the orbitals, i.e. does not couple unequal orbitals.\n\nExamples\n\njulia> EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:a,))\n⟨a|ĥ₀|a⟩\n\njulia> iszero(EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:a,)))\nfalse\n\njulia> EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:b,))\n⟨a|ĥ₀|b⟩\n\njulia> iszero(EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:b,)))\ntrue\n\n\n\n\n\n"
+    "text": "FieldFreeOneBodyHamiltonian\n\nThe one-body Hamiltonian, with no external fields. It is diagonal in the orbitals, i.e. does not couple unequal orbitals.\n\nExamples\n\njulia> EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:a,))\n⟨a|ĥ₀|a⟩\n\njulia> iszero(EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:a,)))\nfalse\n\njulia> EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:b,))\n⟨a|ĥ₀|b⟩\n\njulia> iszero(EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:b,)))\ntrue\n\n\n\n\n\n"
 },
 
 {
@@ -613,15 +645,15 @@ var documenterSearchIndex = {"docs": [
     "page": "System of equations",
     "title": "Example",
     "category": "section",
-    "text": "We start by defining a set of configurations and specifying that a few of the constituent orbitals are non-orthogonal:julia> cfgs = [[:i, :j, :l, :k̃], [:i, :j, :k, :l̃]]\n2-element Array{Array{Symbol,1},1}:\n [:i, :j, :l, :k̃]\n [:i, :j, :k, :l̃]\n\njulia> continua = [:k̃, :l̃]\n2-element Array{Symbol,1}:\n :k̃\n :l̃\n\njulia> overlaps = [OrbitalOverlap(i,j) for i in continua for j in continua]\n4-element Array{OrbitalOverlap{Symbol,Symbol},1}:\n ⟨k̃|k̃⟩\n ⟨k̃|l̃⟩\n ⟨l̃|k̃⟩\n ⟨l̃|l̃⟩We then set up the energy expression as before:julia> H = OneBodyHamiltonian() + CoulombInteraction()\nĥ + ĝ\n\njulia> E = Matrix(H, SlaterDeterminant.(cfgs), overlaps)\n2×2 Array{EnergyExpressions.NBodyMatrixElement,2}:\n (i|i)⟨k̃|k̃⟩ + (j|j)⟨k̃|k̃⟩ + (l|l)⟨k̃|k̃⟩ + (k̃|k̃) - G(i,j)⟨k̃|k̃⟩ + F(i,j)⟨k̃|k̃⟩ + … - G(i,k̃) + F(i,k̃) - G(j,k̃) + F(j,k̃) - G(l,k̃) + F(l,k̃)  …  (l|k)⟨k̃|l̃⟩ - [i l|k i]⟨k̃|l̃⟩ + [i l|i k]⟨k̃|l̃⟩ - [j l|k j]⟨k̃|l̃⟩ + [j l|j k]⟨k̃|l̃⟩ - [l k̃|l̃ k] + [l k̃|k l̃]\n (k|l)⟨l̃|k̃⟩ - [i k|l i]⟨l̃|k̃⟩ + [i k|i l]⟨l̃|k̃⟩ - [j k|l j]⟨l̃|k̃⟩ + [j k|j l]⟨l̃|k̃⟩ - [k l̃|k̃ l] + [k l̃|l k̃]                                     (i|i)⟨l̃|l̃⟩ + (j|j)⟨l̃|l̃⟩ + (k|k)⟨l̃|l̃⟩ + (l̃|l̃) - G(i,j)⟨l̃|l̃⟩ + F(i,j)⟨l̃|l̃⟩ + … - G(i,l̃) + F(i,l̃) - G(j,l̃) + F(j,l̃) - G(k,l̃) + F(k,l̃)Finally, we derive the coupled integro-differential equation system for the continuum orbitals k̃, l̃:julia> eqs = diff(E, Conjugate.(continua))\nEnergyExpressions.MCEquationSystem(EnergyExpressions.OrbitalEquation{Symbol,SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64}}[OrbitalEquation(k̃):\n  [1, 1]  =  𝐈₁|k̃⟩(i|i) + 𝐈₁|k̃⟩(j|j) + 𝐈₁|k̃⟩(l|l) + ĥ|k̃⟩ + 𝐈₁|k̃⟩(- G(i,j)) + 𝐈₁|k̃⟩F(i,j) + 𝐈₁|k̃⟩(- G(i,l)) + 𝐈₁|k̃⟩F(i,l) + 𝐈₁|k̃⟩(- G(j,l)) + 𝐈₁|k̃⟩F(j,l) + -[i|k̃]|i⟩ + [i|i]|k̃⟩ + -[j|k̃]|j⟩ + [j|j]|k̃⟩ + -[l|k̃]|l⟩ + [l|l]|k̃⟩\n  [1, 2]  =  𝐈₁|l̃⟩(l|k) + 𝐈₁|l̃⟩(- [i l|k i]) + 𝐈₁|l̃⟩[i l|i k] + 𝐈₁|l̃⟩(- [j l|k j]) + 𝐈₁|l̃⟩[j l|j k] + -[l|l̃]|k⟩ + [l|k]|l̃⟩\n, OrbitalEquation(l̃):\n  [2, 1]  =  𝐈₁|k̃⟩(k|l) + 𝐈₁|k̃⟩(- [i k|l i]) + 𝐈₁|k̃⟩[i k|i l] + 𝐈₁|k̃⟩(- [j k|l j]) + 𝐈₁|k̃⟩[j k|j l] + -[k|k̃]|l⟩ + [k|l]|k̃⟩\n  [2, 2]  =  𝐈₁|l̃⟩(i|i) + 𝐈₁|l̃⟩(j|j) + 𝐈₁|l̃⟩(k|k) + ĥ|l̃⟩ + 𝐈₁|l̃⟩(- G(i,j)) + 𝐈₁|l̃⟩F(i,j) + 𝐈₁|l̃⟩(- G(i,k)) + 𝐈₁|l̃⟩F(i,k) + 𝐈₁|l̃⟩(- G(j,k)) + 𝐈₁|l̃⟩F(j,k) + -[i|l̃]|i⟩ + [i|i]|l̃⟩ + -[j|l̃]|j⟩ + [j|j]|l̃⟩ + -[k|l̃]|k⟩ + [k|k]|l̃⟩\n], Any[(i|i), 𝐈₁, (j|j), (l|l), ĥ, G(i,j), F(i,j), G(i,l), F(i,l), G(j,l)  …  [j k|l j], [j k|j l], [k|k̃], [k|l], (k|k), G(i,k), F(i,k), G(j,k), F(j,k), [k|k]])We can investigate the MCEquationSystem object eqs a bit. It consists of two coupled equations:julia> eqs.equations\n2-element Array{EnergyExpressions.OrbitalEquation{Symbol,SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64}},1}:\n OrbitalEquation(k̃):\n  [1, 1]  =  𝐈₁|k̃⟩(i|i) + 𝐈₁|k̃⟩(j|j) + 𝐈₁|k̃⟩(l|l) + ĥ|k̃⟩ + 𝐈₁|k̃⟩(- G(i,j)) + 𝐈₁|k̃⟩F(i,j) + 𝐈₁|k̃⟩(- G(i,l)) + 𝐈₁|k̃⟩F(i,l) + 𝐈₁|k̃⟩(- G(j,l)) + 𝐈₁|k̃⟩F(j,l) + -[i|k̃]|i⟩ + [i|i]|k̃⟩ + -[j|k̃]|j⟩ + [j|j]|k̃⟩ + -[l|k̃]|l⟩ + [l|l]|k̃⟩\n  [1, 2]  =  𝐈₁|l̃⟩(l|k) + 𝐈₁|l̃⟩(- [i l|k i]) + 𝐈₁|l̃⟩[i l|i k] + 𝐈₁|l̃⟩(- [j l|k j]) + 𝐈₁|l̃⟩[j l|j k] + -[l|l̃]|k⟩ + [l|k]|l̃⟩\n\n OrbitalEquation(l̃):\n  [2, 1]  =  𝐈₁|k̃⟩(k|l) + 𝐈₁|k̃⟩(- [i k|l i]) + 𝐈₁|k̃⟩[i k|i l] + 𝐈₁|k̃⟩(- [j k|l j]) + 𝐈₁|k̃⟩[j k|j l] + -[k|k̃]|l⟩ + [k|l]|k̃⟩\n  [2, 2]  =  𝐈₁|l̃⟩(i|i) + 𝐈₁|l̃⟩(j|j) + 𝐈₁|l̃⟩(k|k) + ĥ|l̃⟩ + 𝐈₁|l̃⟩(- G(i,j)) + 𝐈₁|l̃⟩F(i,j) + 𝐈₁|l̃⟩(- G(i,k)) + 𝐈₁|l̃⟩F(i,k) + 𝐈₁|l̃⟩(- G(j,k)) + 𝐈₁|l̃⟩F(j,k) + -[i|l̃]|i⟩ + [i|i]|l̃⟩ + -[j|l̃]|j⟩ + [j|j]|l̃⟩ + -[k|l̃]|k⟩ + [k|k]|l̃⟩The first equation consists of the following terms:julia> eqs.equations[1].one_body\n0-element Array{EnergyExpressions.MCCoeff,1}\n\njulia> eqs.equations[1].direct_terms\n3-element Array{Pair{Int64,Array{EnergyExpressions.MCCoeff,1}},1}:\n 13 => [MCCoeff{Int64}(1, 1, 1, Int64[])]\n 14 => [MCCoeff{Int64}(1, 1, 1, Int64[])]\n 12 => [MCCoeff{Int64}(1, 1, 1, Int64[])]\n\njulia> eqs.equations[1].exchange_terms\n3-element Array{Tuple{Any,EnergyExpressions.MCCoeff,Any},1}:\n ([i|k̃], EnergyExpressions.MCCoeff{Int64}(1, 1, -1, Int64[]), :i)\n ([j|k̃], EnergyExpressions.MCCoeff{Int64}(1, 1, -1, Int64[]), :j)\n ([l|k̃], EnergyExpressions.MCCoeff{Int64}(1, 1, -1, Int64[]), :l)\n\njulia> eqs.equations[1].source_terms\n4-element Array{Pair{Int64,Array{Tuple{EnergyExpressions.MCCoeff,Any},1}},1}:\n  2 => [(MCCoeff{Int64}(1, 1, 1, [1]), :k̃), (MCCoeff{Int64}(1, 1, 1, [3]), :k̃), (MCCoeff{Int64}(1, 1, 1, [4]), :k̃), (MCCoeff{Int64}(1, 1, -1, [6]), :k̃), (MCCoeff{Int64}(1, 1, 1, [7]), :k̃), (MCCoeff{Int64}(1, 1, -1, [8]), :k̃), (MCCoeff{Int64}(1, 1, 1, [9]), :k̃), (MCCoeff{Int64}(1, 1, -1, [10]), :k̃), (MCCoeff{Int64}(1, 1, 1, [11]), :k̃), (MCCoeff{Int64}(1, 2, 1, [15]), :l̃), (MCCoeff{Int64}(1, 2, -1, [16]), :l̃), (MCCoeff{Int64}(1, 2, 1, [17]), :l̃), (MCCoeff{Int64}(1, 2, -1, [18]), :l̃), (MCCoeff{Int64}(1, 2, 1, [19]), :l̃)]\n  5 => [(MCCoeff{Int64}(1, 1, 1, Int64[]), :k̃)]\n 21 => [(MCCoeff{Int64}(1, 2, 1, Int64[]), :l̃)]\n 20 => [(MCCoeff{Int64}(1, 2, -1, Int64[]), :k)]where the MCCoeff objects indicate which components of the mixing coefficient vector vecc need to be multiplied, and all the integers are pointers to the list of common integrals:julia> eqs.integrals\n34-element Array{Any,1}:\n (i|i)\n 𝐈₁\n (j|j)\n (l|l)\n ĥ\n G(i,j)\n F(i,j)\n G(i,l)\n F(i,l)\n G(j,l)\n F(j,l)\n [i|i]\n [j|j]\n [l|l]\n (l|k)\n [i l|k i]\n [i l|i k]\n [j l|k j]\n [j l|j k]\n [l|l̃]\n [l|k]\n (k|l)\n [i k|l i]\n [i k|i l]\n [j k|l j]\n [j k|j l]\n [k|k̃]\n [k|l]\n (k|k)\n G(i,k)\n F(i,k)\n G(j,k)\n F(j,k)\n [k|k]From this we see that the 𝐈₁ (one-body identity operator) contribution to |k̃⟩ can be written as a linear combination of |k̃⟩ and |l̃⟩, weighted by different components of the mixing coefficient vector vecc and various other integrals. This is all the information necessary to set up an efficient equation solver."
+    "text": "We start by defining a set of configurations and specifying that a few of the constituent orbitals are non-orthogonal:julia> cfgs = [[:i, :j, :l, :k̃], [:i, :j, :k, :l̃]]\n2-element Array{Array{Symbol,1},1}:\n [:i, :j, :l, :k̃]\n [:i, :j, :k, :l̃]\n\njulia> continua = [:k̃, :l̃]\n2-element Array{Symbol,1}:\n :k̃\n :l̃\n\njulia> overlaps = [OrbitalOverlap(i,j) for i in continua for j in continua]\n4-element Array{OrbitalOverlap{Symbol,Symbol},1}:\n ⟨k̃|k̃⟩\n ⟨k̃|l̃⟩\n ⟨l̃|k̃⟩\n ⟨l̃|l̃⟩We then set up the energy expression as before:julia> H = OneBodyHamiltonian() + CoulombInteraction()\nĥ + ĝ\n\njulia> E = Matrix(H, SlaterDeterminant.(cfgs), overlaps)\n2×2 Array{EnergyExpressions.NBodyMatrixElement,2}:\n (i|i)⟨k̃|k̃⟩ + (j|j)⟨k̃|k̃⟩ + (l|l)⟨k̃|k̃⟩ + (k̃|k̃) - G(i,j)⟨k̃|k̃⟩ + F(i,j)⟨k̃|k̃⟩ + … - G(i,k̃) + F(i,k̃) - G(j,k̃) + F(j,k̃) - G(l,k̃) + F(l,k̃)  …  (l|k)⟨k̃|l̃⟩ - [i l|k i]⟨k̃|l̃⟩ + [i l|i k]⟨k̃|l̃⟩ - [j l|k j]⟨k̃|l̃⟩ + [j l|j k]⟨k̃|l̃⟩ - [l k̃|l̃ k] + [l k̃|k l̃]\n (k|l)⟨l̃|k̃⟩ - [i k|l i]⟨l̃|k̃⟩ + [i k|i l]⟨l̃|k̃⟩ - [j k|l j]⟨l̃|k̃⟩ + [j k|j l]⟨l̃|k̃⟩ - [k l̃|k̃ l] + [k l̃|l k̃]                                     (i|i)⟨l̃|l̃⟩ + (j|j)⟨l̃|l̃⟩ + (k|k)⟨l̃|l̃⟩ + (l̃|l̃) - G(i,j)⟨l̃|l̃⟩ + F(i,j)⟨l̃|l̃⟩ + … - G(i,l̃) + F(i,l̃) - G(j,l̃) + F(j,l̃) - G(k,l̃) + F(k,l̃)Finally, we derive the coupled integro-differential equation system for the continuum orbitals k̃, l̃:julia> eqs = diff(E, Conjugate.(continua))\nEnergyExpressions.MCEquationSystem(EnergyExpressions.OrbitalEquation{Symbol,SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64}}[OrbitalEquation(k̃):\n  [1, 1]  =  𝐈₁|k̃⟩(i|i) + 𝐈₁|k̃⟩(j|j) + 𝐈₁|k̃⟩(l|l) + ĥ|k̃⟩ + 𝐈₁|k̃⟩(- G(i,j)) + 𝐈₁|k̃⟩F(i,j) + 𝐈₁|k̃⟩(- G(i,l)) + 𝐈₁|k̃⟩F(i,l) + 𝐈₁|k̃⟩(- G(j,l)) + 𝐈₁|k̃⟩F(j,l) + -[i|k̃]|i⟩ + [i|i]|k̃⟩ + -[j|k̃]|j⟩ + [j|j]|k̃⟩ + -[l|k̃]|l⟩ + [l|l]|k̃⟩\n  [1, 2]  =  𝐈₁|l̃⟩(l|k) + 𝐈₁|l̃⟩(- [i l|k i]) + 𝐈₁|l̃⟩[i l|i k] + 𝐈₁|l̃⟩(- [j l|k j]) + 𝐈₁|l̃⟩[j l|j k] + -[l|l̃]|k⟩ + [l|k]|l̃⟩\n, OrbitalEquation(l̃):\n  [2, 1]  =  𝐈₁|k̃⟩(k|l) + 𝐈₁|k̃⟩(- [i k|l i]) + 𝐈₁|k̃⟩[i k|i l] + 𝐈₁|k̃⟩(- [j k|l j]) + 𝐈₁|k̃⟩[j k|j l] + -[k|k̃]|l⟩ + [k|l]|k̃⟩\n  [2, 2]  =  𝐈₁|l̃⟩(i|i) + 𝐈₁|l̃⟩(j|j) + 𝐈₁|l̃⟩(k|k) + ĥ|l̃⟩ + 𝐈₁|l̃⟩(- G(i,j)) + 𝐈₁|l̃⟩F(i,j) + 𝐈₁|l̃⟩(- G(i,k)) + 𝐈₁|l̃⟩F(i,k) + 𝐈₁|l̃⟩(- G(j,k)) + 𝐈₁|l̃⟩F(j,k) + -[i|l̃]|i⟩ + [i|i]|l̃⟩ + -[j|l̃]|j⟩ + [j|j]|l̃⟩ + -[k|l̃]|k⟩ + [k|k]|l̃⟩\n], Any[(i|i), 𝐈₁, (j|j), (l|l), ĥ, G(i,j), F(i,j), G(i,l), F(i,l), G(j,l)  …  [j k|l j], [j k|j l], [k|k̃], [k|l], (k|k), G(i,k), F(i,k), G(j,k), F(j,k), [k|k]])We can investigate the MCEquationSystem object eqs a bit. It consists of two coupled equations:julia> eqs.equations\n2-element Array{EnergyExpressions.OrbitalEquation{Symbol,SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64}},1}:\n OrbitalEquation(k̃):\n  [1, 1]  =  𝐈₁|k̃⟩(i|i) + 𝐈₁|k̃⟩(j|j) + 𝐈₁|k̃⟩(l|l) + ĥ|k̃⟩ + 𝐈₁|k̃⟩(- G(i,j)) + 𝐈₁|k̃⟩F(i,j) + 𝐈₁|k̃⟩(- G(i,l)) + 𝐈₁|k̃⟩F(i,l) + 𝐈₁|k̃⟩(- G(j,l)) + 𝐈₁|k̃⟩F(j,l) + -[i|k̃]|i⟩ + [i|i]|k̃⟩ + -[j|k̃]|j⟩ + [j|j]|k̃⟩ + -[l|k̃]|l⟩ + [l|l]|k̃⟩\n  [1, 2]  =  𝐈₁|l̃⟩(l|k) + 𝐈₁|l̃⟩(- [i l|k i]) + 𝐈₁|l̃⟩[i l|i k] + 𝐈₁|l̃⟩(- [j l|k j]) + 𝐈₁|l̃⟩[j l|j k] + -[l|l̃]|k⟩ + [l|k]|l̃⟩\n\n OrbitalEquation(l̃):\n  [2, 1]  =  𝐈₁|k̃⟩(k|l) + 𝐈₁|k̃⟩(- [i k|l i]) + 𝐈₁|k̃⟩[i k|i l] + 𝐈₁|k̃⟩(- [j k|l j]) + 𝐈₁|k̃⟩[j k|j l] + -[k|k̃]|l⟩ + [k|l]|k̃⟩\n  [2, 2]  =  𝐈₁|l̃⟩(i|i) + 𝐈₁|l̃⟩(j|j) + 𝐈₁|l̃⟩(k|k) + ĥ|l̃⟩ + 𝐈₁|l̃⟩(- G(i,j)) + 𝐈₁|l̃⟩F(i,j) + 𝐈₁|l̃⟩(- G(i,k)) + 𝐈₁|l̃⟩F(i,k) + 𝐈₁|l̃⟩(- G(j,k)) + 𝐈₁|l̃⟩F(j,k) + -[i|l̃]|i⟩ + [i|i]|l̃⟩ + -[j|l̃]|j⟩ + [j|j]|l̃⟩ + -[k|l̃]|k⟩ + [k|k]|l̃⟩The first equation consists of the following terms:julia> eqs.equations[1].terms\n6-element Array{Pair{Int64,Array{EnergyExpressions.MCTerm,1}},1}:\n  0 => [MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, 1, 𝐈₁, :k̃, [1]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, 1, 𝐈₁, :k̃, [2]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, 1, 𝐈₁, :k̃, [3]), MCTerm{Int64,OneBodyHamiltonian,Symbol}(1, 1, 1, ĥ, :k̃, Int64[]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, -1, 𝐈₁, :k̃, [4]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, 1, 𝐈₁, :k̃, [5]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, -1, 𝐈₁, :k̃, [6]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, 1, 𝐈₁, :k̃, [7]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, -1, 𝐈₁, :k̃, [8]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, 1, 𝐈₁, :k̃, [9]), MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 1, -1, [i|k̃], :i, Int64[]), MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 1, -1, [j|k̃], :j, Int64[]), MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 1, -1, [l|k̃], :l, Int64[]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 2, 1, 𝐈₁, :l̃, [13]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 2, -1, 𝐈₁, :l̃, [14]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 2, 1, 𝐈₁, :l̃, [15]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 2, -1, 𝐈₁, :l̃, [16]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 2, 1, 𝐈₁, :l̃, [17])]\n 10 => [MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 1, 1, [i|i], :k̃, Int64[])]\n 19 => [MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 2, 1, [l|k], :l̃, Int64[])]\n 11 => [MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 1, 1, [j|j], :k̃, Int64[])]\n 12 => [MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 1, 1, [l|l], :k̃, Int64[])]\n 18 => [MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 2, -1, [l|l̃], :k, Int64[])]where the MCTerm objects indicate which components of the mixing coefficient vector vecc need to be multiplied, and all the integers are pointers to the list of common integrals:julia> eqs.integrals\n32-element Array{Any,1}:\n (i|i)\n (j|j)\n (l|l)\n G(i,j)\n F(i,j)\n G(i,l)\n F(i,l)\n G(j,l)\n F(j,l)\n [i|i]\n [j|j]\n [l|l]\n (l|k)\n [i l|k i]\n [i l|i k]\n [j l|k j]\n [j l|j k]\n [l|l̃]\n [l|k]\n (k|l)\n [i k|l i]\n [i k|i l]\n [j k|l j]\n [j k|j l]\n [k|k̃]\n [k|l]\n (k|k)\n G(i,k)\n F(i,k)\n G(j,k)\n F(j,k)\n [k|k]From this we see that the 𝐈₁ (one-body identity operator) contribution to |k̃⟩ can be written as a linear combination of |k̃⟩ and |l̃⟩, weighted by different components of the mixing coefficient vector vecc and various other integrals. This is all the information necessary to set up an efficient equation solver."
 },
 
 {
-    "location": "system_of_equations/#EnergyExpressions.MCCoeff",
+    "location": "system_of_equations/#EnergyExpressions.MCTerm",
     "page": "System of equations",
-    "title": "EnergyExpressions.MCCoeff",
+    "title": "EnergyExpressions.MCTerm",
     "category": "type",
-    "text": "MCCoeff(i, j, coeff, integrals=[])\n\nRepresents the coefficient of one term in the multi-configurational expansion. i and j are indices in the mixing-coefficient vector c (which is subject to optimization, and thus has to be referred to), coeff is an additional coefficient, and integrals is a list of indices into the vector of common integrals, the values of which should be multiplied to form the overall coefficient.\n\n\n\n\n\n"
+    "text": "MCTerm(i, j, coeff, operator, source_orbital, integrals=[])\n\nRepresents one term in the multi-configurational expansion. i and j are indices in the mixing-coefficient vector c (which is subject to optimization, and thus has to be referred to), coeff is an additional coefficient, and integrals is a list of indices into the vector of common integrals, the values of which should be multiplied to form the overall coefficient.\n\n\n\n\n\n"
 },
 
 {
@@ -630,6 +662,14 @@ var documenterSearchIndex = {"docs": [
     "title": "EnergyExpressions.OrbitalEquation",
     "category": "type",
     "text": "OrbitalEquation(orbital, equation,\n                one_body, direct_terms, exchange_terms, source_terms)\n\nRepresents the integro-differential equation for orbital, expressed as a linear combination of the different terms, with pointers to the list of common integrals that is stored by the encompassing MCEquationSystem object.\n\n\n\n\n\n"
+},
+
+{
+    "location": "system_of_equations/#EnergyExpressions.orbital_equation",
+    "page": "System of equations",
+    "title": "EnergyExpressions.orbital_equation",
+    "category": "function",
+    "text": "orbital_equation(E::EnergyExpression, orbital, integrals::Vector)\n\nGenerate the OrbitalEquation governing orbital by varying the EnergyExpression E, and storing common expressions in integrals.\n\n\n\n\n\n"
 },
 
 {
@@ -653,7 +693,7 @@ var documenterSearchIndex = {"docs": [
     "page": "System of equations",
     "title": "Implementation",
     "category": "section",
-    "text": "MCCoeff\nOrbitalEquation\nMCEquationSystem\npushifmissing! DocTestSetup = nothing"
+    "text": "MCTerm\nOrbitalEquation\norbital_equation\nMCEquationSystem\npushifmissing!CurrentModule = nothing\nDocTestSetup = nothing"
 },
 
 ]}
