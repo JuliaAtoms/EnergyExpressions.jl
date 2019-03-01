@@ -13,6 +13,8 @@ NBodyOperator
 LinearCombinationOperator
 IdentityOperator
 ContractedOperator
+Base.in(orbital::O, co::ContractedOperator) where O
+Base.in(corbital::Conjugate{O}, co::ContractedOperator) where O
 contract
 complement
 ```

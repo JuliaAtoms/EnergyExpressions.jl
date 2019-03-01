@@ -40,8 +40,10 @@ OrbitalOverlap
 OrbitalMatrixElement
 NBodyTerm
 NBodyMatrixElement
+isdependent
 transform
 overlap_matrix
+EnergyExpression
 Matrix
 ```
 

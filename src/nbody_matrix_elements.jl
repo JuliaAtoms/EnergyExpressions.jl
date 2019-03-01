@@ -536,6 +536,14 @@ end
 
 # * Energy expression matrix
 
+"""
+    EnergyExpression
+
+An energy expression is given by an energy matrix, or interaction
+matrix, sandwiched between a vector of mixing coefficients: `E =
+c'H*c`, where `c` are the mixing coefficients and `H` the energy
+matrix.
+"""
 const EnergyExpression = AbstractMatrix{NBodyMatrixElement}
 
 """

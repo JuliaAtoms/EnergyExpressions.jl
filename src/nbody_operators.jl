@@ -92,6 +92,23 @@ struct ContractedOperator{N,P,Q,A,O<:NBodyOperator{P},B} <: NBodyOperator{N}
 end
 
 """
+    in(orbital, co::ContractedOperator)
+
+Test if `orbital` is among the right set of orbitals of the
+[`ContractedOperator`](@ref) `co`. Useful to test if `co` is an
+integral operator with respect to `orbital`.
+"""
+Base.in(orbital::O, co::ContractedOperator) where O = orbital ∈ co.b
+"""
+    in(corbital::Conjugate, co::ContractedOperator)
+
+Test if `corbital` is among the left set of orbitals of the
+[`ContractedOperator`](@ref) `co`. Useful to test if `co` is an
+integral operator with respect to `corbital`.
+"""
+Base.in(corbital::Conjugate{O}, co::ContractedOperator) where O = corbital.orbital ∈ co.a
+
+"""
     contract(orbital_matrix_element, i...)
 
 Contract the `orbital_matrix_element` over all coordinates `i...`.
@@ -122,4 +139,6 @@ function Base.show(io::IO, o::ContractedOperator{N}) where N
     write(io, join(string.(o.b), " "), "⟩")
 end
 
-export NBodyOperator, ZeroBodyOperator, OneBodyOperator, TwoBodyOperator, ContractedOperator
+export NBodyOperator,
+    ZeroBodyOperator, OneBodyOperator, TwoBodyOperator,
+    IdentityOperator, ContractedOperator

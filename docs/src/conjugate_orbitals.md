@@ -1,4 +1,4 @@
-# N-body equations
+# Conjugate orbitals
 
 ```@meta
 DocTestSetup = quote

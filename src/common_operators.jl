@@ -3,7 +3,8 @@
 """
     OneBodyHamiltonian
 
-The one-body Hamiltonian, may include external fields. Is diagonal in spin, i.e.
+The one-body Hamiltonian, may include external fields. It is diagonal
+in spin, i.e. it does not couple orbitals of opposite spin.
 """
 struct OneBodyHamiltonian <: OneBodyOperator end
 
@@ -22,8 +23,8 @@ Base.iszero(me::OrbitalMatrixElement{1,A,OneBodyHamiltonian,B}) where {A<:SpinOr
 """
     FieldFreeOneBodyHamiltonian
 
-The one-body Hamiltonian, with no external fields. Is diagonal in the
-orbitals, i.e. does not couple unequal orbitals.
+The one-body Hamiltonian, with no external fields. It is diagonal in
+the orbitals, i.e. does not couple unequal orbitals.
 
 # Examples
 

@@ -1,15 +1,15 @@
 # System of equations
 
 When dealing with large energy expressions resulting from many
-configurations, when deriving the orbital equations
-(see [`N-body equations`](@ref) and
-[`Calculus of Variations – Implementation`](@ref)), many of the
-integrals involved will be shared between the different terms of the
-equations. It is therefore of interest to gather a list of integrals
-that can be calculated once at every iteration (in a self-consistent
-procedure for finding eigenstates, or in time-propagation), and whose
-values can then be reused when solving the individual equations. The
-routines described below, although primitive, aid in this effort.
+configurations, when deriving the orbital equations (see [N-body
+equations](@ref) and [Calculus of Variations – Implementation](@ref)),
+many of the integrals involved will be shared between the different
+terms of the equations. It is therefore of interest to gather a list
+of integrals that can be calculated once at every iteration (in a
+self-consistent procedure for finding eigenstates, or in
+time-propagation), and whose values can then be reused when solving
+the individual equations. The routines described below, although
+primitive, aid in this effort.
 
 The idea is the following: With an energy expression on the form
 
@@ -157,41 +157,26 @@ julia> eqs.equations
 The first equation consists of the following terms:
 
 ```jldoctest mc-eqs
-julia> eqs.equations[1].one_body
-0-element Array{EnergyExpressions.MCCoeff,1}
-
-julia> eqs.equations[1].direct_terms
-3-element Array{Pair{Int64,Array{EnergyExpressions.MCCoeff,1}},1}:
- 13 => [MCCoeff{Int64}(1, 1, 1, Int64[])]
- 14 => [MCCoeff{Int64}(1, 1, 1, Int64[])]
- 12 => [MCCoeff{Int64}(1, 1, 1, Int64[])]
-
-julia> eqs.equations[1].exchange_terms
-3-element Array{Tuple{Any,EnergyExpressions.MCCoeff,Any},1}:
- ([i|k̃], EnergyExpressions.MCCoeff{Int64}(1, 1, -1, Int64[]), :i)
- ([j|k̃], EnergyExpressions.MCCoeff{Int64}(1, 1, -1, Int64[]), :j)
- ([l|k̃], EnergyExpressions.MCCoeff{Int64}(1, 1, -1, Int64[]), :l)
-
-julia> eqs.equations[1].source_terms
-4-element Array{Pair{Int64,Array{Tuple{EnergyExpressions.MCCoeff,Any},1}},1}:
-  2 => [(MCCoeff{Int64}(1, 1, 1, [1]), :k̃), (MCCoeff{Int64}(1, 1, 1, [3]), :k̃), (MCCoeff{Int64}(1, 1, 1, [4]), :k̃), (MCCoeff{Int64}(1, 1, -1, [6]), :k̃), (MCCoeff{Int64}(1, 1, 1, [7]), :k̃), (MCCoeff{Int64}(1, 1, -1, [8]), :k̃), (MCCoeff{Int64}(1, 1, 1, [9]), :k̃), (MCCoeff{Int64}(1, 1, -1, [10]), :k̃), (MCCoeff{Int64}(1, 1, 1, [11]), :k̃), (MCCoeff{Int64}(1, 2, 1, [15]), :l̃), (MCCoeff{Int64}(1, 2, -1, [16]), :l̃), (MCCoeff{Int64}(1, 2, 1, [17]), :l̃), (MCCoeff{Int64}(1, 2, -1, [18]), :l̃), (MCCoeff{Int64}(1, 2, 1, [19]), :l̃)]
-  5 => [(MCCoeff{Int64}(1, 1, 1, Int64[]), :k̃)]
- 21 => [(MCCoeff{Int64}(1, 2, 1, Int64[]), :l̃)]
- 20 => [(MCCoeff{Int64}(1, 2, -1, Int64[]), :k)]
+julia> eqs.equations[1].terms
+6-element Array{Pair{Int64,Array{EnergyExpressions.MCTerm,1}},1}:
+  0 => [MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, 1, 𝐈₁, :k̃, [1]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, 1, 𝐈₁, :k̃, [2]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, 1, 𝐈₁, :k̃, [3]), MCTerm{Int64,OneBodyHamiltonian,Symbol}(1, 1, 1, ĥ, :k̃, Int64[]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, -1, 𝐈₁, :k̃, [4]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, 1, 𝐈₁, :k̃, [5]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, -1, 𝐈₁, :k̃, [6]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, 1, 𝐈₁, :k̃, [7]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, -1, 𝐈₁, :k̃, [8]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 1, 1, 𝐈₁, :k̃, [9]), MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 1, -1, [i|k̃], :i, Int64[]), MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 1, -1, [j|k̃], :j, Int64[]), MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 1, -1, [l|k̃], :l, Int64[]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 2, 1, 𝐈₁, :l̃, [13]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 2, -1, 𝐈₁, :l̃, [14]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 2, 1, 𝐈₁, :l̃, [15]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 2, -1, 𝐈₁, :l̃, [16]), MCTerm{Int64,IdentityOperator{1},Symbol}(1, 2, 1, 𝐈₁, :l̃, [17])]
+ 10 => [MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 1, 1, [i|i], :k̃, Int64[])]
+ 19 => [MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 2, 1, [l|k], :l̃, Int64[])]
+ 11 => [MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 1, 1, [j|j], :k̃, Int64[])]
+ 12 => [MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 1, 1, [l|l], :k̃, Int64[])]
+ 18 => [MCTerm{Int64,ContractedOperator{1,2,1,Symbol,CoulombInteraction,Symbol},Symbol}(1, 2, -1, [l|l̃], :k, Int64[])]
 ```
 
-where the [`MCCoeff`](@ref) objects indicate which components of the
+where the [`MCTerm`](@ref) objects indicate which components of the
 mixing coefficient vector $\vec{c}$ need to be multiplied, and all the
 integers are pointers to the list of common integrals:
 
 ```jldoctest mc-eqs
 julia> eqs.integrals
-34-element Array{Any,1}:
+32-element Array{Any,1}:
  (i|i)
- 𝐈₁
  (j|j)
  (l|l)
- ĥ
  G(i,j)
  F(i,j)
  G(i,l)
@@ -232,13 +217,14 @@ information necessary to set up an efficient equation solver.
 ## Implementation
 
 ```@docs
-MCCoeff
+MCTerm
 OrbitalEquation
+orbital_equation
 MCEquationSystem
 pushifmissing!
 ```
 
 ```@meta
- DocTestSetup = nothing
+CurrentModule = nothing
+DocTestSetup = nothing
 ```
-
