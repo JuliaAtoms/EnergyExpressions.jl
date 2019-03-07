@@ -461,7 +461,8 @@ determinants. If the orbitals are all orthogonal, the Löwdin rules
 collapse to the Slater–Condon rules.
 """
 NBodyMatrixElement(a::SlaterDeterminant, op::LinearCombinationOperator, b::SlaterDeterminant, overlap) =
-    sum(filter(!iszero, map(o -> NBodyMatrixElement(a, o, b, overlap), op.operators)))
+    sum(filter(!iszero, map(o -> o[2]*NBodyMatrixElement(a, o[1], b, overlap),
+                            op.operators)))
 
 """
     transform(f::Function, nbme::NBodyMatrixElement)

@@ -59,7 +59,7 @@ Base.show(io::IO, ::IdentityOperator{N}) where N =
 Represents a linear combination of [`NBodyOperator`](@ref)s.
 """
 struct LinearCombinationOperator <: QuantumOperator
-    operators::Vector{<:NBodyOperator}
+    operators::Vector{<:Pair{<:NBodyOperator,<:Number}}
 end
 
 Base.zero(::LinearCombinationOperator) =
@@ -74,18 +74,42 @@ Returns the maximum number of bodies coupled by any of the N-body
 operators in the [`LinearCombinationOperator`](@ref).
 """
 numbodies(lco::LinearCombinationOperator) =
-    iszero(lco) ? 0 : maximum(numbodies.(lco.operators))
+    iszero(lco) ? 0 : maximum(numbodies.(first.(lco.operators)))
 
-Base.show(io::IO, op::LinearCombinationOperator) =
-    write(io, join(string.(op.operators), " + "))
+function Base.show(io::IO, op::LinearCombinationOperator)
+    for (i,(o,n)) in enumerate(op.operators)
+        i > 1 && write(io, " ")
+        showcoeff(io, n, i > 1)
+        write(io, string(o))
+    end
+end
 
 Base.:(+)(a::NBodyOperator, b::NBodyOperator) =
-    LinearCombinationOperator(NBodyOperator[a,b])
+    LinearCombinationOperator([a=>1,b=>1])
+Base.:(-)(a::NBodyOperator, b::NBodyOperator) =
+    LinearCombinationOperator([a=>1,b=>-1])
 
 Base.:(+)(a::LinearCombinationOperator, b::NBodyOperator) =
-    LinearCombinationOperator(vcat(a.operators, b))
+    LinearCombinationOperator(vcat(a.operators, b=>1))
+Base.:(-)(a::LinearCombinationOperator, b::NBodyOperator) =
+    LinearCombinationOperator(vcat(a.operators, b=>-1))
+
 Base.:(+)(a::NBodyOperator, b::LinearCombinationOperator) =
-    LinearCombinationOperator(vcat(a, b.operators))
+    LinearCombinationOperator(vcat(a=>1, b.operators))
+Base.:(-)(a::NBodyOperator, b::LinearCombinationOperator) =
+    LinearCombinationOperator(vcat(a=>1, Pair{<:NBodyOperator,<:Number}[o[1]=>-o[2]
+                                                                       for o in b.operators]))
+
+Base.:(+)(a::LinearCombinationOperator, b::LinearCombinationOperator) =
+    LinearCombinationOperator(vcat(a.operators, b.operators))
+Base.:(-)(a::LinearCombinationOperator, b::LinearCombinationOperator) =
+    LinearCombinationOperator(vcat(a.operators, Pair{<:NBodyOperator,<:Number}[o[1]=>-o[2]
+                                                                               for o in b.operators]))
+
+Base.:(*)(a::Number, b::NBodyOperator) =
+    LinearCombinationOperator([b=>a])
+Base.:(*)(a::NBodyOperator, b::Number) =
+    LinearCombinationOperator([a=>b])
 
 # * Contracted operators
 
