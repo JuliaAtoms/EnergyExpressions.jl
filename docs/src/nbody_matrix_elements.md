@@ -38,6 +38,7 @@ where $\alpha$ is a scalar. This is represented by [`NBodyTerm`](@ref) type.
 NBodyTermFactor
 OrbitalOverlap
 OrbitalMatrixElement
+numbodies
 NBodyTerm
 NBodyMatrixElement
 isdependent

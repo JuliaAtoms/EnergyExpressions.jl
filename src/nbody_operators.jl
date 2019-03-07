@@ -9,6 +9,13 @@ Abstract N-body operator coupling `N` bodies each between two Slater determinant
 """
 abstract type NBodyOperator{N} <: QuantumOperator end
 
+"""
+    numbodies(::NBodyOperator{N})
+
+Returns the number of bodies coupled by the N-body operator, i.e. `N`.
+"""
+numbodies(::NBodyOperator{N}) where N = N
+
 
 # # Examples
 
@@ -59,6 +66,15 @@ Base.zero(::LinearCombinationOperator) =
     LinearCombinationOperator(NBodyOperator[])
 Base.iszero(op::LinearCombinationOperator) =
     isempty(op.operators)
+
+"""
+    numbodies(lco::LinearCombinationOperator)
+
+Returns the maximum number of bodies coupled by any of the N-body
+operators in the [`LinearCombinationOperator`](@ref).
+"""
+numbodies(lco::LinearCombinationOperator) =
+    iszero(lco) ? 0 : maximum(numbodies.(lco.operators))
 
 Base.show(io::IO, op::LinearCombinationOperator) =
     write(io, join(string.(op.operators), " + "))
@@ -139,6 +155,6 @@ function Base.show(io::IO, o::ContractedOperator{N}) where N
     write(io, join(string.(o.b), " "), "⟩")
 end
 
-export NBodyOperator,
+export NBodyOperator, numbodies,
     ZeroBodyOperator, OneBodyOperator, TwoBodyOperator,
     IdentityOperator, ContractedOperator

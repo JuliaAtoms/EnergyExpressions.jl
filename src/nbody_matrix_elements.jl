@@ -34,6 +34,14 @@ Base.iszero(::OrbitalOverlap) = false
 Base.adjoint(o::OrbitalOverlap{A,B}) where {A,B} = OrbitalOverlap{B,A}(o.b, o.a)
 
 """
+    numbodies(::OrbitalOverlap)
+
+Returns the number of bodies coupled by the zero-body operator in the
+orbital overlap, i.e. `0`.
+"""
+numbodies(::OrbitalOverlap) = 0
+
+"""
     isdependent(o::OrbitalOverlap, orbital)
 
 Returns `true` if the [`OrbitalOverlap`](@ref) `o` depends on `orbital`.
@@ -80,6 +88,13 @@ struct OrbitalMatrixElement{N,A,O<:NBodyOperator{N},B} <: NBodyTermFactor
 end
 
 Base.iszero(::OrbitalMatrixElement) = false
+
+"""
+    numbodies(::OrbitalMatrixElement{N})
+
+Returns the number of bodies coupled by the operator, i.e. `N`.
+"""
+numbodies(::OrbitalMatrixElement{N}) where N = N
 
 """
     contract(ome::OrbitalMatrixElement{N}, i...)
@@ -568,4 +583,4 @@ function Base.Matrix(op::QuantumOperator, slater_determinants::VSD,
     M
 end
 
-export OrbitalOverlap, overlap_matrix, transform, EnergyExpression, isdependent
+export OrbitalOverlap, numbodies, overlap_matrix, transform, EnergyExpression, isdependent
