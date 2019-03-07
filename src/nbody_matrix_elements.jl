@@ -231,9 +231,7 @@ function transform(f::Function, nbt::NBodyTerm)
 end
 
 function Base.show(io::IO, term::NBodyTerm; show_sign=false)
-    neg = sign(term.coeff) == -1
-    (show_sign || neg) && write(io, neg ? "- " : "+ ")
-    (isempty(term.factors) || abs(term.coeff) != 1) && write(io, "$(abs(term.coeff))")
+    showcoeff(io, term.coeff, show_sign)
     (iszero(term) || isempty(term.factors)) && return
     noprintfactors = 2
     factors = if get(io, :limit, false) && length(term.factors) > 2noprintfactors

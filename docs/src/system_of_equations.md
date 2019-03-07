@@ -131,12 +131,12 @@ for the continuum orbitals `k̃`, `l̃`:
 ```jldoctest mc-eqs
 julia> eqs = diff(E, Conjugate.(continua))
 EnergyExpressions.MCEquationSystem(EnergyExpressions.OrbitalEquation{Symbol,SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64}}[OrbitalEquation(k̃):
-  [1, 1]  =  𝐈₁|k̃⟩(i|i) + 𝐈₁|k̃⟩(j|j) + 𝐈₁|k̃⟩(l|l) + ĥ|k̃⟩ + 𝐈₁|k̃⟩(- G(i,j)) + 𝐈₁|k̃⟩F(i,j) + 𝐈₁|k̃⟩(- G(i,l)) + 𝐈₁|k̃⟩F(i,l) + 𝐈₁|k̃⟩(- G(j,l)) + 𝐈₁|k̃⟩F(j,l) + -[i|k̃]|i⟩ + [i|i]|k̃⟩ + -[j|k̃]|j⟩ + [j|j]|k̃⟩ + -[l|k̃]|l⟩ + [l|l]|k̃⟩
-  [1, 2]  =  𝐈₁|l̃⟩(l|k) + 𝐈₁|l̃⟩(- [i l|k i]) + 𝐈₁|l̃⟩[i l|i k] + 𝐈₁|l̃⟩(- [j l|k j]) + 𝐈₁|l̃⟩[j l|j k] + -[l|l̃]|k⟩ + [l|k]|l̃⟩
+  [1, 1]  =  + (i|i)𝐈₁|k̃⟩ + (j|j)𝐈₁|k̃⟩ + (l|l)𝐈₁|k̃⟩ + ĥ|k̃⟩ - G(i,j)𝐈₁|k̃⟩ + F(i,j)𝐈₁|k̃⟩ - G(i,l)𝐈₁|k̃⟩ + F(i,l)𝐈₁|k̃⟩ - G(j,l)𝐈₁|k̃⟩ + F(j,l)𝐈₁|k̃⟩ - [i|k̃]|i⟩ + [i|i]|k̃⟩ - [j|k̃]|j⟩ + [j|j]|k̃⟩ - [l|k̃]|l⟩ + [l|l]|k̃⟩
+  [1, 2]  =  + (l|k)𝐈₁|l̃⟩ - [i l|k i]𝐈₁|l̃⟩ + [i l|i k]𝐈₁|l̃⟩ - [j l|k j]𝐈₁|l̃⟩ + [j l|j k]𝐈₁|l̃⟩ - [l|l̃]|k⟩ + [l|k]|l̃⟩
 , OrbitalEquation(l̃):
-  [2, 1]  =  𝐈₁|k̃⟩(k|l) + 𝐈₁|k̃⟩(- [i k|l i]) + 𝐈₁|k̃⟩[i k|i l] + 𝐈₁|k̃⟩(- [j k|l j]) + 𝐈₁|k̃⟩[j k|j l] + -[k|k̃]|l⟩ + [k|l]|k̃⟩
-  [2, 2]  =  𝐈₁|l̃⟩(i|i) + 𝐈₁|l̃⟩(j|j) + 𝐈₁|l̃⟩(k|k) + ĥ|l̃⟩ + 𝐈₁|l̃⟩(- G(i,j)) + 𝐈₁|l̃⟩F(i,j) + 𝐈₁|l̃⟩(- G(i,k)) + 𝐈₁|l̃⟩F(i,k) + 𝐈₁|l̃⟩(- G(j,k)) + 𝐈₁|l̃⟩F(j,k) + -[i|l̃]|i⟩ + [i|i]|l̃⟩ + -[j|l̃]|j⟩ + [j|j]|l̃⟩ + -[k|l̃]|k⟩ + [k|k]|l̃⟩
-], Any[(i|i), 𝐈₁, (j|j), (l|l), ĥ, G(i,j), F(i,j), G(i,l), F(i,l), G(j,l)  …  [j k|l j], [j k|j l], [k|k̃], [k|l], (k|k), G(i,k), F(i,k), G(j,k), F(j,k), [k|k]])
+  [2, 1]  =  + (k|l)𝐈₁|k̃⟩ - [i k|l i]𝐈₁|k̃⟩ + [i k|i l]𝐈₁|k̃⟩ - [j k|l j]𝐈₁|k̃⟩ + [j k|j l]𝐈₁|k̃⟩ - [k|k̃]|l⟩ + [k|l]|k̃⟩
+  [2, 2]  =  + (i|i)𝐈₁|l̃⟩ + (j|j)𝐈₁|l̃⟩ + (k|k)𝐈₁|l̃⟩ + ĥ|l̃⟩ - G(i,j)𝐈₁|l̃⟩ + F(i,j)𝐈₁|l̃⟩ - G(i,k)𝐈₁|l̃⟩ + F(i,k)𝐈₁|l̃⟩ - G(j,k)𝐈₁|l̃⟩ + F(j,k)𝐈₁|l̃⟩ - [i|l̃]|i⟩ + [i|i]|l̃⟩ - [j|l̃]|j⟩ + [j|j]|l̃⟩ - [k|l̃]|k⟩ + [k|k]|l̃⟩
+], Any[(i|i), (j|j), (l|l), G(i,j), F(i,j), G(i,l), F(i,l), G(j,l), F(j,l), [i|i]  …  [j k|l j], [j k|j l], [k|k̃], [k|l], (k|k), G(i,k), F(i,k), G(j,k), F(j,k), [k|k]])
 ```
 
 We can investigate the [`MCEquationSystem`](@ref) object `eqs` a
@@ -146,12 +146,12 @@ bit. It consists of two coupled equations:
 julia> eqs.equations
 2-element Array{EnergyExpressions.OrbitalEquation{Symbol,SparseArrays.SparseMatrixCSC{LinearCombinationEquation,Int64}},1}:
  OrbitalEquation(k̃):
-  [1, 1]  =  𝐈₁|k̃⟩(i|i) + 𝐈₁|k̃⟩(j|j) + 𝐈₁|k̃⟩(l|l) + ĥ|k̃⟩ + 𝐈₁|k̃⟩(- G(i,j)) + 𝐈₁|k̃⟩F(i,j) + 𝐈₁|k̃⟩(- G(i,l)) + 𝐈₁|k̃⟩F(i,l) + 𝐈₁|k̃⟩(- G(j,l)) + 𝐈₁|k̃⟩F(j,l) + -[i|k̃]|i⟩ + [i|i]|k̃⟩ + -[j|k̃]|j⟩ + [j|j]|k̃⟩ + -[l|k̃]|l⟩ + [l|l]|k̃⟩
-  [1, 2]  =  𝐈₁|l̃⟩(l|k) + 𝐈₁|l̃⟩(- [i l|k i]) + 𝐈₁|l̃⟩[i l|i k] + 𝐈₁|l̃⟩(- [j l|k j]) + 𝐈₁|l̃⟩[j l|j k] + -[l|l̃]|k⟩ + [l|k]|l̃⟩
+  [1, 1]  =  + (i|i)𝐈₁|k̃⟩ + (j|j)𝐈₁|k̃⟩ + (l|l)𝐈₁|k̃⟩ + ĥ|k̃⟩ - G(i,j)𝐈₁|k̃⟩ + F(i,j)𝐈₁|k̃⟩ - G(i,l)𝐈₁|k̃⟩ + F(i,l)𝐈₁|k̃⟩ - G(j,l)𝐈₁|k̃⟩ + F(j,l)𝐈₁|k̃⟩ - [i|k̃]|i⟩ + [i|i]|k̃⟩ - [j|k̃]|j⟩ + [j|j]|k̃⟩ - [l|k̃]|l⟩ + [l|l]|k̃⟩
+  [1, 2]  =  + (l|k)𝐈₁|l̃⟩ - [i l|k i]𝐈₁|l̃⟩ + [i l|i k]𝐈₁|l̃⟩ - [j l|k j]𝐈₁|l̃⟩ + [j l|j k]𝐈₁|l̃⟩ - [l|l̃]|k⟩ + [l|k]|l̃⟩
 
  OrbitalEquation(l̃):
-  [2, 1]  =  𝐈₁|k̃⟩(k|l) + 𝐈₁|k̃⟩(- [i k|l i]) + 𝐈₁|k̃⟩[i k|i l] + 𝐈₁|k̃⟩(- [j k|l j]) + 𝐈₁|k̃⟩[j k|j l] + -[k|k̃]|l⟩ + [k|l]|k̃⟩
-  [2, 2]  =  𝐈₁|l̃⟩(i|i) + 𝐈₁|l̃⟩(j|j) + 𝐈₁|l̃⟩(k|k) + ĥ|l̃⟩ + 𝐈₁|l̃⟩(- G(i,j)) + 𝐈₁|l̃⟩F(i,j) + 𝐈₁|l̃⟩(- G(i,k)) + 𝐈₁|l̃⟩F(i,k) + 𝐈₁|l̃⟩(- G(j,k)) + 𝐈₁|l̃⟩F(j,k) + -[i|l̃]|i⟩ + [i|i]|l̃⟩ + -[j|l̃]|j⟩ + [j|j]|l̃⟩ + -[k|l̃]|k⟩ + [k|k]|l̃⟩
+  [2, 1]  =  + (k|l)𝐈₁|k̃⟩ - [i k|l i]𝐈₁|k̃⟩ + [i k|i l]𝐈₁|k̃⟩ - [j k|l j]𝐈₁|k̃⟩ + [j k|j l]𝐈₁|k̃⟩ - [k|k̃]|l⟩ + [k|l]|k̃⟩
+  [2, 2]  =  + (i|i)𝐈₁|l̃⟩ + (j|j)𝐈₁|l̃⟩ + (k|k)𝐈₁|l̃⟩ + ĥ|l̃⟩ - G(i,j)𝐈₁|l̃⟩ + F(i,j)𝐈₁|l̃⟩ - G(i,k)𝐈₁|l̃⟩ + F(i,k)𝐈₁|l̃⟩ - G(j,k)𝐈₁|l̃⟩ + F(j,k)𝐈₁|l̃⟩ - [i|l̃]|i⟩ + [i|i]|l̃⟩ - [j|l̃]|j⟩ + [j|j]|l̃⟩ - [k|l̃]|k⟩ + [k|k]|l̃⟩
 ```
 
 The first equation consists of the following terms:

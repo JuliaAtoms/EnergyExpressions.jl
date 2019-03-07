@@ -22,15 +22,10 @@ Base.:(*)(nbe::NBodyEquation, factor::NBodyTerm) =
     NBodyEquation(nbe.orbital, nbe.operator, nbe.factor*factor)
 
 function Base.show(io::IO, eq::NBodyEquation)
-    isminusone(eq.factor) && write(io, "-")
+    show(io, eq.factor, show_sign=true)
     eq.orbital isa Conjugate && write(io, "⟨$(conj(eq.orbital))|")
     show(io, eq.operator)
     !(eq.orbital isa Conjugate) && write(io, "|$(eq.orbital)⟩")
-    if !isone(eq.factor) && !isminusone(eq.factor)
-        eq.factor.coeff < 0 && write(io, "(")
-        show(io, eq.factor)
-        eq.factor.coeff < 0 && write(io, ")")
-    end
 end
 
 """
@@ -61,7 +56,7 @@ function Base.show(io::IO, eq::LinearCombinationEquation)
     else
         eq.equations
     end
-    write(io, join(string.(terms), " + "))
+    write(io, join(string.(terms), " "))
 end
 
 export NBodyEquation, LinearCombinationEquation
