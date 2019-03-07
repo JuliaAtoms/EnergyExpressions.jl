@@ -393,6 +393,14 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "nbody_matrix_elements/#EnergyExpressions.numbodies",
+    "page": "N-body matrix elements",
+    "title": "EnergyExpressions.numbodies",
+    "category": "function",
+    "text": "numbodies(::NBodyOperator{N})\n\nReturns the number of bodies coupled by the N-body operator, i.e. N.\n\n\n\n\n\nnumbodies(lco::LinearCombinationOperator)\n\nReturns the maximum number of bodies coupled by any of the N-body operators in the LinearCombinationOperator.\n\n\n\n\n\nnumbodies(::OrbitalOverlap)\n\nReturns the number of bodies coupled by the zero-body operator in the orbital overlap, i.e. 0.\n\n\n\n\n\nnumbodies(::OrbitalMatrixElement{N})\n\nReturns the number of bodies coupled by the operator, i.e. N.\n\n\n\n\n\n"
+},
+
+{
     "location": "nbody_matrix_elements/#EnergyExpressions.NBodyTerm",
     "page": "N-body matrix elements",
     "title": "EnergyExpressions.NBodyTerm",
@@ -453,7 +461,7 @@ var documenterSearchIndex = {"docs": [
     "page": "N-body matrix elements",
     "title": "N-body matrix elements",
     "category": "section",
-    "text": "CurrentModule = EnergyExpressions\nDocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendThe matrix element of an N-body operator between two Slater determinants may be expanded according to the Löwdin rules (which reduce to the Slater–Condon rules if all single-particle orbitals are orthogonal):beginequation\nlabeleqnmatrix-element-expansion\nmatrixelPhi_AOmega_nPhi_B =\nfrac1nsum_p (-)^p\nmatrixelk_1k_2k_nOmega_nl_1l_2l_n\nD^AB(k_1k_2k_nl_1l_2l_n)\nendequationwhere D^AB(k_1k_2k_nl_1l_2l_n) is the determinant minor of the orbital overlap determinant D^AB with the rows k_1k_2k_n and columns l_1l_2l_n stricken out, and p runs over all permutations.In general, a term in the expansion is thus of the formbeginequation\nalphamatrixelk_1k_2k_nOmega_nl_1l_2l_nbraketabbraketcddotsbraketyz\nendequationwhere alpha is a scalar. This is represented by NBodyTerm type.NBodyTermFactor\nOrbitalOverlap\nOrbitalMatrixElement\nNBodyTerm\nNBodyMatrixElement\nisdependent\ntransform\noverlap_matrix\nEnergyExpression\nMatrix"
+    "text": "CurrentModule = EnergyExpressions\nDocTestSetup = quote\n    using EnergyExpressions\n    using AtomicLevels\nendThe matrix element of an N-body operator between two Slater determinants may be expanded according to the Löwdin rules (which reduce to the Slater–Condon rules if all single-particle orbitals are orthogonal):beginequation\nlabeleqnmatrix-element-expansion\nmatrixelPhi_AOmega_nPhi_B =\nfrac1nsum_p (-)^p\nmatrixelk_1k_2k_nOmega_nl_1l_2l_n\nD^AB(k_1k_2k_nl_1l_2l_n)\nendequationwhere D^AB(k_1k_2k_nl_1l_2l_n) is the determinant minor of the orbital overlap determinant D^AB with the rows k_1k_2k_n and columns l_1l_2l_n stricken out, and p runs over all permutations.In general, a term in the expansion is thus of the formbeginequation\nalphamatrixelk_1k_2k_nOmega_nl_1l_2l_nbraketabbraketcddotsbraketyz\nendequationwhere alpha is a scalar. This is represented by NBodyTerm type.NBodyTermFactor\nOrbitalOverlap\nOrbitalMatrixElement\nnumbodies\nNBodyTerm\nNBodyMatrixElement\nisdependent\ntransform\noverlap_matrix\nEnergyExpression\nMatrix"
 },
 
 {
