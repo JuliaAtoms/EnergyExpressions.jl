@@ -1,25 +1,21 @@
 """
-    coupled_states(hamiltonians...[; i₀=1])
+    coupled_states(E[; i₀=1])
 
-Find all states coupled by the `hamiltonians`, starting from the state
-with index `i₀`. This can be useful to reduce the necessary basis or
-to generate invariant sets for split-operator propagation.
+Find all states coupled by the energy expression `E`, starting from
+the state with index `i₀`. This can be useful to reduce the necessary
+basis or to generate invariant sets for split-operator propagation.
 """
-function coupled_states(hamiltonians::Matrix{<:Union{<:OneBodyEnergyExpression,
-                                                     <:TwoBodyEnergyExpression}}...;
-                        i₀=1)
-    couplings = SparseMatrixCSC(sum(.!iszero.(h) for h in hamiltonians))
-
-    m = size(hamiltonians[1],1)
+function coupled_states(E::EM; i₀=1) where {EM<:EnergyExpression}
+    m = size(E,1)
     visited = falses(m)
     visited[i₀] = true
 
-    rows = rowvals(couplings)
+    rows = rowvals(E)
 
     istack = [i₀]
     while !isempty(istack)
         icur = pop!(istack)
-        neighbours = rows[nzrange(couplings, icur)]
+        neighbours = rows[nzrange(E, icur)]
         for n in neighbours
             if !visited[n]
                 push!(istack, n)
@@ -31,8 +27,7 @@ function coupled_states(hamiltonians::Matrix{<:Union{<:OneBodyEnergyExpression,
     visited
 end
 
-function invariant_sets(hamiltonians::Matrix{<:Union{<:OneBodyEnergyExpression,
-                                                     <:TwoBodyEnergyExpression}}...)
+function invariant_sets(H::QuantumOperator)
     m = size(hamiltonians[1],1)
     visited = falses(m)
 
@@ -40,7 +35,7 @@ function invariant_sets(hamiltonians::Matrix{<:Union{<:OneBodyEnergyExpression,
 
     while !all(visited)
         icur = findfirst(.!visited)
-        set = coupled_states(hamiltonians...; i₀=icur)
+        set = coupled_states(H; i₀=icur)
         push!(sets, set)
         visited[:] .|= set
     end
