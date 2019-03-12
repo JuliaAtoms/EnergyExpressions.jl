@@ -1,5 +1,5 @@
-function showcoeff(io::IO, n::Number, show_sign::Bool)
-    isimag(n) = isreal(im*n)
+function showcoeff(io::IO, n::Number, show_sign::Bool, show_one::Bool=false)
+    isimag(n) = !iszero(n) && isreal(im*n)
     isneg(n) = n < 0
 
     if isreal(n) && isneg(n) || isimag(n) && isneg(imag(n))
@@ -20,5 +20,7 @@ function showcoeff(io::IO, n::Number, show_sign::Bool)
         else
             write(io, string(n))
         end
+    elseif show_one
+        write(io, "1")
     end
 end

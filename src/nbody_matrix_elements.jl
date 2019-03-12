@@ -231,7 +231,7 @@ function transform(f::Function, nbt::NBodyTerm)
 end
 
 function Base.show(io::IO, term::NBodyTerm; show_sign=false)
-    showcoeff(io, term.coeff, show_sign)
+    showcoeff(io, term.coeff, show_sign, isempty(term.factors))
     (iszero(term) || isempty(term.factors)) && return
     noprintfactors = 2
     factors = if get(io, :limit, false) && length(term.factors) > 2noprintfactors
