@@ -302,34 +302,14 @@ end
 # ** Determinant utilities
 
 """
-    isabovediagonal(i::CartesianIndex{N})
-
-Returns `true` if the CartesianIndex `i` is above the hyper-diagonal.
-"""
-function isabovediagonal(i::CartesianIndex{N}) where N
-    for j = 2:N
-        i[j] > i[j-1] || return false
-    end
-    true
-end
-
-"""
-    isdiagonal(i::CartesianIndex)
-
-Returns `true` if the CartesianIndex `i` is diagonal in any
-dimensions, i.e. if not all coordinates are unique. The density
-matrices vanish in this case, due to the Pauli principle; this is also
-known as the “Fermi hole”.
-"""
-isdiagonal(i::CartesianIndex) = !allunique(Tuple(i))
-
-"""
     detaxis(i::CartesianIndex{N})
 
 Generate the axis index vector for the determinant minor, whose rows
 or columns represented by the `CartesianIndex` `i` should be omitted.
 Implemented via [`complement`](@ref).
 """
+detaxis(i::AbstractVector, n) = complement(n, i)
+detaxis(i::Tuple, n) = complement(n, i...)
 detaxis(i::CartesianIndex, n) = complement(n, Tuple(i)...)
 detaxis(i::Integer, n) = complement(n, i)
 
@@ -342,11 +322,21 @@ where the rows `k` and the columns `l` have been stricken out.
 """
 function detminor(k, l, A)
     n = size(A,1)
+    n == 1 && return 1
     det(A[detaxis(k,n),detaxis(l,n)])
 end
 
 indexsum(k::Integer,l::Integer) = k+l
-indexsum(k::CartesianIndex,l::CartesianIndex) = sum(Tuple(k)) + sum(Tuple(l))
+indexsum(k::Tuple,l::Tuple) = sum(k) + sum(l)
+indexsum(k::AbstractVector,l::AbstractVector) = sum(k) + sum(l)
+indexsum(k::CartesianIndex,l::CartesianIndex) = indexsum(Tuple(k), Tuple(l))
+
+"""
+    powneg1(k) = (-)ᵏ
+
+Calculates powers of negative unity for integer `k`.
+"""
+powneg1(k::Integer) = isodd(k) ? -1 : 1
 
 """
     cofactor(k, l, A)
@@ -355,7 +345,7 @@ Calculate the
 [cofactor](https://en.wikipedia.org/wiki/Minor_(linear_algebra)) of
 `A`, where the rows `k` and the columns `l` have been stricken out.
 """
-cofactor(k, l, A) = (-1)^indexsum(k,l)*detminor(k, l, A)
+cofactor(k, l, A) = powneg1(indexsum(k,l))*detminor(k, l, A)
 
 """
     det(A)
@@ -376,7 +366,7 @@ function LinearAlgebra.det(A::M) where {M<:AbstractMatrix{NBodyTerm}}
         iszero(A[i,j]) && continue
         Cᵢⱼ = cofactor(i,j,A)
         iszero(Cᵢⱼ) && continue
-        D = D + A[i,j]*Cᵢⱼ
+        D += A[i,j]*Cᵢⱼ
     end
     D
 end
@@ -402,52 +392,71 @@ single-particle orbitals in the Slater determinants. If the orbitals
 are all orthogonal, the Löwdin rules collapse to the Slater–Condon
 rules.
 """
-function NBodyMatrixElement(a::SlaterDeterminant, op::NBodyOperator{N}, b::SlaterDeterminant, overlap) where N
-    length(a) == length(b) ||
-        throw(DimensionMismatch("Slater determinants of different dimensions"))
+@generated function NBodyMatrixElement(a::SlaterDeterminant, op::NBodyOperator{N}, b::SlaterDeterminant, overlap) where N
+    quote
+        length(a) == length(b) ||
+            throw(DimensionMismatch("Slater determinants of different dimensions"))
 
-    numorbitals = length(a)
-    start = CartesianIndex(ones(Int,N)...)
-    oend = numorbitals*start
-    Nend = N*start
+        numorbitals = length(a)
 
-    mes = NBodyMatrixElement[]
+        mes = NBodyMatrixElement[]
 
-    ao = a.orbitals
-    bo = b.orbitals
+        ao = a.orbitals
+        bo = b.orbitals
 
-    # Generate all distinct permutations of the orbitals. The first N
-    # orbitals are used to compute the N-body matrix element. If two
-    # or more indices are the same, the matrix element/determinantal
-    # overlap is trivially zero. We generate distinct permutations by
-    # only considering those above the hyper-diagonal.
-    for k in start:oend
-        isabovediagonal(k) || continue # To avoid double-counting
-        for l in start:oend
-            isabovediagonal(l) || continue
+        kN = zeros(Int, $N)
+        lN = zeros(Int, $N)
 
-            Dkl = cofactor(k, l, overlap) # Determinantal overlap of all other orbitals
-            iszero(Dkl) && continue
+        akN = similar(ao, $N)
+        blN = similar(bo, $N)
 
-            # Generate all distinct permutations of the N first
-            # orbitals of the current total permutation.
-            for i = start:Nend
-                isabovediagonal(i) || continue
-                si = permutation_sign([Tuple(i)...])
-                for j = start:Nend
-                    isdiagonal(j) && continue
-                    sj = permutation_sign([Tuple(j)...])
+        iN = zeros(Int, $N)
+        jN = zeros(Int, $N)
 
-                    me = OrbitalMatrixElement((ao[getindex.(Ref(k),[Tuple(i)...])]...,), op,
-                                              (bo[getindex.(Ref(l),[Tuple(j)...])]...,))
-                    iszero(me) && continue
-                    push!(mes, si*sj*Dkl*me)
+        aiN = similar(ao, $N)
+        bjN = similar(bo, $N)
+
+        # Generate all distinct permutations of the orbitals. The first N
+        # orbitals are used to compute the N-body matrix element. If two
+        # or more indices are the same, the matrix element/determinantal
+        # overlap is trivially zero. We generate distinct permutations by
+        # only considering those above the hyper-diagonal.
+        @above_diagonal_loop $N k numorbitals begin
+            Base.Cartesian.@nexprs $N d -> kN[d] = k_d
+            Base.Cartesian.@nexprs $N d -> akN[d] = ao[k_d]
+
+            @above_diagonal_loop $N l numorbitals begin
+                Base.Cartesian.@nexprs $N d -> lN[d] = l_d
+                Base.Cartesian.@nexprs $N d -> blN[d] = bo[l_d]
+
+                Dkl = cofactor(kN, lN, overlap) # Determinantal overlap of all other orbitals
+                iszero(Dkl) && continue
+
+                # Generate all distinct permutations of the N first
+                # orbitals of the current total permutation.
+                @above_diagonal_loop $N i N begin
+                    Base.Cartesian.@nexprs $N d -> iN[d] = i_d
+                    si = permutation_sign(iN)
+                    Base.Cartesian.@nexprs $N d -> aiN[d] = akN[i_d]
+
+                    @anti_diagonal_loop $N j N begin
+                        Base.Cartesian.@nexprs $N d -> jN[d] = j_d
+                        sj = permutation_sign(jN)
+                        Base.Cartesian.@nexprs $N d -> bjN[d] = blN[j_d]
+
+                        # me = OrbitalMatrixElement((akN[iN]...,), op, (blN[jN]...,))
+                        # me = OrbitalMatrixElement((akN[1],), op, (blN[1],))
+                        # me = OrbitalMatrixElement((ao[1],), op, (bo[1],))
+                        me = OrbitalMatrixElement((aiN...,), op, (bjN...,))
+                        iszero(me) && continue
+                        push!(mes, si*sj*Dkl*me)
+                    end
                 end
             end
         end
-    end
 
-    sum(mes)
+        sum(mes)
+    end
 end
 
 """
@@ -571,11 +580,13 @@ function Base.Matrix(op::QuantumOperator, slater_determinants::VSD,
                      overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]) where {VSD<:AbstractVector{<:SlaterDeterminant}}
     m = length(slater_determinants)
 
-    M = zeros(NBodyMatrixElement, m, m)
+    M = spzeros(NBodyMatrixElement, m, m)
 
     for (i,a) in enumerate(slater_determinants)
         for (j,b) in enumerate(slater_determinants)
-            M[i,j] = NBodyMatrixElement(a,op,b, overlap_matrix(a,b,overlaps))
+            me = NBodyMatrixElement(a,op,b, overlap_matrix(a,b,overlaps))
+            iszero(me) && continue
+            M[i,j] = me
         end
     end
 

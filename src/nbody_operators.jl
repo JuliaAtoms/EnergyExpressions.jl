@@ -163,13 +163,8 @@ Generate the complement to `i...` in the set `1:N`. Useful for
 contracting [`OrbitalMatrixElement`](@ref)s over all coordinates
 _except_ `i...`.
 """
-function complement(N::Integer, i::Integer...)
-    i = sort([i...])
-    filter(!isempty,
-           vcat(1:i[1]-1,
-                [(i[j-1]+1):(i[j]-1) for j in 2:length(i)]...,
-                i[end]+1:N))
-end
+complement(N::Integer, i::Integer...) = setdiff(1:N, i)
+complement(N::Integer, i::AbstractVector{<:Integer}) = setdiff(1:N, i)
 
 function Base.show(io::IO, o::ContractedOperator{N}) where N
     write(io, "⟨", join(string.(o.a), " "))
@@ -179,6 +174,6 @@ function Base.show(io::IO, o::ContractedOperator{N}) where N
     write(io, join(string.(o.b), " "), "⟩")
 end
 
-export NBodyOperator, numbodies,
+export QuantumOperator, NBodyOperator, numbodies,
     ZeroBodyOperator, OneBodyOperator, TwoBodyOperator,
     IdentityOperator, ContractedOperator
