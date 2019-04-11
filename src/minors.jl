@@ -3,8 +3,8 @@ count_nonzeros(IJ, mn) = [count(isequal(ij), IJ) for ij in 1:mn]
 """
     nonzero_minors(N, overlap) -> (ks,ls)
 
-Find all minor determinants of order `N` of the orbital `overlap`
-matrix that do not vanish, i.e. all non-vanishing minors are
+Find all (distinct) minor determinants of order `N` of the orbital
+`overlap` matrix that do not vanish, i.e. all non-vanishing minors are
 guaranteed to be present, but not all of the returned minors are
 guaranteed to be non-zero. Vanishing minors returned arise when the
 overlap matrix is rank deficient, which is unlikely to happen when

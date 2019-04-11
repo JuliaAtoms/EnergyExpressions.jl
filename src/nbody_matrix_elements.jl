@@ -407,9 +407,6 @@ rules.
         ao = a.orbitals
         bo = b.orbitals
 
-        kN = zeros(Int, $N)
-        lN = zeros(Int, $N)
-
         akN = similar(ao, $N)
         blN = similar(bo, $N)
 
@@ -419,41 +416,32 @@ rules.
         aiN = similar(ao, $N)
         bjN = similar(bo, $N)
 
-        # Generate all distinct permutations of the orbitals. The first N
-        # orbitals are used to compute the N-body matrix element. If two
-        # or more indices are the same, the matrix element/determinantal
-        # overlap is trivially zero. We generate distinct permutations by
-        # only considering those above the hyper-diagonal.
-        @above_diagonal_loop $N k numorbitals begin
-            Base.Cartesian.@nexprs $N d -> kN[d] = k_d
-            Base.Cartesian.@nexprs $N d -> akN[d] = ao[k_d]
+        ks,ls = nonzero_minors($N, overlap)
 
-            @above_diagonal_loop $N l numorbitals begin
-                Base.Cartesian.@nexprs $N d -> lN[d] = l_d
-                Base.Cartesian.@nexprs $N d -> blN[d] = bo[l_d]
+        for (k,l) in zip(ks,ls)
+            Dkl = cofactor(k, l, overlap) # Determinantal overlap of all other orbitals
+            iszero(Dkl) && continue
 
-                Dkl = cofactor(kN, lN, overlap) # Determinantal overlap of all other orbitals
-                iszero(Dkl) && continue
+            for d in eachindex(k)
+                akN[d] = ao[k[d]]
+                blN[d] = bo[l[d]]
+            end
 
-                # Generate all distinct permutations of the N first
-                # orbitals of the current total permutation.
-                @above_diagonal_loop $N i N begin
-                    Base.Cartesian.@nexprs $N d -> iN[d] = i_d
-                    si = permutation_sign(iN)
-                    Base.Cartesian.@nexprs $N d -> aiN[d] = akN[i_d]
+            # Generate all distinct permutations of the N first
+            # orbitals of the current total permutation.
+            @above_diagonal_loop $N i N begin
+                Base.Cartesian.@nexprs $N d -> iN[d] = i_d
+                si = permutation_sign(iN)
+                Base.Cartesian.@nexprs $N d -> aiN[d] = akN[i_d]
 
-                    @anti_diagonal_loop $N j N begin
-                        Base.Cartesian.@nexprs $N d -> jN[d] = j_d
-                        sj = permutation_sign(jN)
-                        Base.Cartesian.@nexprs $N d -> bjN[d] = blN[j_d]
+                @anti_diagonal_loop $N j N begin
+                    Base.Cartesian.@nexprs $N d -> jN[d] = j_d
+                    sj = permutation_sign(jN)
+                    Base.Cartesian.@nexprs $N d -> bjN[d] = blN[j_d]
 
-                        # me = OrbitalMatrixElement((akN[iN]...,), op, (blN[jN]...,))
-                        # me = OrbitalMatrixElement((akN[1],), op, (blN[1],))
-                        # me = OrbitalMatrixElement((ao[1],), op, (bo[1],))
-                        me = OrbitalMatrixElement((aiN...,), op, (bjN...,))
-                        iszero(me) && continue
-                        push!(mes, si*sj*Dkl*me)
-                    end
+                    me = OrbitalMatrixElement((aiN...,), op, (bjN...,))
+                    iszero(me) && continue
+                    push!(mes, si*sj*Dkl*me)
                 end
             end
         end
