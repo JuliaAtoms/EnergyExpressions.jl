@@ -344,6 +344,9 @@ powneg1(k::Integer) = isodd(k) ? -1 : 1
 Calculate the
 [cofactor](https://en.wikipedia.org/wiki/Minor_(linear_algebra)) of
 `A`, where the rows `k` and the columns `l` have been stricken out.
+The cofactor is calculated recursively, by expanding the minor
+determinants in cofactors, so this function should only be used in
+case it is known that the cofactor is non-zero.
 """
 cofactor(k, l, A) = powneg1(indexsum(k,l))*detminor(k, l, A)
 
@@ -540,6 +543,7 @@ Notice that this overlap matrix was calculated between the Slater determinant `s
 """
 function overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant, overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[])
     m = length(a)
+    length(b) == m || throw(ArgumentError("Configurations not of same length: $a & $b"))
     Is = Int[]
     Js = Int[]
     os = Vector{NBodyTerm}()
