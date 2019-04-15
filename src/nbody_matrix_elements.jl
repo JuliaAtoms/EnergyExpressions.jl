@@ -480,6 +480,19 @@ end
 
 # * Overlap matrices
 
+function overlap_matrix!(S::AbstractSparseMatrix{<:NBodyTerm}, a::SlaterDeterminant, b::SlaterDeterminant)
+    length(a) == length(b) || throw(ArgumentError("Configurations not of same length: $a & $b"))
+    for (i,ao) in enumerate(a.orbitals)
+        for (j,bo) in enumerate(b.orbitals)
+            if ao == bo
+                S[i,j] = one(NBodyTerm)
+            end
+        end
+    end
+
+    S
+end
+
 """
     overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant[, overlaps=[]])
 
@@ -531,22 +544,20 @@ Notice that this overlap matrix was calculated between the Slater determinant `s
 """
 function overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant, overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[])
     m = length(a)
-    length(b) == m || throw(ArgumentError("Configurations not of same length: $a & $b"))
-    Is = Int[]
-    Js = Int[]
-    os = Vector{NBodyTerm}()
-    for (i,ao) in enumerate(a.orbitals)
-        for (j,bo) in enumerate(b.orbitals)
-            o1 = OrbitalOverlap(ao, bo)
-            o2 = OrbitalOverlap(bo, ao)
-            if (o1 ∈ overlaps || o2 ∈ overlaps || o1 == o2) && o1 ∉ os
-                push!(os, o1 ∉ overlaps && o2 ∉ overlaps ? one(NBodyTerm) : o1)
-                push!(Is, i)
-                push!(Js, j)
-            end
+    S = spzeros(NBodyTerm, m, m)
+    overlap_matrix!(S, a, b)
+
+    for overlap in overlaps
+        for (oa,ob) in [(overlap.a,overlap.b),(overlap.b,overlap.a)]
+            i = findfirst(isequal(oa), a.orbitals)
+            isnothing(i) && continue
+            j = findfirst(isequal(ob), b.orbitals)
+            isnothing(j) && continue
+            S[i,j] = OrbitalOverlap(oa,ob)
         end
     end
-    sparse(Is,Js,os,m,m)
+
+    S
 end
 
 # * Energy expression matrix
