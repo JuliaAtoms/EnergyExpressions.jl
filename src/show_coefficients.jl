@@ -13,12 +13,12 @@ function showcoeff(io::IO, n::Number, show_sign::Bool, show_one::Bool=false)
         elseif isimag(n)
             ii = imag(n)
             if !(isone(ii) || isone(-ii))
-                write(io, "$(ii)im")
+                write(io, "$(abs(ii))im")
             else
                 write(io, "im")
             end
         else
-            write(io, string(n))
+            write(io, string(abs(n)))
         end
     elseif show_one
         write(io, "1")
