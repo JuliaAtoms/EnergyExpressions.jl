@@ -5,7 +5,7 @@ Find all states coupled by the energy expression `E`, starting from
 the state with index `i₀`. This can be useful to reduce the necessary
 basis or to generate invariant sets for split-operator propagation.
 """
-function coupled_states(E::EM; i₀=1) where {EM<:EnergyExpression}
+function coupled_states(E::EnergyExpression; i₀=1)
     m = size(E,1)
     visited = falses(m)
     visited[i₀] = true
@@ -27,17 +27,21 @@ function coupled_states(E::EM; i₀=1) where {EM<:EnergyExpression}
     visited
 end
 
-function invariant_sets(H::QuantumOperator)
-    m = size(hamiltonians[1],1)
+function invariant_sets(E::EnergyExpression)
+    m = size(E,1)
     visited = falses(m)
 
-    sets = Vector{Vector{Bool}}()
+    sets = Vector{Vector{Int}}()
 
     while !all(visited)
         icur = findfirst(.!visited)
-        set = coupled_states(H; i₀=icur)
-        push!(sets, set)
+        set = coupled_states(E; i₀=icur)
         visited[:] .|= set
+        j = findall(set)
+        # If the state icur is the only one in its set, it may be that
+        # it is actually not coupled to anything.
+        length(j) == 1 && iszero(E[icur,j]) && continue
+        push!(sets, j)
     end
     sets
 end
