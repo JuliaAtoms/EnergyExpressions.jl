@@ -82,12 +82,15 @@ julia> EnergyExpressions.OrbitalMatrixElement((:a,:b), MyTwoBodyOperator(), (:c,
 ```
 """
 struct OrbitalMatrixElement{N,A,O<:NBodyOperator{N},B} <: NBodyTermFactor
-    a::NTuple{N,A}
+    a::Vector{A}
     o::O
-    b::NTuple{N,B}
+    b::Vector{B}
 end
 
 Base.iszero(::OrbitalMatrixElement) = false
+
+Base.:(==)(a::OrbitalMatrixElement, b::OrbitalMatrixElement) =
+    a.a == b.a && a.o == b.o && a.b == b.b
 
 """
     numbodies(::OrbitalMatrixElement{N})
@@ -258,6 +261,9 @@ Base.zero(::Type{NBodyMatrixElement}) =
 
 Base.zero(::NBodyMatrixElement) = zero(NBodyMatrixElement)
 
+Base.one(::Type{NBodyMatrixElement}) =
+    NBodyMatrixElement([one(NBodyTerm)])
+
 Base.iszero(nbme::NBodyMatrixElement) =
     isempty(nbme.terms) || all(iszero.(nbme.terms))
 
@@ -402,7 +408,7 @@ rules.
 
         numorbitals = length(a)
 
-        mes = NBodyMatrixElement[]
+        terms = NBodyTerm[]
 
         ao = a.orbitals
         bo = b.orbitals
@@ -439,14 +445,15 @@ rules.
                     sj = permutation_sign(jN)
                     Base.Cartesian.@nexprs $N d -> bjN[d] = blN[j_d]
 
-                    me = OrbitalMatrixElement((aiN...,), op, (bjN...,))
+                    me = OrbitalMatrixElement(copy(aiN), op, copy(bjN))
                     iszero(me) && continue
-                    push!(mes, si*sj*Dkl*me)
+                    nbme = convert(NBodyMatrixElement, si*sj*Dkl*me)
+                    append!(terms, nbme.terms)
                 end
             end
         end
 
-        sum(mes)
+        NBodyMatrixElement(terms)
     end
 end
 
@@ -460,9 +467,15 @@ mutual overlaps between all single-particle orbitals in the Slater
 determinants. If the orbitals are all orthogonal, the Löwdin rules
 collapse to the Slater–Condon rules.
 """
-NBodyMatrixElement(a::SlaterDeterminant, op::LinearCombinationOperator, b::SlaterDeterminant, overlap) =
-    sum(filter(!iszero, map(o -> o[2]*NBodyMatrixElement(a, o[1], b, overlap),
-                            op.operators)))
+function NBodyMatrixElement(a::SlaterDeterminant, op::LinearCombinationOperator, b::SlaterDeterminant, overlap)
+    terms = NBodyTerm[]
+    for (o,coeff) in op.operators
+        iszero(coeff) && continue
+        nbme = coeff*NBodyMatrixElement(a, o, b, overlap)
+        !iszero(nbme) && append!(terms, nbme.terms)
+    end
+    NBodyMatrixElement(terms)
+end
 
 """
     transform(f::Function, nbme::NBodyMatrixElement)
@@ -587,7 +600,9 @@ function Base.Matrix(op::QuantumOperator, slater_determinants::VSD,
 
     for (i,a) in enumerate(slater_determinants)
         for (j,b) in enumerate(slater_determinants)
-            me = NBodyMatrixElement(a,op,b, overlap_matrix(a,b,overlaps))
+            S = overlap_matrix(a,b,overlaps)
+
+            me = NBodyMatrixElement(a,op,b, S)
             iszero(me) && continue
             M[i,j] = me
         end

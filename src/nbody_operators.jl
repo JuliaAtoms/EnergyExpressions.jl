@@ -131,6 +131,9 @@ struct ContractedOperator{N,P,Q,A,O<:NBodyOperator{P},B} <: NBodyOperator{N}
     end
 end
 
+Base.:(==)(a::ContractedOperator, b::ContractedOperator) =
+    a.a == b.a && a.o == b.o && a.b == b.b
+
 """
     in(orbital, co::ContractedOperator)
 
