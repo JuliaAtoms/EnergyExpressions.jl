@@ -356,6 +356,59 @@ case it is known that the cofactor is non-zero.
 """
 cofactor(k, l, A) = powneg1(indexsum(k,l))*detminor(k, l, A)
 
+function merge_overlapping_blocks(blocks::Vector{UnitRange{Int}})
+    cur_block = first(blocks)
+    new_blocks = UnitRange{Int}[]
+    for b in blocks
+        if isempty(cur_block ∩ b)
+            push!(new_blocks, cur_block)
+            cur_block = b
+        else
+            cur_block = min(cur_block[1],b[1]):max(cur_block[end],b[end])
+        end
+    end
+    if isempty(new_blocks)
+        push!(new_blocks, cur_block)
+    elseif blocks[end] ∉ new_blocks[end]
+        push!(new_blocks, blocks[end])
+    end
+
+    new_blocks
+end
+
+function find_diagonal_blocks(A::AbstractSparseMatrix)
+    m,n = size(A)
+    m == n || throw(ArgumentError("Matrix must be square"))
+
+    rows = rowvals(A)
+
+    # Find the row extent of each column, including the diagonal; each
+    # column is tentatively its own diagonal block.
+    blocks = map(1:n) do j
+        j_rows = rows[nzrange(A,j)]
+        min(j,minimum(j_rows)):max(j,maximum(j_rows))
+    end
+
+    # Merge overlapping blocks; since they are ordered by column and
+    # always contain the diagonal, we can do a forward sweep and then
+    # a backward sweep to capture all.
+    blocks = merge_overlapping_blocks(blocks)
+    reverse(merge_overlapping_blocks(reverse(blocks)))
+end
+
+function block_det(A::AbstractSparseMatrix{T}, blocks::Vector{UnitRange{Int}}) where T
+    D = one(T)
+    for b in blocks
+        if length(b) > 1
+            D *= det(A[b,b])
+        else
+            i = b[1]
+            D *= A[i,i]
+        end
+    end
+    D
+end
+
 """
     det(A)
 
@@ -364,11 +417,22 @@ Calculate the determinant of the matrix `A` whose elements are of the
 column. This is an expensive operation, and should only be done with
 relatively sparse matrices.
 """
-function LinearAlgebra.det(A::M) where {M<:AbstractMatrix{NBodyTerm}}
-    size(A) == (0,0) && return 1
-    size(A) == (1,1) && return A[1,1]
+function LinearAlgebra.det(A::AbstractSparseMatrix{<:NBodyTerm})
+    m,n = size(A)
+    # Some trivial special cases
+    (m,n) == (0,0) && return 1
+    (m,n) == (1,1) && return A[1,1]
     iszero(A) && return zero(NBodyMatrixElement)
-    m = size(A,1)
+
+    # If the matrix is too large, we try to break it up in smaller
+    # diagonal blocks; however, if we only get one block back, we have
+    # to apply the general case.
+    if m > 5
+        blocks = find_diagonal_blocks(A)
+        length(blocks) > 1 && return block_det(A, blocks)
+    end
+
+    # The general case, Laplace expansion.
     D = zero(NBodyMatrixElement)
     j = 1 # Expand along first column
     for i = 1:m
