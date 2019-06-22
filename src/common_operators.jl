@@ -65,12 +65,16 @@ julia> EnergyExpressions.OrbitalMatrixElement((:a,:b), CoulombInteraction(), (:b
 G(a,b)
 ```
 """
-struct CoulombInteraction <: TwoBodyOperator end
-const CoulombPotential{A,B} = ContractedOperator{1,2,1,A,CoulombInteraction,B}
+struct CoulombInteraction{O} <: TwoBodyOperator
+    o::O # This can be used to indicate e.g. approximate Coulomb interaction
+end
+CoulombInteraction() = CoulombInteraction(nothing)
+
+const CoulombPotential{A,B} = ContractedOperator{1,2,1,A,<:CoulombInteraction,B}
 
 Base.show(io::IO, ::CoulombInteraction) = write(io, "ĝ")
 
-function Base.show(io::IO, me::OrbitalMatrixElement{2,A,CoulombInteraction,B}) where {A,B}
+function Base.show(io::IO, me::OrbitalMatrixElement{2,A,<:CoulombInteraction,B}) where {A,B}
     if me.a == me.b # Direct interaction
         write(io, "F($(me.a[1]),$(me.a[2]))")
     elseif me.a[1] == me.b[2] && me.a[2] == me.b[1] # Exchange interaction
@@ -89,7 +93,7 @@ Base.show(io::IO, co::CoulombPotential{A,B}) where {A,B} =
 The matrix element vanishes if the spin-orbitals associated with the
 same coordinate do not have the same spin.
 """
-Base.iszero(me::OrbitalMatrixElement{2,A,CoulombInteraction,B}) where {A<:SpinOrbital,B<:SpinOrbital} =
+Base.iszero(me::OrbitalMatrixElement{2,A,<:CoulombInteraction,B}) where {A<:SpinOrbital,B<:SpinOrbital} =
     me.a[1].spin != me.b[1].spin || me.a[2].spin != me.b[2].spin
 
 export OneBodyHamiltonian, FieldFreeOneBodyHamiltonian, CoulombInteraction, CoulombPotential
