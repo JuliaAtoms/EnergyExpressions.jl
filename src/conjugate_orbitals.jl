@@ -1,4 +1,4 @@
-import AtomicLevels: AbstractOrbital
+import AtomicLevels: AbstractOrbital, symmetry
 
 """
     Conjugate(orbital)
@@ -48,5 +48,7 @@ julia> conj(Conjugate(:a))
 ```
 """
 Base.conj(co::Conjugate{O}) where O = co.orbital
+
+AtomicLevels.symmetry(co::Conjugate{O}) where O = symmetry(co.orbital)
 
 export Conjugate
