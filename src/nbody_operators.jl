@@ -3,6 +3,15 @@
 abstract type QuantumOperator end
 
 """
+    ishermitian(op::QuantumOperator)
+
+By default, all `QuantumOperator`s are Hermitian; this can be
+overridden for subtypes to explicitly declare an operator
+non-Hermitian.
+"""
+LinearAlgebra.ishermitian(::QuantumOperator) = true
+
+"""
     NBodyOperator{N}
 
 Abstract N-body operator coupling `N` bodies each between two Slater determinants
@@ -67,6 +76,9 @@ Base.zero(::LinearCombinationOperator) =
 Base.iszero(op::LinearCombinationOperator) =
     isempty(op.operators)
 
+Base.:(==)(a::LinearCombinationOperator,b::LinearCombinationOperator) =
+    a.operators == b.operators
+
 """
     numbodies(lco::LinearCombinationOperator)
 
@@ -110,6 +122,9 @@ Base.:(*)(a::Number, b::NBodyOperator) =
     LinearCombinationOperator([b=>a])
 Base.:(*)(a::NBodyOperator, b::Number) =
     LinearCombinationOperator([a=>b])
+
+Base.filter(fun::Function, op::LinearCombinationOperator) =
+    LinearCombinationOperator(filter(oc -> fun(oc[1]), op.operators))
 
 # * Contracted operators
 
