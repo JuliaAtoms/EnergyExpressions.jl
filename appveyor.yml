@@ -14,10 +14,11 @@ platform:
 #   allow_failures:
 #   - julia_version: nightly
 
-# branches:
-#   only:
-#     - master
-#     - /release-.*/
+branches:
+  only:
+    - master
+    - /release-.*/
+    - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
 
 notifications:
   - provider: Email
