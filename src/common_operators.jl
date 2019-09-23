@@ -45,6 +45,8 @@ true
 struct FieldFreeOneBodyHamiltonian <: OneBodyOperator end
 
 Base.show(io::IO, ::FieldFreeOneBodyHamiltonian) = write(io, "ĥ₀")
+Base.show(io::IO, me::OrbitalMatrixElement{1,A,FieldFreeOneBodyHamiltonian,B}) where{A,B} =
+    write(io, "(", string(first(me.a)), ")₀")
 Base.iszero(me::OrbitalMatrixElement{1,A,FieldFreeOneBodyHamiltonian,B}) where {A,B} =
     me.a != me.b
 

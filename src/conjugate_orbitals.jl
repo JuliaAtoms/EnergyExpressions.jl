@@ -50,5 +50,6 @@ julia> conj(Conjugate(:a))
 Base.conj(co::Conjugate{O}) where O = co.orbital
 
 AtomicLevels.symmetry(co::Conjugate{O}) where O = symmetry(co.orbital)
+AtomicLevels.degeneracy(co::Conjugate{O}) where O = degeneracy(co.orbital)
 
 export Conjugate

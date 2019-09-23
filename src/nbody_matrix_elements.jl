@@ -525,13 +525,13 @@ end
     NBodyMatrixElement(a, op, b, overlap)
 
 Generate the matrix element of `op`, a linear combination of
-[`NBodyOperator`](@ref), between the Slater determinants `a` and `b`,
-according to the Löwdin rules. The matrix `overlap` contains the
-mutual overlaps between all single-particle orbitals in the Slater
-determinants. If the orbitals are all orthogonal, the Löwdin rules
-collapse to the Slater–Condon rules.
+[`NBodyOperator`](@ref), between the states (e.g. Slater determinants)
+`a` and `b`, according to the Löwdin rules. The matrix `overlap`
+contains the mutual overlaps between all single-particle orbitals in
+the Slater determinants. If the orbitals are all orthogonal, the
+Löwdin rules collapse to the Slater–Condon rules.
 """
-function NBodyMatrixElement(a::SlaterDeterminant, op::LinearCombinationOperator, b::SlaterDeterminant, overlap)
+function NBodyMatrixElement(a, op::LinearCombinationOperator, b, overlap)
     terms = NBodyTerm[]
     for (o,coeff) in op.operators
         iszero(coeff) && continue
@@ -650,20 +650,20 @@ matrix.
 const EnergyExpression = AbstractMatrix{NBodyMatrixElement}
 
 """
-    Matrix(op::QuantumOperator, slater_determinants[, overlaps])
+    Matrix(op::QuantumOperator, cfgs[, overlaps])
 
 Generate the matrix corresponding to the quantum operator `op`,
-between the different `slater_determinants`. It is possible to specify
+between the different `cfgs`. It is possible to specify
 non-orthogonalities between single-particle orbitals in `overlaps`.
 """
-function Base.Matrix(op::QuantumOperator, slater_determinants::VSD,
-                     overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]) where {VSD<:AbstractVector{<:SlaterDeterminant}}
-    m = length(slater_determinants)
+function Base.Matrix(op::QuantumOperator, cfgs,
+                     overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[])
+    m = length(cfgs)
 
     M = spzeros(NBodyMatrixElement, m, m)
 
-    for (i,a) in enumerate(slater_determinants)
-        for (j,b) in enumerate(slater_determinants)
+    for (i,a) in enumerate(cfgs)
+        for (j,b) in enumerate(cfgs)
             S = overlap_matrix(a,b,overlaps)
 
             me = NBodyMatrixElement(a,op,b, S)
