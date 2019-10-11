@@ -13,12 +13,12 @@ Base.show(io::IO, me::OrbitalMatrixElement{1,A,OneBodyHamiltonian,B}) where{A,B}
     write(io, "(", join(string.(me.a), " "), "|", join(string.(me.b), " "), ")")
 
 """
-    iszero(me::EnergyExpressions.OrbitalMatrixElement{1,<:SpinOrbital,OneBodyHamiltonian,<:SpinOrbital})
+    iszero(me::EnergyExpressions.OrbitalMatrixElement{1,<:SpinOrbital{<:Orbital},OneBodyHamiltonian,<:SpinOrbital{<:Orbital}})
 
 The matrix element vanishes if the spin-orbitals do not have the same spin.
 """
-Base.iszero(me::OrbitalMatrixElement{1,A,OneBodyHamiltonian,B}) where {A<:SpinOrbital,B<:SpinOrbital} =
-    me.a[1].spin != me.b[1].spin
+Base.iszero(me::OrbitalMatrixElement{1,A,OneBodyHamiltonian,B}) where {A<:SpinOrbital{<:Orbital},B<:SpinOrbital{<:Orbital}} =
+    me.a[1].m[2] != me.b[1].m[2]
 
 """
     FieldFreeOneBodyHamiltonian
@@ -88,12 +88,12 @@ Base.show(io::IO, co::CoulombPotential{A,B}) where {A,B} =
     write(io, "[$(co.a[1])|$(co.b[1])]")
 
 """
-    iszero(me::EnergyExpressions.OrbitalMatrixElement{2,<:SpinOrbital,CoulombInteraction,<:SpinOrbital})
+    iszero(me::EnergyExpressions.OrbitalMatrixElement{2,<:SpinOrbital{<:Orbital},CoulombInteraction,<:SpinOrbital{<:Orbital}})
 
-The matrix element vanishes if the spin-orbitals associated with the
-same coordinate do not have the same spin.
+The matrix element vanishes if the (non-relativistic) spin-orbitals
+associated with the same coordinate do not have the same spin.
 """
-Base.iszero(me::OrbitalMatrixElement{2,A,<:CoulombInteraction,B}) where {A<:SpinOrbital,B<:SpinOrbital} =
-    me.a[1].spin != me.b[1].spin || me.a[2].spin != me.b[2].spin
+Base.iszero(me::OrbitalMatrixElement{2,A,<:CoulombInteraction,B}) where {A<:SpinOrbital{<:Orbital},B<:SpinOrbital{<:Orbital}} =
+    me.a[1].m[2] != me.b[1].m[2] || me.a[2].m[2] != me.b[2].m[2]
 
 export OneBodyHamiltonian, FieldFreeOneBodyHamiltonian, CoulombInteraction, CoulombPotential
