@@ -624,14 +624,17 @@ function overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant, overlaps::Ve
     S = spzeros(NBodyTerm, m, m)
     overlap_matrix!(S, a, b)
 
+    add_overlap! = (oa, ob) -> begin
+        i = findfirst(isequal(oa), a.orbitals)
+        isnothing(i) && return
+        j = findfirst(isequal(ob), b.orbitals)
+        isnothing(j) && return
+        S[i,j] = OrbitalOverlap(oa,ob)
+    end
+
     for overlap in overlaps
-        for (oa,ob) in [(overlap.a,overlap.b),(overlap.b,overlap.a)]
-            i = findfirst(isequal(oa), a.orbitals)
-            isnothing(i) && continue
-            j = findfirst(isequal(ob), b.orbitals)
-            isnothing(j) && continue
-            S[i,j] = OrbitalOverlap(oa,ob)
-        end
+        add_overlap!(overlap.a,overlap.b)
+        add_overlap!(overlap.b,overlap.a)
     end
 
     S
@@ -650,29 +653,73 @@ matrix.
 const EnergyExpression = AbstractMatrix{NBodyMatrixElement}
 
 """
+    Matrix(a, op::QuantumOperator, b[, overlaps])
+
+Generate the matrix corresponding to the quantum operator `op`,
+between the [`SlaterDeterminant`](@ref)s `a` and `b`, i.e
+`⟨a|op|b⟩`. It is possible to specify non-orthogonalities between
+single-particle orbitals in `overlaps`.
+"""
+function Base.Matrix(a::VSD, op::QuantumOperator, b::VSD,
+                     overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]) where {VSD<:AbstractVector{<:SlaterDeterminant}}
+    m,n = length(a),length(b)
+
+    I = Int[]
+    J = Int[]
+    V = NBodyMatrixElement[]
+
+    for (i,a) in enumerate(a)
+        aoverlaps = filter(o -> o.a ∈ a.orbitals || o.b ∈ a.orbitals,
+                           overlaps)
+        for (j,b) in enumerate(b)
+            aboverlaps = filter(o -> o.a ∈ b.orbitals || o.b ∈ b.orbitals,
+                                aoverlaps)
+            S = overlap_matrix(a, b, aboverlaps)
+            me = NBodyMatrixElement(a,op,b, S)
+            iszero(me) && continue
+
+            push!(I, i)
+            push!(J, j)
+            push!(V, me)
+        end
+    end
+
+    sparse(I, J, V, m, n)
+end
+
+"""
     Matrix(op::QuantumOperator, slater_determinants[, overlaps])
 
 Generate the matrix corresponding to the quantum operator `op`,
 between the different `slater_determinants`. It is possible to specify
 non-orthogonalities between single-particle orbitals in `overlaps`.
 """
-function Base.Matrix(op::QuantumOperator, slater_determinants::VSD,
-                     overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]) where {VSD<:AbstractVector{<:SlaterDeterminant}}
-    m = length(slater_determinants)
+Base.Matrix(op::QuantumOperator, slater_determinants::VSD,
+            overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]) where {VSD<:AbstractVector{<:SlaterDeterminant}} =
+                Matrix(slater_determinants, op, slater_determinants, overlaps)
 
-    M = spzeros(NBodyMatrixElement, m, m)
+function transform(fun::Function, E::EnergyExpression)
+    m,n = size(E)
 
-    for (i,a) in enumerate(slater_determinants)
-        for (j,b) in enumerate(slater_determinants)
-            S = overlap_matrix(a,b,overlaps)
+    I = Int[]
+    J = Int[]
+    V = NBodyMatrixElement[]
+    rows = rowvals(E)
+    vals = nonzeros(E)
 
-            me = NBodyMatrixElement(a,op,b, S)
+    for j = 1:n
+        for ind in nzrange(E, j)
+            i = rows[ind]
+            me = transform(fun, vals[ind])
             iszero(me) && continue
-            M[i,j] = me
+
+            push!(I, i)
+            push!(J, j)
+            push!(V, me)
         end
     end
 
-    M
+    sparse(I, J, V, m, n)
 end
 
 export OrbitalOverlap, numbodies, overlap_matrix, transform, EnergyExpression, isdependent

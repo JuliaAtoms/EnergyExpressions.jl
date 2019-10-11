@@ -5,7 +5,7 @@ Find all states coupled by the energy expression `E`, starting from
 the state with index `i₀`. This can be useful to reduce the necessary
 basis or to generate invariant sets for split-operator propagation.
 """
-function coupled_states(E::EnergyExpression; i₀=1)
+function coupled_states(E::AbstractSparseMatrix; i₀=1)
     m = size(E,1)
     visited = falses(m)
     visited[i₀] = true
@@ -27,7 +27,7 @@ function coupled_states(E::EnergyExpression; i₀=1)
     visited
 end
 
-function invariant_sets(E::EnergyExpression)
+function invariant_sets(E::AbstractSparseMatrix)
     m = size(E,1)
     visited = falses(m)
 
