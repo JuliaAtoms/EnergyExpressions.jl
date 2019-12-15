@@ -7,6 +7,7 @@ function showcoeff(io::IO, n::Number, show_sign::Bool, show_one::Bool=false)
     else
         show_sign && write(io, "+ ")
     end
+    n = round(n, digits=6)
     if !(isone(n) || isone(-n))
         if !(isreal(n) || isimag(n))
             write(io, "($n)")
