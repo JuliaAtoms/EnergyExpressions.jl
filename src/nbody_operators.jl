@@ -72,7 +72,10 @@ struct LinearCombinationOperator <: QuantumOperator
 end
 
 Base.zero(::LinearCombinationOperator) =
-    LinearCombinationOperator(NBodyOperator[])
+    LinearCombinationOperator(Pair{<:NBodyOperator,<:Number}[])
+Base.zero(::Type{LinearCombinationOperator}) =
+    LinearCombinationOperator(Pair{<:NBodyOperator,<:Number}[])
+
 Base.iszero(op::LinearCombinationOperator) =
     isempty(op.operators)
 
@@ -122,6 +125,11 @@ Base.:(*)(a::Number, b::NBodyOperator) =
     LinearCombinationOperator([b=>a])
 Base.:(*)(a::NBodyOperator, b::Number) =
     LinearCombinationOperator([a=>b])
+
+Base.:(*)(a::Number, b::LinearCombinationOperator) =
+    LinearCombinationOperator([op=>a*c for (op,c) in b.operators])
+Base.:(*)(a::LinearCombinationOperator, b::Number) =
+    LinearCombinationOperator([op=>b*c for (op,c) in a.operators])
 
 Base.filter(fun::Function, op::LinearCombinationOperator) =
     LinearCombinationOperator(filter(oc -> fun(oc[1]), op.operators))
