@@ -31,6 +31,12 @@ end
 # non-orthogonality precisely by providing OrbitalOverlaps.
 Base.iszero(::OrbitalOverlap) = false
 
+Base.:(==)(a::OrbitalOverlap, b::OrbitalOverlap) =
+    a.a == b.a && a.b == b.b
+
+Base.hash(o::OrbitalOverlap, h::UInt) =
+    hash(hash(hash(o.a), hash(o.b)), h)
+
 Base.adjoint(o::OrbitalOverlap{A,B}) where {A,B} = OrbitalOverlap{B,A}(o.b, o.a)
 
 """
@@ -91,6 +97,9 @@ Base.iszero(::OrbitalMatrixElement) = false
 
 Base.:(==)(a::OrbitalMatrixElement, b::OrbitalMatrixElement) =
     a.a == b.a && a.o == b.o && a.b == b.b
+
+Base.hash(ome::OrbitalMatrixElement, h::UInt) =
+    hash(hash(hash(hash(ome.a), hash(ome.o)), hash(ome.b)), h)
 
 """
     numbodies(::OrbitalMatrixElement{N})
@@ -304,6 +313,58 @@ function Base.show(io::IO, nbme::NBodyMatrixElement)
         end
     end
 end
+
+# ** Comparison of NBodyMatrixElements
+
+"""
+    compare(a::NBodyMatrixElement, op, b::NBodyMatrixElement; kwargs...)
+
+Compare the [`NBodyMatrixElement`](@ref)s `a` and `b` for similarity;
+all the terms of `a` need to be present in `b`, and vice versa, and
+their expansion coefficients have to agree when compared using `op`.
+
+This function is mainly designed for testing purposes, i.e. to compare
+an expression with a reference, generated otherwise. It may not be
+performant. It may also fail on edge cases.
+"""
+function compare(a::NBodyMatrixElement, op, b::NBodyMatrixElement; kwargs...)
+    ad,bd = map((a,b)) do o
+        od = Dict{Vector{NBodyTermFactor},Number}()
+        for term in o.terms
+            c = get(od, term.factors, 0.0)
+            od[term.factors] = c + term.coeff
+        end
+        od
+    end
+    length(keys(ad)) == length(keys(bd)) || return false
+    isempty(setdiff(keys(ad), keys(bd))) || return false
+    for (ak,ac) in pairs(ad)
+        op(ac, bd[ak]; kwargs...) || return false
+    end
+
+    true
+end
+
+"""
+    Base.:(==)(a::NBodyMatrixElement, b::NBodyMatrixElement; kwargs...)
+
+Test if `a` and `b` are exactly equal to each other, i.e. their terms
+all agree exactly, as well as the expansion coefficients. The actual
+comparison is performed by [`compare`](@ref).
+"""
+Base.:(==)(a::NBodyMatrixElement, b::NBodyMatrixElement) =
+    compare(a, ==, b)
+
+"""
+    Base.isapprox(a::NBodyMatrixElement, b::NBodyMatrixElement; kwargs...)
+
+Test if `a` and `b` are approximately equal to each other, i.e. their
+terms all agree exactly, and the expansion coefficients are
+approximately equal. The actual comparison is performed by
+[`compare`](@ref).
+"""
+Base.isapprox(a::NBodyMatrixElement, b::NBodyMatrixElement; kwargs...) =
+    compare(a, ≈, b; kwargs...)
 
 # ** Determinant utilities
 
