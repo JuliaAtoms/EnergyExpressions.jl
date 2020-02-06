@@ -92,6 +92,10 @@ numbodies(lco::LinearCombinationOperator) =
     iszero(lco) ? 0 : maximum(numbodies.(first.(lco.operators)))
 
 function Base.show(io::IO, op::LinearCombinationOperator)
+    if iszero(op)
+        write(io, "0")
+        return
+    end
     for (i,(o,n)) in enumerate(op.operators)
         i > 1 && write(io, " ")
         showcoeff(io, n, i > 1)
@@ -127,9 +131,9 @@ Base.:(*)(a::NBodyOperator, b::Number) =
     LinearCombinationOperator([a=>b])
 
 Base.:(*)(a::Number, b::LinearCombinationOperator) =
-    LinearCombinationOperator([op=>a*c for (op,c) in b.operators])
+    LinearCombinationOperator(Pair{<:NBodyOperator,<:Number}[op=>a*c for (op,c) in b.operators])
 Base.:(*)(a::LinearCombinationOperator, b::Number) =
-    LinearCombinationOperator([op=>b*c for (op,c) in a.operators])
+    LinearCombinationOperator(Pair{<:NBodyOperator,<:Number}[op=>b*c for (op,c) in a.operators])
 
 Base.filter(fun::Function, op::LinearCombinationOperator) =
     LinearCombinationOperator(filter(oc -> fun(oc[1]), op.operators))
