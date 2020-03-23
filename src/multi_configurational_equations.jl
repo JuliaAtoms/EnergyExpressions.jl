@@ -116,12 +116,19 @@ Derive the integro-differential equations for all `orbitals`, from
 gathers information on which integrals are common to all equations,
 for efficient equation solving.
 """
-function Base.diff(E::EM, orbitals::VO) where {EM<:EnergyExpression, O,VO<:AbstractVector{O}}
+function Base.diff(E::EM, orbitals::VO; verbosity=0) where {EM<:EnergyExpression, O,VO<:AbstractVector{O}}
     # Vector of common integrals
     integrals = []
 
+    norb = length(orbitals)
+    p = if verbosity > 0
+        @info "Deriving equations for $(norb) orbitals"
+        Progress(norb)
+    end
     equations = map(orbitals) do orbital
-        orbital_equation(E, orbital, integrals)
+        eq = orbital_equation(E, orbital, integrals)
+        isnothing(p) || ProgressMeter.next!(p)
+        eq
     end
 
     MCEquationSystem(equations, integrals)
