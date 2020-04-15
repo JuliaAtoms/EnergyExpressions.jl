@@ -184,6 +184,9 @@ Base.iszero(term::NBodyTerm) = iszero(term.coeff) || any(iszero.(term.factors))
 Base.convert(::Type{NBodyTerm}, f::NBodyTermFactor) =
     NBodyTerm([f], 1)
 
+Base.convert(::Type{T}, nbt::NBodyTerm) where {T<:Number} =
+    convert(T, nbt.coeff)*prod(f -> convert(T, f), nbt.factors)
+
 Base.:(*)(a::NBodyTerm, b::NBodyTerm) =
     NBodyTerm(vcat(a.factors, b.factors), a.coeff*b.coeff)
 
@@ -296,6 +299,9 @@ Base.:(*)(a::NBodyMatrixElement, b::Union{Number,NBodyTerm,NBodyTermFactor}) =
 
 Base.:(*)(a::Union{Number,NBodyTerm,NBodyTermFactor}, b::NBodyMatrixElement) =
     NBodyMatrixElement([a*t for t in b.terms])
+
+Base.convert(::Type{T}, nbme::NBodyMatrixElement) where {T<:Number} =
+    sum(t -> convert(T, t), nbme.terms)
 
 function Base.show(io::IO, nbme::NBodyMatrixElement)
     if iszero(nbme)
