@@ -728,12 +728,18 @@ between the [`SlaterDeterminant`](@ref)s `a` and `b`, i.e
 single-particle orbitals in `overlaps`.
 """
 function Base.Matrix(a::VSD, op::QuantumOperator, b::VSD,
-                     overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]) where {VSD<:AbstractVector{<:SlaterDeterminant}}
+                     overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[];
+                     verbosity=0) where {VSD<:AbstractVector{<:SlaterDeterminant}}
     m,n = length(a),length(b)
 
     I = Int[]
     J = Int[]
     V = NBodyMatrixElement[]
+
+    p = if verbosity > 0
+        @info "Generating energy expression"
+        Progress(length(a)*length(b))
+    end
 
     for (i,a) in enumerate(a)
         aoverlaps = filter(o -> o.a ∈ a.orbitals || o.b ∈ a.orbitals,
@@ -743,6 +749,9 @@ function Base.Matrix(a::VSD, op::QuantumOperator, b::VSD,
                                 aoverlaps)
             S = overlap_matrix(a, b, aboverlaps)
             me = NBodyMatrixElement(a,op,b, S)
+
+            !isnothing(p) && ProgressMeter.next!(p)
+
             iszero(me) && continue
 
             push!(I, i)
@@ -765,7 +774,7 @@ Base.Matrix(op::QuantumOperator, slater_determinants::VSD,
             overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]) where {VSD<:AbstractVector{<:SlaterDeterminant}} =
                 Matrix(slater_determinants, op, slater_determinants, overlaps)
 
-function transform(fun::Function, E::EnergyExpression)
+function transform(fun::Function, E::EnergyExpression; verbosity=0)
     m,n = size(E)
 
     I = Int[]
@@ -774,10 +783,18 @@ function transform(fun::Function, E::EnergyExpression)
     rows = rowvals(E)
     vals = nonzeros(E)
 
+    p = if verbosity > 0
+        @info "Transforming energy expression"
+        Progress(nnz(E))
+    end
+
     for j = 1:n
         for ind in nzrange(E, j)
             i = rows[ind]
             me = transform(fun, vals[ind])
+
+            !isnothing(p) && ProgressMeter.next!(p)
+
             iszero(me) && continue
 
             push!(I, i)
