@@ -24,29 +24,13 @@ Base.iszero(me::OrbitalMatrixElement{1,A,OneBodyHamiltonian,B}) where {A<:SpinOr
     FieldFreeOneBodyHamiltonian
 
 The one-body Hamiltonian, with no external fields. It is diagonal in
-the orbitals, i.e. does not couple unequal orbitals.
-
-# Examples
-
-```jldoctest
-julia> EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:a,))
-⟨a|ĥ₀|a⟩
-
-julia> iszero(EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:a,)))
-false
-
-julia> EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:b,))
-⟨a|ĥ₀|b⟩
-
-julia> iszero(EnergyExpressions.OrbitalMatrixElement((:a,), FieldFreeOneBodyHamiltonian(), (:b,)))
-true
-```
+the orbital symmetry.
 """
 struct FieldFreeOneBodyHamiltonian <: OneBodyOperator end
 
 Base.show(io::IO, ::FieldFreeOneBodyHamiltonian) = write(io, "ĥ₀")
-Base.iszero(me::OrbitalMatrixElement{1,A,FieldFreeOneBodyHamiltonian,B}) where {A,B} =
-    me.a != me.b
+Base.iszero(me::OrbitalMatrixElement{1,<:SpinOrbital,FieldFreeOneBodyHamiltonian,<:SpinOrbital}) =
+    symmetry(me.a[1]) != symmetry(me.b[1])
 
 """
     CoulombInteraction
