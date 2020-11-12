@@ -48,6 +48,10 @@ Base.show(io::IO, sd::SlaterDeterminant) =
 function Base.show(io::IO, ::MIME"text/plain", sd::SlaterDeterminant)
     noprintterms = 5
     n = length(sd)
+    if n > 3
+        show(io, sd)
+        return
+    end
     numperm = factorial(n)
     for (j,p) in enumerate(permutations(1:n))
         if j < noprintterms || j > numperm-noprintterms
