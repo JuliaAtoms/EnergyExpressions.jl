@@ -1,4 +1,6 @@
-import EnergyExpressions: @above_diagonal_loop, cofactor, nonzero_minors
+import EnergyExpressions: @above_diagonal_loop, cofactor, nonzero_minors, find_diagonal_blocks, NBodyMatrixElement
+using SparseArrays
+using Combinatorics
 
 # Used to generate reference data to test the linear complexity
 # algorithm against; the naïve algorithm is correct, but is of
@@ -55,7 +57,57 @@ function test_find_minors(cfga, cfgb, overlaps=OrbitalOverlap[])
     @test errors == 0
 end
 
+function find_diagonal_blocks_test_case(A, blocks)
+    @test find_diagonal_blocks(A) == blocks
+    @test find_diagonal_blocks(SparseMatrixCSC(A')) == blocks
+end
+
+function test_cofactors(N, ii, jj)
+    orbitals = 1:N
+    excite = i -> i+100
+    virtuals = map(excite, orbitals)
+
+    configurations = [SlaterDeterminant(vcat(1:i-1,excite(i),i+1:N))
+                      for i=1:N]
+    overlaps = map(((a,b),) -> OrbitalOverlap(a,b),
+                   reduce(vcat, [collect(combinations(virtuals,2)),
+                                 [[a,a] for a in virtuals]]))
+
+    results = Vector{EnergyExpressions.NBodyMatrixElement}()
+
+    for (i,j) = [(ii,jj),(jj,ii)]
+        a = configurations[i]
+        b = configurations[j]
+        S = overlap_matrix(a, b, overlaps)
+        ks,ls = nonzero_minors(1, S)
+        for (k,l) in zip(ks,ls)
+            push!(results, cofactor(k, l, S))
+        end
+    end
+    results
+end
+
 @testset "Minor determinants" begin
+    @testset "Find diagonal blocks" begin
+        find_diagonal_blocks_test_case((sparse([3,1,2], 1:3, ones(Int, 3))), [1:3])
+        find_diagonal_blocks_test_case((sparse([1,4,2,3], 1:4, ones(Int, 4))), [1:1, 2:4])
+        find_diagonal_blocks_test_case((sparse([1,2,5,3,4], 1:5, ones(Int, 5))), [1:1, 2:2, 3:5])
+        find_diagonal_blocks_test_case((sparse([1,2,3,6,4,5], 1:6, ones(Int, 6))), [1:1, 2:2, 3:3, 4:6])
+    end
+
+    @testset "Cofactors" begin
+        @test test_cofactors(7,4,7) == [NBodyMatrixElement([-OrbitalOverlap(104,107)]),
+                                          NBodyMatrixElement([-OrbitalOverlap(107,104)])]
+        @test test_cofactors(8,5,8) == [NBodyMatrixElement([-OrbitalOverlap(105,108)]),
+                                          NBodyMatrixElement([-OrbitalOverlap(108,105)])]
+        @test test_cofactors(9,6,9) == [NBodyMatrixElement([-OrbitalOverlap(106,109)]),
+                                          NBodyMatrixElement([-OrbitalOverlap(109,106)])]
+        @test test_cofactors(9,7,9) == [NBodyMatrixElement([-OrbitalOverlap(107,109)]),
+                                          NBodyMatrixElement([-OrbitalOverlap(109,107)])]
+        @test test_cofactors(54,45,54) == [NBodyMatrixElement([-OrbitalOverlap(145,154)]),
+                                             NBodyMatrixElement([-OrbitalOverlap(154,145)])]
+    end
+
     @testset "Base cases" begin
         test_find_minors([:a], [:a])
         test_find_minors([:a,:b], [:a,:b])
@@ -88,7 +140,7 @@ end
     @testset "Atomic cases" begin
         h = ConcreteNBodyOperator{1}()
         g = ConcreteNBodyOperator{2}()
-        
+
         for (cfga,cfgb,exp1,exp2) in [
             (c"1s2",c"1s2",2,1),
             (c"1s2",c"1s 2p",1,1),
@@ -104,7 +156,7 @@ end
             b = SlaterDeterminant(spin_configurations(cfgb)[1])
 
             S = overlap_matrix(a, b)
-            
+
             for (op,ex) in [(h,exp1),(g,exp2)]
                 ks,ls = nonzero_minors(numbodies(op), S)
                 @test length(ks) == length(ls) == ex

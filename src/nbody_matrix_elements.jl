@@ -211,6 +211,8 @@ Base.:(*)(a::NBodyTermFactor, b::Number) =
 Base.:(*)(a::Number, b::NBodyTermFactor) =
     NBodyTerm([b], a)
 
+Base.:(-)(f::NBodyTermFactor) = (-1)*f
+
 """
     isdependent(nbt::NBodyTerm, o)
 
@@ -424,20 +426,15 @@ case it is known that the cofactor is non-zero.
 cofactor(k, l, A) = powneg1(indexsum(k,l))*detminor(k, l, A)
 
 function merge_overlapping_blocks(blocks::Vector{UnitRange{Int}})
-    cur_block = first(blocks)
-    new_blocks = UnitRange{Int}[]
+    blocks = sort(blocks, by=first)
+    new_blocks = [first(blocks)]
     for b in blocks
+        cur_block = new_blocks[end]
         if isempty(cur_block ∩ b)
-            push!(new_blocks, cur_block)
-            cur_block = b
+            push!(new_blocks, b)
         else
-            cur_block = min(cur_block[1],b[1]):max(cur_block[end],b[end])
+            new_blocks[end] = min(cur_block[1],b[1]):max(cur_block[end],b[end])
         end
-    end
-    if isempty(new_blocks)
-        push!(new_blocks, cur_block)
-    elseif blocks[end] ∉ new_blocks[end]
-        push!(new_blocks, blocks[end])
     end
 
     new_blocks
@@ -456,11 +453,7 @@ function find_diagonal_blocks(A::AbstractSparseMatrix)
         min(j,minimum(j_rows)):max(j,maximum(j_rows))
     end
 
-    # Merge overlapping blocks; since they are ordered by column and
-    # always contain the diagonal, we can do a forward sweep and then
-    # a backward sweep to capture all.
-    blocks = merge_overlapping_blocks(blocks)
-    reverse(merge_overlapping_blocks(reverse(blocks)))
+    merge_overlapping_blocks(blocks)
 end
 
 function block_det(A::AbstractSparseMatrix{T}, blocks::Vector{UnitRange{Int}}) where T
