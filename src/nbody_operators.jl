@@ -82,6 +82,13 @@ Base.iszero(op::LinearCombinationOperator) =
 Base.:(==)(a::LinearCombinationOperator,b::LinearCombinationOperator) =
     a.operators == b.operators
 
+function Base.hash(lco::LinearCombinationOperator, h::UInt)
+    for (op,coeff) in lco.operators
+        h = hash(op, hash(coeff, h))
+    end
+    h
+end
+
 """
     numbodies(lco::LinearCombinationOperator)
 
