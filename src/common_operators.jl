@@ -54,6 +54,8 @@ struct CoulombInteraction{O} <: TwoBodyOperator
 end
 CoulombInteraction() = CoulombInteraction(nothing)
 
+Base.hash(g::CoulombInteraction, h::UInt) = hash(g.o, h)
+
 const CoulombPotential{A,B} = ContractedOperator{1,2,1,A,<:CoulombInteraction,B}
 
 Base.show(io::IO, ::CoulombInteraction) = write(io, "ĝ")
