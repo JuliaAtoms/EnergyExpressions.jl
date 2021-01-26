@@ -27,7 +27,7 @@ Vary the orbital overlap ⟨abc...|Ω|xyz...⟩ with respect to |o⟩.
 """
 function Base.diff(ome::OrbitalMatrixElement{N}, o::O) where {N,O}
     i = findfirst(isequal(o), ome.b)
-    isnothing(i) && return 0
+    (isnothing(i) || iszero(ome)) && return 0
     NBodyEquation(Conjugate(ome.a[i]), contract(ome, complement(N, i)...))
 end
 
@@ -38,7 +38,7 @@ Vary the orbital overlap ⟨abc...|Ω|xyz...⟩ with respect to ⟨o|.
 """
 function Base.diff(ome::OrbitalMatrixElement{N}, o::Conjugate{O}) where {N,O}
     i = findfirst(isequal(conj(o)), ome.a)
-    isnothing(i) && return 0
+    (isnothing(i) || iszero(ome)) && return 0
     NBodyEquation(ome.b[i], contract(ome, complement(N, i)...))
 end
 
