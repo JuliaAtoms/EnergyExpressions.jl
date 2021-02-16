@@ -29,6 +29,8 @@ the orbital symmetry.
 struct FieldFreeOneBodyHamiltonian <: OneBodyOperator end
 
 Base.show(io::IO, ::FieldFreeOneBodyHamiltonian) = write(io, "ĥ₀")
+Base.show(io::IO, me::OrbitalMatrixElement{1,A,FieldFreeOneBodyHamiltonian,B}) where{A,B} =
+    write(io, "(", join(string.(me.a), " "), "|", join(string.(me.b), " "), ")")
 Base.iszero(me::OrbitalMatrixElement{1,<:SpinOrbital,FieldFreeOneBodyHamiltonian,<:SpinOrbital}) =
     symmetry(me.a[1]) != symmetry(me.b[1])
 
