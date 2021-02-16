@@ -279,10 +279,13 @@ Base.one(::Type{NBodyMatrixElement}) =
     NBodyMatrixElement([one(NBodyTerm)])
 
 Base.iszero(nbme::NBodyMatrixElement) =
-    isempty(nbme.terms) || all(iszero.(nbme.terms))
+    isempty(nbme.terms) || all(iszero, nbme.terms)
 
 Base.convert(::Type{NBodyMatrixElement}, nbt::NBodyTerm) =
     NBodyMatrixElement([nbt])
+
+Base.convert(::Type{NBodyMatrixElement}, n::Number) =
+    n*one(NBodyMatrixElement)
 
 Base.:(+)(a::NBodyMatrixElement, b::NBodyMatrixElement) =
     NBodyMatrixElement(vcat(a.terms, b.terms))
@@ -397,7 +400,7 @@ where the rows `k` and the columns `l` have been stricken out.
 """
 function detminor(k, l, A)
     n = size(A,1)
-    n == 1 && return 1
+    n == 1 && isempty(k) && return A[1]
     det(A[detaxis(k,n),detaxis(l,n)])
 end
 
@@ -515,46 +518,28 @@ permutation_sign(p) =
 
 # ** N-body matrix construction
 
-"""
-    NBodyMatrixElement(a, op, b, overlap)
-
-Generate the matrix element of the N-body operator `op`, between the
-Slater determinants `a` and `b`, according to the Löwdin rules. The
-matrix `overlap` contains the mutual overlaps between all
-single-particle orbitals in the Slater determinants. If the orbitals
-are all orthogonal, the Löwdin rules collapse to the Slater–Condon
-rules.
-"""
-@generated function NBodyMatrixElement(a::SlaterDeterminant, op::NBodyOperator{N}, b::SlaterDeterminant, overlap) where N
+@generated function NBodyMatrixElement(a, op::NBodyOperator{N}, b, nzcofactors) where N
     quote
         length(a) == length(b) ||
-            throw(DimensionMismatch("Slater determinants of different dimensions"))
-
-        numorbitals = length(a)
+            throw(DimensionMismatch("Different number of orbitals"))
 
         terms = NBodyTerm[]
 
-        ao = a.orbitals
-        bo = b.orbitals
-
-        akN = similar(ao, $N)
-        blN = similar(bo, $N)
+        akN = similar(a, $N)
+        blN = similar(b, $N)
 
         iN = zeros(Int, $N)
         jN = zeros(Int, $N)
 
-        aiN = similar(ao, $N)
-        bjN = similar(bo, $N)
+        aiN = similar(a, $N)
+        bjN = similar(b, $N)
 
-        ks,ls = nonzero_minors($N, overlap)
-
-        for (k,l) in zip(ks,ls)
-            Dkl = cofactor(k, l, overlap) # Determinantal overlap of all other orbitals
+        for (k,l,Dkl) in nzcofactors
             iszero(Dkl) && continue
 
             for d in eachindex(k)
-                akN[d] = ao[k[d]]
-                blN[d] = bo[l[d]]
+                akN[d] = a[k[d]]
+                blN[d] = b[l[d]]
             end
 
             # Generate all distinct permutations of the N first
@@ -579,6 +564,22 @@ rules.
 
         NBodyMatrixElement(terms)
     end
+end
+
+"""
+    NBodyMatrixElement(a, op, b, overlap)
+
+Generate the matrix element of the N-body operator `op`, between the
+Slater determinants `a` and `b`, according to the Löwdin rules. The
+matrix `overlap` contains the mutual overlaps between all
+single-particle orbitals in the Slater determinants. If the orbitals
+are all orthogonal, the Löwdin rules collapse to the Slater–Condon
+rules.
+"""
+function NBodyMatrixElement(a::SlaterDeterminant, op::NBodyOperator{N}, b::SlaterDeterminant, overlap) where N
+    ks,ls = nonzero_minors(N, overlap)
+    nzcofactors = zip(ks, ls, (cofactor(k, l, overlap) for (k,l) in zip(ks,ls)))
+    NBodyMatrixElement(a.orbitals, op, b.orbitals, nzcofactors)
 end
 
 """
