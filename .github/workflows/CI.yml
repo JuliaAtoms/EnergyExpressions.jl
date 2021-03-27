@@ -73,7 +73,10 @@ jobs:
             Pkg.add(url="https://github.com/JuliaAtoms/AtomicLevels.jl.git")
             Pkg.develop(PackageSpec(path=pwd()))
             Pkg.instantiate()'
-      - run: |
+      - name: Run Doctests
+        # See https://github.com/actions/toolkit/issues/399
+        continue-on-error: true
+        run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
             using EnergyExpressions
