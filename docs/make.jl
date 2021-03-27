@@ -23,7 +23,9 @@ makedocs(
             "System of equations" => "system_of_equations.md"
         ]
     ],
-    format = Documenter.HTML(assets = ["assets/latex.js"])
+    format = Documenter.HTML(assets = ["assets/latex.js"]),
+    strict = true,
+    doctest = false
 )
 
 deploydocs(repo = "github.com/JuliaAtoms/EnergyExpressions.jl.git")
