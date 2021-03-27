@@ -24,7 +24,6 @@ makedocs(
         ]
     ],
     format = Documenter.HTML(assets = ["assets/latex.js"]),
-    strict = true,
     doctest = false
 )
 
