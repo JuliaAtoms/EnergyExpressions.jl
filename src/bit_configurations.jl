@@ -1,6 +1,7 @@
 # * Binary utilities
 
 function showbin(io::IO, c::BitVector)
+    # Printing order = LSB ... MSB
     for (i,e) in enumerate(c)
         write(io, e ? "1" : ".")
         i%4 == 0 && write(io, " ")

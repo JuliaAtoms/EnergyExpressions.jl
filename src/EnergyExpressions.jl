@@ -5,6 +5,7 @@ using LinearAlgebra
 using SparseArrays
 using Combinatorics
 using UnicodeFun
+using Formatting
 using ProgressMeter
 
 if VERSION < v"1.1-DEV"
