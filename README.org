@@ -2,11 +2,10 @@
 #+AUTHOR: Stefanos Carlström
 #+EMAIL: stefanos.carlstrom@gmail.com
 
-[[https://travis-ci.org/JuliaAtoms/EnergyExpressions.jl][https://travis-ci.org/JuliaAtoms/EnergyExpressions.jl.svg?branch=master]]
-[[https://ci.appveyor.com/project/juliaatoms/energyexpressions-jl][https://img.shields.io/appveyor/ci/juliaatoms/energyexpressions-jl.svg?logo=appveyor]]
-[[https://codecov.io/gh/JuliaAtoms/EnergyExpressions.jl][https://codecov.io/gh/JuliaAtoms/EnergyExpressions.jl/branch/master/graph/badge.svg]]
-
-[[https://juliaatoms.github.io/EnergyExpressions.jl/dev/index.html][https://img.shields.io/badge/docs-dev-blue.svg]]
+[![Documentation][docs-stable-img]][docs-stable-url]
+[![Documentation (dev)][docs-dev-img]][docs-dev-url]
+[![GitHub Actions CI][ci-gha-img]][ci-gha-url]
+[![CodeCov][codecov-img]][codecov-url]
 
 Small library for setting up energy expressions for electronic systems
 that can be used to derive differential equations via calculus of
