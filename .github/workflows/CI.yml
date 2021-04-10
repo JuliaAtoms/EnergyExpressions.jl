@@ -4,8 +4,10 @@ on:
   - pull_request
 jobs:
   test:
-    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - threads ${{ matrix.julia-threads }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
+    env:
+      JULIA_NUM_THREADS: ${{ matrix.julia-threads }}
     strategy:
       fail-fast: false
       matrix:
@@ -19,6 +21,9 @@ jobs:
           - windows-latest
         arch:
           - x64
+        julia-threads:
+          - "1"
+          - "2"
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
