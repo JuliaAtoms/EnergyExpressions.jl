@@ -26,6 +26,18 @@ end
 
 # * Orbitals
 
+"""
+    Orbitals(orbitals, overlaps, has_overlap, non_orthogonalities)
+
+Structure storing a common set of `orbitals`, along with possible
+`overlaps` between them, in case of non-orthogonalities. `has_overlap`
+is a boolean matrix indicates if a pair of orbitals have overlap,
+either due to non-orthogonality or if they are the same
+orbital. `non_orthogonalities` is a boolean vector that indicates if a
+specific orbital is non-orthogonal to _any_ other orbital in the set
+of orbitals. This structure is used internally by
+[`BitConfigurations`](@ref).
+"""
 struct Orbitals{O,Overlaps,HasOverlap,NonOrthogonalities}
     orbitals::Vector{O}
     overlaps::Overlaps

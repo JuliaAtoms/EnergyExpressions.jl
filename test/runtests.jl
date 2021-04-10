@@ -1,5 +1,6 @@
 using EnergyExpressions
 using AtomicLevels
+using LinearAlgebra
 using Test
 
 include("conjugate_orbitals.jl")
