@@ -518,52 +518,51 @@ permutation_sign(p) =
 
 # ** N-body matrix construction
 
-@generated function NBodyMatrixElement(a, op::NBodyOperator{N}, b, nzcofactors) where N
+"""
+    distinct_permutations(fun::Function, ::NBodyOperator{N}, b)
+
+Generate all distinct permutations `p` of `b` (which is expected to be
+of length `N`), and call `fun(σ, b[p])` where `σ=(-1)^p` is the sign
+of the permutation `p`.
+"""
+@generated function distinct_permutations(fun::Function, ::NBodyOperator{N}, b) where N
     quote
-        length(a) == length(b) ||
-            throw(DimensionMismatch("Different number of orbitals"))
-
-        terms = NBodyTerm[]
-
-        akN = similar(a, $N)
-        blN = similar(b, $N)
-
-        iN = zeros(Int, $N)
         jN = zeros(Int, $N)
 
-        aiN = similar(a, $N)
-        bjN = similar(b, $N)
-
-        for (k,l,Dkl) in nzcofactors
-            iszero(Dkl) && continue
-
-            for d in eachindex(k)
-                akN[d] = a[k[d]]
-                blN[d] = b[l[d]]
-            end
-
-            # Generate all distinct permutations of the N first
-            # orbitals of the current total permutation.
-            @above_diagonal_loop $N i N begin
-                Base.Cartesian.@nexprs $N d -> iN[d] = i_d
-                si = permutation_sign(iN)
-                Base.Cartesian.@nexprs $N d -> aiN[d] = akN[i_d]
-
-                @anti_diagonal_loop $N j N begin
-                    Base.Cartesian.@nexprs $N d -> jN[d] = j_d
-                    sj = permutation_sign(jN)
-                    Base.Cartesian.@nexprs $N d -> bjN[d] = blN[j_d]
-
-                    me = OrbitalMatrixElement(copy(aiN), op, copy(bjN))
-                    iszero(me) && continue
-                    nbme = convert(NBodyMatrixElement, si*sj*Dkl*me)
-                    append!(terms, nbme.terms)
-                end
-            end
+        @anti_diagonal_loop $N j N begin
+            Base.Cartesian.@nexprs $N d -> jN[d] = j_d
+            fun(permutation_sign(jN), b[[jN...]])
         end
-
-        NBodyMatrixElement(terms)
     end
+end
+
+"""
+    NBodyMatrixElement(a, op, b, nzcofactors)
+
+Generate the matrix element of the N-body operator `op`, between the
+orbital sets `a` and `b`, where `nzcofactors` list all N-tuples for
+which the determinantal cofactor of the orbital overlap matrix is
+non-vanishing.
+"""
+function NBodyMatrixElement(a, op::NBodyOperator{N}, b, nzcofactors) where N
+    length(a) == length(b) ||
+        throw(DimensionMismatch("Different number of orbitals"))
+
+    terms = NBodyTerm[]
+
+    for (k,l,Dkl) in nzcofactors
+        iszero(Dkl) && continue
+
+        ak = a[k]
+        distinct_permutations(op, b[l]) do σ, bl
+            me = OrbitalMatrixElement(ak, op, bl)
+            iszero(me) && return
+            nbme = convert(NBodyMatrixElement, σ*Dkl*me)
+            append!(terms, nbme.terms)
+        end
+    end
+
+    NBodyMatrixElement(terms)
 end
 
 """
