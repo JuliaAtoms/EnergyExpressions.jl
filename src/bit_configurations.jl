@@ -340,7 +340,7 @@ function non_zero_cofactors(sd::BitConfigurations, N, i, j; verbosity=0)
 
     if verbosity > 0
         S = orbital_overlap_matrix(sd, i, j)
-        display(S)
+        @info "Overlap matrix:" S
         i == j && @show det(S)
     end
 
@@ -388,6 +388,8 @@ function non_zero_cofactors(sd::BitConfigurations, N, i, j; verbosity=0)
     if N == 0
         # As a special case, for the zero-body operator, return the
         # properly phased determinant of S2.
+        push!(ks, [])
+        push!(ls, [])
         push!(Ds, rs*det(S2))
         return ks, ls, Ds
     end
