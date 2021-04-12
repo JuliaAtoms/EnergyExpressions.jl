@@ -72,7 +72,7 @@ Generate the [`OrbitalEquation`](@ref) governing `orbital` by varying
 the [`EnergyExpression`](@ref) `E`, and storing common expressions in
 `integrals`.
 """
-function orbital_equation(E::EM, orbital::O, integrals::Vector) where {EM<:EnergyExpression,O}
+function orbital_equation(E::EM, orbital::O, integrals::KeyTracker) where {EM<:EnergyExpression,O}
     equation = diff(E, orbital)
 
     # Complementary orbital
@@ -89,7 +89,7 @@ function orbital_equation(E::EM, orbital::O, integrals::Vector) where {EM<:Energ
             source_orbital = subeq.orbital
             coeff = MCTerm(i,j,subeq.factor.coeff,
                            operator, source_orbital,
-                           map(factor -> pushifmissing!(integrals, factor),
+                           map(factor -> get!(integrals, factor),
                                subeq.factor.factors) |> Vector{Int})
 
             # If the operator isa ContractedOperator, an integral has
@@ -100,7 +100,7 @@ function orbital_equation(E::EM, orbital::O, integrals::Vector) where {EM<:Energ
             # which has to be reevaluated each time it is applied to
             # an orbital.
             integral = (operator isa ContractedOperator && comp_orbital ∉ operator) ?
-                pushifmissing!(integrals, operator) : 0
+                get!(integrals, operator) : 0
             terms[integral] = push!(get(terms, integral, MCTerm[]), coeff)
         end
     end
@@ -118,7 +118,42 @@ for efficient equation solving.
 """
 function Base.diff(E::EM, orbitals::VO; verbosity=0) where {EM<:EnergyExpression, O,VO<:AbstractVector{O}}
     # Vector of common integrals
-    integrals = []
+    integrals = KeyTracker(LockedDict{Any,Int}())
+
+    norb = length(orbitals)
+    p = if verbosity > 0
+        @info "Deriving equations for $(norb) orbitals"
+        Progress(norb)
+    end
+
+    equations = [OrbitalEquation[] for i in 1:Threads.nthreads()]
+    for i = 1:length(orbitals)
+        tid = Threads.threadid()
+        orbital = orbitals[i]
+        eq = orbital_equation(E, orbital, integrals)
+        isnothing(p) || ProgressMeter.next!(p)
+        push!(equations[tid], eq)
+    end
+    equations = reduce(vcat, equations)
+
+    MCEquationSystem(equations, keys(integrals))
+end
+
+"""
+    diff(fun!, energy_expression, orbitals)
+
+Derive the integro-differential equations for all `orbitals`, from
+`energy_expression`; after each orbital equation has been generated
+`fun!` is applied to `energy_expression` with the current orbital as
+argument, which allows gradual modification of the energy
+expression. Returns a [`MCEquationSystem`](@ref), that gathers
+information on which integrals are common to all equations, for
+efficient equation solving.
+
+"""
+function Base.diff(fun!::Function, E::EM, orbitals::VO; verbosity=0) where {EM<:EnergyExpression, O,VO<:AbstractVector{O}}
+    # Vector of common integrals
+    integrals = KeyTracker{Any}()
 
     norb = length(orbitals)
     p = if verbosity > 0
@@ -127,9 +162,10 @@ function Base.diff(E::EM, orbitals::VO; verbosity=0) where {EM<:EnergyExpression
     end
     equations = map(orbitals) do orbital
         eq = orbital_equation(E, orbital, integrals)
+        fun!(E, orbital)
         isnothing(p) || ProgressMeter.next!(p)
         eq
     end
 
-    MCEquationSystem(equations, integrals)
+    MCEquationSystem(equations, keys(integrals))
 end

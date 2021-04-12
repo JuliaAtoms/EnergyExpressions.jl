@@ -26,6 +26,18 @@ end
 
 # * Orbitals
 
+"""
+    Orbitals(orbitals, overlaps, has_overlap, non_orthogonalities)
+
+Structure storing a common set of `orbitals`, along with possible
+`overlaps` between them, in case of non-orthogonalities. `has_overlap`
+is a boolean matrix indicates if a pair of orbitals have overlap,
+either due to non-orthogonality or if they are the same
+orbital. `non_orthogonalities` is a boolean vector that indicates if a
+specific orbital is non-orthogonal to _any_ other orbital in the set
+of orbitals. This structure is used internally by
+[`BitConfigurations`](@ref).
+"""
 struct Orbitals{O,Overlaps,HasOverlap,NonOrthogonalities}
     orbitals::Vector{O}
     overlaps::Overlaps
@@ -340,7 +352,7 @@ function non_zero_cofactors(sd::BitConfigurations, N, i, j; verbosity=0)
 
     if verbosity > 0
         S = orbital_overlap_matrix(sd, i, j)
-        display(S)
+        @info "Overlap matrix:" S
         i == j && @show det(S)
     end
 
@@ -388,6 +400,8 @@ function non_zero_cofactors(sd::BitConfigurations, N, i, j; verbosity=0)
     if N == 0
         # As a special case, for the zero-body operator, return the
         # properly phased determinant of S2.
+        push!(ks, [])
+        push!(ls, [])
         push!(Ds, rs*det(S2))
         return ks, ls, Ds
     end
