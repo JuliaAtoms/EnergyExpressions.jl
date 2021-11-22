@@ -28,6 +28,48 @@ function Base.show(io::IO, eq::NBodyEquation)
     !(eq.orbital isa Conjugate) && write(io, "|$(eq.orbital)⟩")
 end
 
+function Base.:(+)(a::NBodyEquation, b::NBodyEquation)
+    factor = a.factor + b.factor
+    if a.orbital == b.orbital && a.operator == b.operator && factor isa NBodyTerm
+        NBodyEquation(a.orbital, a.operator, factor)
+    else
+        LinearCombinationEquation([a,b])
+    end
+end
+
+function add_equations!(equations::AbstractVector{<:NBodyEquation}, eq::NBodyEquation)
+    i = findfirst(a -> a.orbital == eq.orbital && a.operator == eq.operator,
+                  equations)
+    if isnothing(i)
+        push!(equations, eq)
+    else
+        factor = eq.factor+equations[i].factor
+        if factor isa NBodyTerm
+            # If the resulting multiplicative factor is something
+            # simple, like a plain number, we can combine the terms
+            # into one.
+            equations[i] = NBodyEquation(eq.orbital, eq.operator, factor)
+        else
+            # However, if we end with something complicated —
+            # e.g. variation of R⁰(a,a;a,b)⟨a|a⟩ + R⁰(a,a;a,b) with
+            # respect to ⟨a| would yield five terms
+            #
+            # + ⟨a|a⟩r⁻¹×Y⁰(a,b)|a⟩ + ⟨a|a⟩r⁻¹×Y⁰(a,a)|b⟩ + R⁰(a,a;a,b)𝐈₁|a⟩ + 1r⁻¹×Y⁰(a,b)|a⟩ + 1r⁻¹×Y⁰(a,a)|b⟩,
+            #
+            # two of which we could group as
+            #
+            # + 1r⁻¹×Y⁰(a,b)|a⟩ (1 + ⟨a|a⟩)
+            #
+            # — we simply treat them as separate terms. We do this
+            # because it's easier to implement, but also because we
+            # probably want to handle the terms separately (or do
+            # we?). In any case, this should be pretty rare.
+            push!(equations, eq)
+        end
+    end
+    equations
+end
+
 """
     LinearCombinationEquation(equations)
 
@@ -57,6 +99,20 @@ function Base.show(io::IO, eq::LinearCombinationEquation)
         eq.equations
     end
     write(io, join(string.(terms), " "))
+end
+
+function Base.:(*)(eq::LinearCombinationEquation, factor::NBodyTerm)
+    equations = [NBodyEquation(nbe.orbital, nbe.operator, nbe.factor*factor)
+                 for nbe in eq.equations]
+    LinearCombinationEquation(equations)
+end
+
+Base.:(+)(a::LinearCombinationEquation, b::NBodyEquation) =
+    LinearCombinationEquation(add_equations!(copy(a.equations), b))
+
+function add_equations!(equations::AbstractVector{<:NBodyEquation}, eqs::LinearCombinationEquation)
+    foreach(Base.Fix1(add_equations!, equations), eqs.equations)
+    equations
 end
 
 export NBodyEquation, LinearCombinationEquation

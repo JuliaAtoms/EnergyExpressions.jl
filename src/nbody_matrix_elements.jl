@@ -115,12 +115,12 @@ Contract `ome` over all coordinates `i...`. `length(i)` cannot be
 larger than `N`.
 """
 function contract(ome::OrbitalMatrixElement{N,A,O,B}, i::Integer...) where {N,A,O,B}
-    Q = N - length(i)
+    Q = length(i)
 
-    Q > 0 ||
+    Q ≤ N ||
         throw(ArgumentError("Cannot contract $(N)-body orbital matrix element over $(length(i)) coordinates"))
 
-    Q == N && return ome.o
+    iszero(Q) && return ome.o
 
     ContractedOperator(NTuple{Q,A}(ome.a[ii] for ii in i),
                        ome.o,
@@ -296,8 +296,13 @@ Base.:(+)(a::NBodyMatrixElement, b::NBodyTerm) =
 Base.:(+)(a::NBodyTerm, b::NBodyMatrixElement) =
     NBodyMatrixElement(vcat(a, b.terms))
 
-Base.:(+)(a::NBodyTerm, b::NBodyTerm) =
-    NBodyMatrixElement([a, b])
+function Base.:(+)(a::NBodyTerm, b::NBodyTerm)
+    if a.factors == b.factors
+        NBodyTerm(a.factors, a.coeff+b.coeff)
+    else
+        NBodyMatrixElement([a, b])
+    end
+end
 
 Base.:(*)(a::NBodyMatrixElement, b::Union{Number,NBodyTerm,NBodyTermFactor}) =
     NBodyMatrixElement([b*t for t in a.terms])
