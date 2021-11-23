@@ -14,7 +14,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 UnicodeFun = "1cfade01-22cf-5700-b092-accc4b62d6e1"
 
 [compat]
-AtomicLevels = "0.1"
+AtomicLevels = "0.1.7"
 Combinatorics = "1"
 Formatting = "0.4"
 ProgressMeter = "1.5"

@@ -556,7 +556,7 @@ orbital sets `a` and `b`, where `nzcofactors` list all N-tuples for
 which the determinantal cofactor of the orbital overlap matrix is
 non-vanishing.
 """
-function NBodyMatrixElement(a, op::NBodyOperator{N}, b, nzcofactors) where N
+function NBodyMatrixElement(a::SlaterDeterminant, op::NBodyOperator{N}, b::SlaterDeterminant, nzcofactors) where N
     length(a) == length(b) ||
         throw(DimensionMismatch("Different number of orbitals"))
 
@@ -597,13 +597,13 @@ end
     NBodyMatrixElement(a, op, b, overlap)
 
 Generate the matrix element of `op`, a linear combination of
-[`NBodyOperator`](@ref), between the Slater determinants `a` and `b`,
-according to the Löwdin rules. The matrix `overlap` contains the
-mutual overlaps between all single-particle orbitals in the Slater
-determinants. If the orbitals are all orthogonal, the Löwdin rules
-collapse to the Slater–Condon rules.
+[`NBodyOperator`](@ref), between the configurations (e.g. Slater
+determinants) `a` and `b`, according to the Löwdin rules. The matrix
+`overlap` contains the mutual overlaps between all single-particle
+orbitals in the Slater determinants. If the orbitals are all
+orthogonal, the Löwdin rules collapse to the Slater–Condon rules.
 """
-function NBodyMatrixElement(a::SlaterDeterminant, op::LinearCombinationOperator, b::SlaterDeterminant, overlap)
+function NBodyMatrixElement(a::Cfg, op::LinearCombinationOperator, b::Cfg, overlap) where Cfg
     terms = NBodyTerm[]
     for (o,coeff) in op.operators
         iszero(coeff) && continue
@@ -629,10 +629,10 @@ end
 
 # * Overlap matrices
 
-function overlap_matrix!(S::AbstractSparseMatrix{<:NBodyTerm}, a::SlaterDeterminant, b::SlaterDeterminant)
-    length(a) == length(b) || throw(ArgumentError("Configurations not of same length: $a & $b"))
-    for (i,ao) in enumerate(a.orbitals)
-        for (j,bo) in enumerate(b.orbitals)
+function overlap_matrix!(S::AbstractSparseMatrix{<:NBodyTerm}, a::Cfg, b::Cfg) where Cfg
+    num_electrons(a) == num_electrons(b) || throw(ArgumentError("Configurations not of same length: $a & $b"))
+    for (i,ao) in enumerate(orbitals(a))
+        for (j,bo) in enumerate(orbitals(b))
             if ao == bo
                 S[i,j] = one(NBodyTerm)
             end
@@ -643,12 +643,12 @@ function overlap_matrix!(S::AbstractSparseMatrix{<:NBodyTerm}, a::SlaterDetermin
 end
 
 """
-    overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant[, overlaps=[]])
+    overlap_matrix(a::Cfg, b::Cfg[, overlaps=[]]) where Cfg
 
 Generate the single-particle orbital overlap matrix, between the
-orbitals in the Slater determinants `a` and `b`. All orbitals are
-assumed to be orthogonal, except for those which are given in
-`overlaps`.
+orbitals in the configurations (e.g. Slater determinants) `a` and
+`b`. All orbitals are assumed to be orthogonal, except for those which
+are given in `overlaps`.
 
 # Examples
 
@@ -691,15 +691,16 @@ julia> overlap_matrix(sa, sa, [OrbitalOverlap(:k̃,:k̃)])
 ```
 Notice that this overlap matrix was calculated between the Slater determinant `sa` and itself.
 """
-function overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant, overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[])
-    m = length(a)
-    S = spzeros(NBodyTerm, m, m)
+function overlap_matrix(a::Cfg, b::Cfg, overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]) where Cfg
+    m = length(orbitals(a))
+    n = length(orbitals(b))
+    S = spzeros(NBodyTerm, m, n)
     overlap_matrix!(S, a, b)
 
     add_overlap! = (oa, ob) -> begin
-        i = findfirst(isequal(oa), a.orbitals)
+        i = findfirst(isequal(oa), orbitals(a))
         isnothing(i) && return
-        j = findfirst(isequal(ob), b.orbitals)
+        j = findfirst(isequal(ob), orbitals(b))
         isnothing(j) && return
         S[i,j] = OrbitalOverlap(oa,ob)
     end
@@ -728,13 +729,13 @@ const EnergyExpression = AbstractMatrix{NBodyMatrixElement}
     Matrix(a, op::QuantumOperator, b[, overlaps])
 
 Generate the matrix corresponding to the quantum operator `op`,
-between the [`SlaterDeterminant`](@ref)s `a` and `b`, i.e
-`⟨a|op|b⟩`. It is possible to specify non-orthogonalities between
-single-particle orbitals in `overlaps`.
+between the configurations (e.g. [`SlaterDeterminant`](@ref)s) `a` and
+`b`, i.e `⟨a|op|b⟩`. It is possible to specify non-orthogonalities
+between single-particle orbitals in `overlaps`.
 """
-function Base.Matrix(as::VSD, op::QuantumOperator, bs::VSD,
+function Base.Matrix(as::CFGs, op::QuantumOperator, bs::CFGs,
                      overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[];
-                     verbosity=0) where {VSD<:AbstractVector{<:SlaterDeterminant}}
+                     verbosity=0) where {CFGs<:AbstractVector}
     m,n = length(as),length(bs)
 
     I = [Int[] for i in 1:Threads.nthreads()]
@@ -779,9 +780,9 @@ Generate the matrix corresponding to the quantum operator `op`,
 between the different `slater_determinants`. It is possible to specify
 non-orthogonalities between single-particle orbitals in `overlaps`.
 """
-Base.Matrix(op::QuantumOperator, slater_determinants::VSD,
-            overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]) where {VSD<:AbstractVector{<:SlaterDeterminant}} =
-                Matrix(slater_determinants, op, slater_determinants, overlaps)
+Base.Matrix(op::QuantumOperator, cfgs::CFGs,
+            overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]; kwargs...) where {CFGs<:AbstractVector} =
+                Matrix(cfgs, op, cfgs, overlaps; kwargs...)
 
 function transform(fun::Function, E::EnergyExpression; verbosity=0)
     m,n = size(E)
