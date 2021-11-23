@@ -16,10 +16,15 @@ struct NBodyEquation{QO<:OneBodyOperator,O}
         new{QO,O}(orbital, operator, factor)
 end
 
-Base.iszero(::NBodyEquation) = false
+Base.iszero(nbe::NBodyEquation) = iszero(nbe.factor)
+Base.zero(::Type{NBodyEquation}) = NBodyEquation(Symbol(:vac), IdentityOperator{1}(), zero(NBodyTerm))
 
-Base.:(*)(nbe::NBodyEquation, factor::NBodyTerm) =
+Base.:(*)(nbe::NBodyEquation, factor) =
     NBodyEquation(nbe.orbital, nbe.operator, nbe.factor*factor)
+
+Base.:(*)(factor, nbe::NBodyEquation) = nbe*factor
+
+Base.:(-)(nbe::NBodyEquation) = -1*nbe
 
 function Base.show(io::IO, eq::NBodyEquation)
     show(io, eq.factor, show_sign=true)
@@ -33,9 +38,12 @@ function Base.:(+)(a::NBodyEquation, b::NBodyEquation)
     if a.orbital == b.orbital && a.operator == b.operator && factor isa NBodyTerm
         NBodyEquation(a.orbital, a.operator, factor)
     else
-        LinearCombinationEquation([a,b])
+        LinearCombinationEquation([a]) + b
     end
 end
+
+Base.:(==)(a::NBodyEquation, b::NBodyEquation) =
+    a.orbital == b.orbital && a.operator == b.operator && a.factor == b.factor
 
 function add_equations!(equations::AbstractVector{<:NBodyEquation}, eq::NBodyEquation)
     i = findfirst(a -> a.orbital == eq.orbital && a.operator == eq.operator,
@@ -44,7 +52,9 @@ function add_equations!(equations::AbstractVector{<:NBodyEquation}, eq::NBodyEqu
         push!(equations, eq)
     else
         factor = eq.factor+equations[i].factor
-        if factor isa NBodyTerm
+        if iszero(factor)
+            deleteat!(equations, i)
+        elseif factor isa NBodyTerm
             # If the resulting multiplicative factor is something
             # simple, like a plain number, we can combine the terms
             # into one.
@@ -83,8 +93,7 @@ end
 
 Base.zero(::Type{LinearCombinationEquation}) = LinearCombinationEquation(NBodyEquation[])
 Base.zero(::LinearCombinationEquation) = zero(LinearCombinationEquation)
-Base.iszero(eq::LinearCombinationEquation) =
-    isempty(eq.equations)
+Base.iszero(eq::LinearCombinationEquation) = isempty(eq.equations) || all(iszero, eq.equations)
 
 function Base.show(io::IO, eq::LinearCombinationEquation)
     if iszero(eq)
@@ -101,18 +110,66 @@ function Base.show(io::IO, eq::LinearCombinationEquation)
     write(io, join(string.(terms), " "))
 end
 
-function Base.:(*)(eq::LinearCombinationEquation, factor::NBodyTerm)
+function Base.:(*)(eq::LinearCombinationEquation, factor)
     equations = [NBodyEquation(nbe.orbital, nbe.operator, nbe.factor*factor)
                  for nbe in eq.equations]
     LinearCombinationEquation(equations)
 end
 
-Base.:(+)(a::LinearCombinationEquation, b::NBodyEquation) =
-    LinearCombinationEquation(add_equations!(copy(a.equations), b))
+Base.:(*)(factor, eq::LinearCombinationEquation) = eq*factor
+Base.:(-)(eq::LinearCombinationEquation) = -1*eq
+
+function Base.:(+)(a::LinearCombinationEquation, b::NBodyEquation)
+    T = promote_type(eltype(a.equations), typeof(b))
+    LinearCombinationEquation(add_equations!(Vector{T}(copy(a.equations)), b))
+end
+
+Base.:(+)(a::NBodyEquation, b::LinearCombinationEquation) = b + a
 
 function add_equations!(equations::AbstractVector{<:NBodyEquation}, eqs::LinearCombinationEquation)
     foreach(Base.Fix1(add_equations!, equations), eqs.equations)
     equations
 end
+
+function Base.:(+)(a::LinearCombinationEquation, b::LinearCombinationEquation)
+    T = promote_type(eltype(a.equations), eltype(b.equations))
+    LinearCombinationEquation(add_equations!(Vector{T}(copy(a.equations)), b))
+end
+
+Base.:(==)(a::LinearCombinationEquation, b::LinearCombinationEquation) =
+    compare_vectors(a.equations, b.equations)
+
+function Base.:(==)(a::LinearCombinationEquation, b::NBodyEquation)
+    length(a.equations) == 0 && iszero(b) && return true
+    length(a.equations) == 1 || return false
+    a.equations[1] == b
+end
+
+Base.:(==)(a::NBodyEquation, b::LinearCombinationEquation) = (b == a)
+
+function Base.:(-)(a::LinearCombinationEquation, b::LinearCombinationEquation)
+    iszero(b) && return a
+    iszero(a) && return -b
+    eqs = Vector{NBodyEquation}(copy(a.equations))
+    for e in b.equations
+        i = findfirst(ae -> ae.orbital == e.orbital && ae.operator == e.operator, eqs)
+        if isnothing(i)
+            push!(eqs, -e)
+        else
+            factor = eqs[i].factor - e.factor
+            if iszero(factor)
+                deleteat!(eqs, i)
+            elseif factor isa NBodyTerm
+                eqs[i] = NBodyEquation(e.orbital, e.operator, factor)
+            else
+                push!(eqs, -e)
+            end
+        end
+    end
+    LinearCombinationEquation(eqs)
+end
+
+Base.:(-)(a::LinearCombinationEquation, b::NBodyEquation) = a - LinearCombinationEquation([b])
+Base.:(-)(a::NBodyEquation, b::LinearCombinationEquation) = LinearCombinationEquation([a]) - b
 
 export NBodyEquation, LinearCombinationEquation

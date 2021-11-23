@@ -172,6 +172,9 @@ struct NBodyTerm
     coeff
 end
 
+Base.:(==)(a::NBodyTerm, b::NBodyTerm) =
+    compare_vectors(a.factors, b.factors) && a.coeff == b.coeff
+
 Base.one(::Type{NBodyTerm}) = NBodyTerm(NBodyTermFactor[], 1)
 Base.one(::NBodyTerm) = one(NBodyTerm)
 Base.isone(term::NBodyTerm) = isempty(term.factors) && isone(term.coeff)
@@ -195,6 +198,8 @@ Base.:(*)(a::NBodyTerm, b::Number) =
 
 Base.:(*)(a::Number, b::NBodyTerm) =
     NBodyTerm(b.factors, a*b.coeff)
+
+Base.:(-)(f::NBodyTerm) = (-1)*f
 
 Base.:(*)(a::NBodyTerm, b::NBodyTermFactor) =
     NBodyTerm(vcat(a.factors, b), a.coeff)
@@ -303,6 +308,8 @@ function Base.:(+)(a::NBodyTerm, b::NBodyTerm)
         NBodyMatrixElement([a, b])
     end
 end
+
+Base.:(-)(a::NBodyTerm, b::NBodyTerm) = a + (-b)
 
 Base.:(*)(a::NBodyMatrixElement, b::Union{Number,NBodyTerm,NBodyTermFactor}) =
     NBodyMatrixElement([b*t for t in a.terms])

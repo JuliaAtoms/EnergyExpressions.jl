@@ -9,3 +9,5 @@ include("loop_macros.jl")
 include("minors.jl")
 
 include("common_operators.jl")
+
+include("variations.jl")
