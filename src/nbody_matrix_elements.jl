@@ -587,7 +587,7 @@ single-particle orbitals in the Slater determinants. If the orbitals
 are all orthogonal, the Löwdin rules collapse to the Slater–Condon
 rules.
 """
-function NBodyMatrixElement(a::SlaterDeterminant, op::NBodyOperator{N}, b::SlaterDeterminant, overlap) where N
+function NBodyMatrixElement(a::SlaterDeterminant, op::NBodyOperator{N}, b::SlaterDeterminant, overlap::AbstractMatrix) where N
     ks,ls = nonzero_minors(N, overlap)
     nzcofactors = zip(ks, ls, (cofactor(k, l, overlap) for (k,l) in zip(ks,ls)))
     NBodyMatrixElement(a.orbitals, op, b.orbitals, nzcofactors)
