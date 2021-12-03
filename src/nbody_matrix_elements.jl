@@ -556,7 +556,7 @@ orbital sets `a` and `b`, where `nzcofactors` list all N-tuples for
 which the determinantal cofactor of the orbital overlap matrix is
 non-vanishing.
 """
-function NBodyMatrixElement(a::SlaterDeterminant, op::NBodyOperator{N}, b::SlaterDeterminant, nzcofactors) where N
+function NBodyMatrixElement(a, op::NBodyOperator{N}, b, nzcofactors) where N
     length(a) == length(b) ||
         throw(DimensionMismatch("Different number of orbitals"))
 
