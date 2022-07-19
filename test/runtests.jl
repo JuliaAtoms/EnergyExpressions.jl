@@ -3,6 +3,8 @@ using AtomicLevels
 using LinearAlgebra
 using Test
 
+include("locked_dict.jl")
+
 include("conjugate_orbitals.jl")
 include("bit_configurations.jl")
 include("loop_macros.jl")
