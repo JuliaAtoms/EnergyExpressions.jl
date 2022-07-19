@@ -3,6 +3,7 @@ using AtomicLevels
 using LinearAlgebra
 using Test
 
+include("key_tracker.jl")
 include("locked_dict.jl")
 
 include("conjugate_orbitals.jl")
