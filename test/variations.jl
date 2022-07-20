@@ -1,27 +1,3 @@
-ome(a, op, b) = EnergyExpressions.OrbitalMatrixElement(a, op, b)
-ome(a::Symbol, op, b::Symbol) = ome([a], op, [b])
-c(a, op, b) = ContractedOperator(Tuple(e for e in a), op, Tuple(e for e in b))
-c(a::Symbol, op, b::Symbol) = c([a], op, [b])
-eq(orb, op, args...) = NBodyEquation(orb, op, args...)
-ceq(orb, op, args...) = eq(Conjugate(orb), op, args...)
-ov(a,b) = OrbitalOverlap(a,b)
-nbt(args...) = EnergyExpressions.NBodyTerm([args...], 1)
-
-function test_variations_equal(E, orbital, b)
-    a = diff(E, orbital)
-    a == b || @error "When varying, expected equality between" E a b a-b
-    @test a == b
-    b == a || @error "When varying, expected equality between" E b a b-a
-    @test b == a
-end
-
-function test_equations_equal(a, b)
-    a == b || @error "Expected equality between" a b a-b
-    @test a == b
-    b == a || @error "Expected equality between" b a b-a
-    @test b == a
-end
-
 @testset "Calculus-of-variations" begin
     h = FieldFreeOneBodyHamiltonian()
     g = CoulombInteraction()

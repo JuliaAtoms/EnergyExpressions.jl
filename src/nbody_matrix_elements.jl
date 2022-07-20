@@ -91,6 +91,13 @@ struct OrbitalMatrixElement{N,A,O<:NBodyOperator{N},B} <: NBodyTermFactor
     a::Vector{A}
     o::O
     b::Vector{B}
+    function OrbitalMatrixElement(a::Vector{A}, o::O, b::Vector{B}) where {N,A,O<:NBodyOperator{N},B}
+        la = length(a)
+        lb = length(b)
+        la == lb == N ||
+            throw(ArgumentError("Number of orbitals $(la) and $(lb) do not agree with N = $N"))
+        new{N,A,O,B}(a, o, b)
+    end
 end
 
 Base.iszero(::OrbitalMatrixElement) = false
@@ -210,6 +217,15 @@ Base.:(*)(a::NBodyTermFactor, b::NBodyTerm) =
 Base.:(*)(a::NBodyTermFactor, b::NBodyTermFactor) =
     NBodyTerm([a, b], 1)
 
+Base.:(+)(a::NBodyTermFactor, b::NBodyTermFactor) =
+    convert(NBodyTerm, a) + convert(NBodyTerm, b)
+
+Base.:(+)(a::NBodyTerm, b::NBodyTermFactor) =
+    a + convert(NBodyTerm, b)
+
+Base.:(+)(a::NBodyTermFactor, b::NBodyTerm) =
+    convert(NBodyTerm, a) + b
+
 Base.:(*)(a::NBodyTermFactor, b::Number) =
     NBodyTerm([a], b)
 
@@ -301,6 +317,12 @@ Base.:(+)(a::NBodyMatrixElement, b::NBodyTerm) =
 Base.:(+)(a::NBodyTerm, b::NBodyMatrixElement) =
     NBodyMatrixElement(vcat(a, b.terms))
 
+Base.:(+)(a::NBodyMatrixElement, b::NBodyTermFactor) =
+    a + convert(NBodyTerm, b)
+
+Base.:(+)(a::NBodyTermFactor, b::NBodyMatrixElement) =
+    convert(NBodyTerm, a) + b
+
 function Base.:(+)(a::NBodyTerm, b::NBodyTerm)
     if a.factors == b.factors
         NBodyTerm(a.factors, a.coeff+b.coeff)
@@ -316,6 +338,12 @@ Base.:(*)(a::NBodyMatrixElement, b::Union{Number,NBodyTerm,NBodyTermFactor}) =
 
 Base.:(*)(a::Union{Number,NBodyTerm,NBodyTermFactor}, b::NBodyMatrixElement) =
     NBodyMatrixElement([a*t for t in b.terms])
+
+Base.:(-)(f::NBodyMatrixElement) = (-1)*f
+
+Base.:(-)(a::Union{NBodyTerm,NBodyTermFactor,NBodyMatrixElement},
+          b::Union{NBodyTerm,NBodyTermFactor,NBodyMatrixElement}) =
+              a + (-b)
 
 Base.convert(::Type{T}, nbme::NBodyMatrixElement) where {T<:Number} =
     sum(t -> convert(T, t), nbme.terms)
@@ -377,6 +405,12 @@ comparison is performed by [`compare`](@ref).
 """
 Base.:(==)(a::NBodyMatrixElement, b::NBodyMatrixElement) =
     compare(a, ==, b)
+
+Base.:(==)(a::NBodyMatrixElement, b::NBodyTerm) =
+    a == convert(NBodyMatrixElement, b)
+
+Base.:(==)(a::NBodyTerm, b::NBodyMatrixElement) =
+    convert(NBodyMatrixElement, a) == b
 
 """
     Base.isapprox(a::NBodyMatrixElement, b::NBodyMatrixElement; kwargs...)

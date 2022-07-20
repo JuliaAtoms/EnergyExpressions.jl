@@ -21,3 +21,9 @@ ProgressMeter = "1.5"
 UnicodeFun = "0.4"
 julia = "1.5"
 
+[extras]
+DeepDiffs = "ab62b9b5-e342-54a8-a765-a90f495de1a6"
+Suppressor = "fd094767-a336-5f1f-9728-57cf17d0bbfb"
+
+[targets]
+test = ["DeepDiffs", "Suppressor"]

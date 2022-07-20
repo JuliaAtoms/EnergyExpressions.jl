@@ -73,7 +73,14 @@ end
 
 Base.length(orbitals::Orbitals) = length(orbitals.orbitals)
 Base.eachindex(orbitals::Orbitals) = eachindex(orbitals.orbitals)
+Base.iterate(orbitals::Orbitals, args...) = iterate(orbitals.orbitals, args...)
 Base.getindex(orbitals::Orbitals, i) = orbitals.orbitals[i]
+
+Base.:(==)(a::Orbitals, b::Orbitals) =
+    a.orbitals == b.orbitals &&
+    a.overlaps == b.overlaps &&
+    a.has_overlap == b.has_overlap &&
+    a.non_orthogonalities == b.non_orthogonalities
 
 # * BitConfiguration
 
@@ -189,9 +196,8 @@ end
 get_orbitals(c::Configuration) = c.orbitals
 get_orbitals(v::AbstractVector) = v
 
-function BitConfigurations(configurations::AbstractVector,
-                           overlaps=OrbitalOverlap[])
-    orbitals = unique(reduce(vcat, map(get_orbitals, configurations)))
+function BitConfigurations(orbitals::Orbitals,
+                           configurations::AbstractVector)
     orb_map = Dict(o => i for (i,o) in enumerate(orbitals))
     C = falses(length(orbitals), length(configurations))
     p = Progress(prod(size(C)))
@@ -201,7 +207,16 @@ function BitConfigurations(configurations::AbstractVector,
             ProgressMeter.next!(p)
         end
     end
-    BitConfigurations(Orbitals(orbitals, overlaps), C)
+    BitConfigurations(orbitals, C)
+end
+
+function BitConfigurations(configurations::AbstractVector,
+                           overlaps=OrbitalOverlap[])
+    orbitals = (!isempty(configurations) ?
+        unique(reduce(vcat, map(get_orbitals, configurations))) :
+        [])
+    BitConfigurations(Orbitals(orbitals, overlaps),
+                      configurations)
 end
 
 Base.getindex(m::BitConfigurations, i::Integer) = BitConfiguration(m.orbitals, m.configurations[:,i])
@@ -209,11 +224,16 @@ Base.getindex(m::BitConfigurations, i) = BitConfigurations(m.orbitals, m.configu
 Base.length(m::BitConfigurations) = size(m.configurations, 2)
 Base.isempty(m::BitConfigurations) = length(m) == 0
 
+Base.:(==)(a::BitConfigurations, b::BitConfigurations) =
+    a.orbitals == b.orbitals &&
+    a.configurations == b.configurations
+
 function AtomicLevels.core(m::BitConfigurations)
     isempty(m) && return 1:0
     # Find all initial orbitals which are occupied in all
     # configurations.
-    i = findfirst(.!vec(reduce(&, m.configurations, dims=2))) - 1
+    i = something(findfirst(.!vec(reduce(&, m.configurations, dims=2))),
+                  length(m.orbitals)+1) - 1
     sel = 1:i
     if i > 0 && !isnothing(m.orbitals.overlaps)
         # We require that the core orbitals are all canonical ones,
@@ -244,7 +264,7 @@ function Base.show(io::IO, ::MIME"text/plain", m::BitConfigurations)
     fmt = FormatExpr("{1:$(length(digits(ncfg)))d}: ")
     printfmt(io, fmt, 1)
     ref = m[1]
-    sel = (isempty(c) ? 0 : c[end])+1:length(m.orbitals)
+    sel = (isempty(c) || length(m) == 1 ? 0 : c[end])+1:length(m.orbitals)
     show(io, ref, sel)
     show_conf = i -> begin
         println(io)
@@ -256,10 +276,9 @@ function Base.show(io::IO, ::MIME"text/plain", m::BitConfigurations)
         write(io, join(string.(m.orbitals[p]), " "))
     end
     screen_rows = fld(max(3,first(displaysize(io))-6), 2)
-    ncfg = length(m)
     first_block = 2:min(ncfg, screen_rows)
     second_block = max(1,ncfg - screen_rows):ncfg
-    if isempty((2:first_block[end]+2) ∩ second_block)
+    if !isempty(first_block) && isempty((2:first_block[end]+2) ∩ second_block)
         foreach(show_conf, first_block)
         print(io, "\n⋮")
         foreach(show_conf, second_block)
@@ -352,7 +371,9 @@ function non_zero_cofactors(sd::BitConfigurations, N, i, j; verbosity=0)
 
     if verbosity > 0
         S = orbital_overlap_matrix(sd, i, j)
-        @info "Overlap matrix:" S
+        println("Overlap matrix:")
+        show(stdout, "text/plain", S)
+        println()
         i == j && @show det(S)
     end
 
@@ -362,6 +383,7 @@ function non_zero_cofactors(sd::BitConfigurations, N, i, j; verbosity=0)
     common = a & b
     # For these, we may employ Slater–Condon rules
     canonical_orbitals = findall(map(&, common, .~v))
+    verbosity > 1 && @show canonical_orbitals
 
     # For these, we have to apply the Löwdin rules, but we can
     # precompute the determinant of this subspace once, for all those
@@ -377,9 +399,11 @@ function non_zero_cofactors(sd::BitConfigurations, N, i, j; verbosity=0)
     S2 = sd.orbitals.overlaps[anon, bnon]
     non2 = sd.orbitals.has_overlap[anon, bnon]
     if verbosity > 0
-        display(S2)
-        display(sparse(non2))
-        isempty(S2) && @info "We're essentially in Slater–Condon land"
+        show(stdout, "text/plain", S2)
+        println()
+        show(stdout, "text/plain", sparse(non2))
+        println()
+        isempty(S2) && println("We're essentially in Slater–Condon land")
     end
 
     # Minimum order of Γ⁽ᵖ⁾
@@ -388,11 +412,11 @@ function non_zero_cofactors(sd::BitConfigurations, N, i, j; verbosity=0)
     pmin = max(prmin, pcmin)
 
     if N < pmin
-        verbosity > 0 && @info "Too many vanishing rows/columns"
+        verbosity > 0 && println("Too many vanishing rows/columns")
         return ks, ls, Ds
     end
 
-    verbosity > 0 && @info "We need to strike out $(pmin)..$(min(N, length(anon))) rows/columns from S2"
+    verbosity > 0 && println("We need to strike out $(pmin)..$(min(N, length(anon))) rows/columns from S2")
 
     rs = relative_sign(a, b, h, p, verbosity=verbosity)
     verbosity > 0 && @show rs
@@ -407,7 +431,7 @@ function non_zero_cofactors(sd::BitConfigurations, N, i, j; verbosity=0)
     end
 
     for n = pmin:min(N, length(anon))
-        # n is many rows/columns we're striking out from S2;
+        # n is how many rows/columns we're striking out from S2;
         # consequently m is how many rows/columns we have to strike
         # out from S1
         m = N - n

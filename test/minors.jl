@@ -1,7 +1,3 @@
-import EnergyExpressions: @above_diagonal_loop, cofactor, nonzero_minors, find_diagonal_blocks, NBodyMatrixElement
-using SparseArrays
-using Combinatorics
-
 # Used to generate reference data to test the linear complexity
 # algorithm against; the naïve algorithm is correct, but is of
 # factorial complexity and cannot be used for more than ~20 orbitals.
