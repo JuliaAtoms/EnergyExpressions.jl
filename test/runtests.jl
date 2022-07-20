@@ -19,6 +19,7 @@ include("minors.jl")
 include("slater_determinants.jl")
 
 include("show_coefficients.jl")
+include("nbody_operators.jl")
 include("common_operators.jl")
 
 include("variations.jl")

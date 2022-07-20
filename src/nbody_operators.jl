@@ -190,8 +190,7 @@ Base.in(corbital::Conjugate{O}, co::ContractedOperator) where O = corbital.orbit
 
 Contract the `orbital_matrix_element` over all coordinates `i...`.
 """
-contract(ome, i::Integer...) =
-    throw(ArgumentError("`contract` not implemented for $(ome)"))
+function contract end
 
 """
     complement(N, i...)
