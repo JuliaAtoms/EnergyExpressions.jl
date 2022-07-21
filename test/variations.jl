@@ -113,4 +113,31 @@
         test_variations_equal(e1, 1, diff(e2, 1))
         test_variations_equal(e1, 2, diff(e2, 2))
     end
+
+    @testset "Variation of energy expression" begin
+        g = CoulombInteraction()
+        F12 = ome([1,2],g,[1,2])
+        F34 = ome([3,4],g,[3,4])
+        s12 = ov(1,2)
+        s34 = ov(3,4)
+        E = sparse(NBodyMatrixElement[F12*s34 0; 0 F34*s12])
+
+        z = zero(LinearCombinationEquation)
+
+        @test diff(E, Conjugate(1)) ==
+            LinearCombinationEquation[diff(F12, Conjugate(1))*s34 z
+                                      z F34*diff(s12, Conjugate(1))]
+
+        @test diff(E, 1) ==
+            LinearCombinationEquation[diff(F12, 1)*s34 z
+                                      z z]
+
+        @test diff(E, Conjugate(3)) ==
+            LinearCombinationEquation[F12*diff(s34, Conjugate(3)) z
+                                      z diff(F34, Conjugate(3))*s12]
+
+        @test diff(E, 3) ==
+            LinearCombinationEquation[z z
+                                      z diff(F34, 3)*s12]
+    end
 end

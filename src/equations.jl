@@ -95,6 +95,9 @@ Base.zero(::Type{LinearCombinationEquation}) = LinearCombinationEquation(NBodyEq
 Base.zero(::LinearCombinationEquation) = zero(LinearCombinationEquation)
 Base.iszero(eq::LinearCombinationEquation) = isempty(eq.equations) || all(iszero, eq.equations)
 
+Base.convert(::Type{LinearCombinationEquation}, eq::NBodyEquation) =
+    LinearCombinationEquation([eq])
+
 function Base.show(io::IO, eq::LinearCombinationEquation)
     if iszero(eq)
         write(io, "0")
