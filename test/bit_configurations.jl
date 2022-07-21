@@ -136,6 +136,7 @@ end
         end
         @testset "Orthogonal orbitals" begin
             bcs = BitConfigurations([[:a, :b, :c], [:a, :d, :e]])
+            @test orbitals(bcs) == [:a, :b, :c, :d, :e]
 
             @test length(bcs) == 2
             @test !isempty(bcs)

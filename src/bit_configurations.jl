@@ -75,6 +75,7 @@ Base.length(orbitals::Orbitals) = length(orbitals.orbitals)
 Base.eachindex(orbitals::Orbitals) = eachindex(orbitals.orbitals)
 Base.iterate(orbitals::Orbitals, args...) = iterate(orbitals.orbitals, args...)
 Base.getindex(orbitals::Orbitals, i) = orbitals.orbitals[i]
+AtomicLevels.orbitals(orbitals::Orbitals) = orbitals.orbitals
 
 Base.:(==)(a::Orbitals, b::Orbitals) =
     a.orbitals == b.orbitals &&
@@ -195,6 +196,7 @@ end
 
 get_orbitals(c::Configuration) = c.orbitals
 get_orbitals(v::AbstractVector) = v
+AtomicLevels.orbitals(bcs::BitConfigurations) = orbitals(bcs.orbitals)
 
 function BitConfigurations(orbitals::Orbitals,
                            configurations::AbstractVector)
