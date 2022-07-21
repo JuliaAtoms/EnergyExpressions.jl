@@ -103,4 +103,14 @@
             test_variations_equal(nbme2, :a, cex + cex_extra)
         end
     end
+
+    @testset "Coulomb matrix elements symmetry" begin
+        g = CoulombInteraction()
+
+        e1 = ome([1,2], g, [1,2]) + ome([1,2], g, [2,1])
+        e2 = ome([2,1], g, [2,1]) + ome([2,1], g, [1,2])
+
+        test_variations_equal(e1, 1, diff(e2, 1))
+        test_variations_equal(e1, 2, diff(e2, 2))
+    end
 end

@@ -45,5 +45,15 @@ import EnergyExpressions: OrbitalMatrixElement
         bd = ContractedOperator(NTuple{1,String}(("b",)),g,NTuple{1,String}(("d",)))
         @test bd isa CoulombPotential
         @test string(bd) == "[b|d]"
+
+        g = CoulombInteraction()
+        @test ome([1,2], g, [1,2]) == ome([2,1], g, [2,1])
+        @test ome([1,2], g, [2,1]) == ome([2,1], g, [1,2])
+
+        e1 = ome([1,2], g, [1,2]) + ome([1,2], g, [2,1])
+        e2 = ome([2,1], g, [2,1]) + ome([2,1], g, [1,2])
+
+        @test e1 == e2
+        @test hash(e1) == hash(e2)
     end
 end

@@ -75,6 +75,22 @@ end
 Base.show(io::IO, co::CoulombPotential{A,B}) where {A,B} =
     write(io, "[$(co.a[1])|$(co.b[1])]")
 
+# The Coulomb matrix elements are symmetric upon interchange of the
+# coordinates, however not upon interchange of the bra and ket side,
+# since we allow complex orbitals in general [this is in contrast to
+# the real Rᵏ integrals mentioned in section 12.4 of the BSR manual by
+# Zatsarinny (2006)].
+Base.:(==)(a::OrbitalMatrixElement{2,<:Any,<:CoulombInteraction,<:Any},
+           b::OrbitalMatrixElement{2,<:Any,<:CoulombInteraction,<:Any}) =
+               a.o == b.o &&
+               (a.a == b.a && a.b == b.b ||
+               a.a == reverse(b.a) && a.b == reverse(b.b))
+
+function Base.hash(ome::OrbitalMatrixElement{2,<:Any,<:CoulombInteraction,<:Any}, h::UInt)
+    p = sortperm(ome.a)
+    hash(hash(hash(hash(ome.a[p]), hash(ome.o)), hash(ome.b[p])), h)
+end
+
 """
     iszero(me::EnergyExpressions.OrbitalMatrixElement{2,<:SpinOrbital{<:Orbital},CoulombInteraction,<:SpinOrbital{<:Orbital}})
 

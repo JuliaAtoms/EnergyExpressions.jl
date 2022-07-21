@@ -182,6 +182,9 @@ end
 Base.:(==)(a::NBodyTerm, b::NBodyTerm) =
     compare_vectors(a.factors, b.factors) && a.coeff == b.coeff
 
+Base.hash(nbt::NBodyTerm, h::UInt) =
+    hash(hash(hash(nbt.factors), hash(nbt.coeff)), h)
+
 Base.one(::Type{NBodyTerm}) = NBodyTerm(NBodyTermFactor[], 1)
 Base.one(::NBodyTerm) = one(NBodyTerm)
 Base.isone(term::NBodyTerm) = isempty(term.factors) && isone(term.coeff)
@@ -422,6 +425,9 @@ approximately equal. The actual comparison is performed by
 """
 Base.isapprox(a::NBodyMatrixElement, b::NBodyMatrixElement; kwargs...) =
     compare(a, ≈, b; kwargs...)
+
+Base.hash(nbme::NBodyMatrixElement, h::UInt) =
+    hash(nbme.terms, h)
 
 # ** Determinant utilities
 
