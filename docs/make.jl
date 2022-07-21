@@ -27,4 +27,7 @@ makedocs(
     doctest = false
 )
 
-deploydocs(repo = "github.com/JuliaAtoms/EnergyExpressions.jl.git")
+deploydocs(
+    repo = "github.com/JuliaAtoms/EnergyExpressions.jl.git",
+    push_preview = true,
+)
