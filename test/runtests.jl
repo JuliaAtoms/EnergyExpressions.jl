@@ -1,5 +1,6 @@
 using EnergyExpressions
 import EnergyExpressions: @above_diagonal_loop, cofactor, nonzero_minors, find_diagonal_blocks,
+    detaxis, powneg1, permutation_sign, indexsum,
     NBodyTerm, NBodyMatrixElement, OrbitalMatrixElement,
     BitPattern, Orbitals, BitConfiguration,
     showbin, num_particles, orbital_numbers, get_orbitals,
