@@ -19,7 +19,7 @@ Combinatorics = "1"
 Formatting = "0.4"
 ProgressMeter = "1.5"
 UnicodeFun = "0.4"
-julia = "1.5"
+julia = "1.6"
 
 [extras]
 DeepDiffs = "ab62b9b5-e342-54a8-a765-a90f495de1a6"
