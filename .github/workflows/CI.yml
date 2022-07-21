@@ -52,8 +52,8 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Pkg
-            Pkg.add(url="https://github.com/JuliaAtoms/AtomicLevels.jl.git")
-            Pkg.develop(PackageSpec(path=pwd()))
+            #Pkg.add(url="https://github.com/JuliaAtoms/AtomicLevels.jl.git")
+            #Pkg.develop(PackageSpec(path=pwd()))
             Pkg.instantiate()'
       - run: julia --project=docs docs/make.jl
         env:
@@ -70,8 +70,8 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Pkg
-            Pkg.add(url="https://github.com/JuliaAtoms/AtomicLevels.jl.git")
-            Pkg.develop(PackageSpec(path=pwd()))
+            #Pkg.add(url="https://github.com/JuliaAtoms/AtomicLevels.jl.git")
+            #Pkg.develop(PackageSpec(path=pwd()))
             Pkg.instantiate()'
       - name: Run Doctests
         # See https://github.com/actions/toolkit/issues/399
