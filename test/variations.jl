@@ -5,14 +5,6 @@
     I₃ = IdentityOperator{3}()
     I₄ = IdentityOperator{4}()
 
-    @testset "Comparison of equations" begin
-        test_equations_equal(eq(:a, c(:a, g, :b)) + eq(:a, h) + eq(:b, c(:a, g, :a)),
-                             eq(:a, h) + eq(:a, c(:a, g, :b)) + eq(:b, c(:a, g, :a)))
-
-        test_equations_equal(eq(:a, h) + eq(:b, c(:a, g, :a)) + eq(:a, h),
-                             2eq(:a, h) + eq(:b, c(:a, g, :a)))
-    end
-
     @testset "Various variations" begin
         extra = EnergyExpressions.OrbitalMatrixElement([:a,:a], g, [:a,:b])
         ex_extra = eq(:a, c(:a, g, :b)) + eq(:b, c(:a, g, :a))

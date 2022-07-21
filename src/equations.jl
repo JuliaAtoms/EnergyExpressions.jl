@@ -174,5 +174,6 @@ end
 
 Base.:(-)(a::LinearCombinationEquation, b::NBodyEquation) = a - LinearCombinationEquation([b])
 Base.:(-)(a::NBodyEquation, b::LinearCombinationEquation) = LinearCombinationEquation([a]) - b
+Base.:(-)(a::NBodyEquation, b::NBodyEquation) = LinearCombinationEquation([a]) - LinearCombinationEquation([b])
 
 export NBodyEquation, LinearCombinationEquation

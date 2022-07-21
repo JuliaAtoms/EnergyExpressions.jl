@@ -83,5 +83,6 @@ end
     include("nbody_operators.jl")
     include("common_operators.jl")
 
+    include("equations.jl")
     include("variations.jl")
 end
