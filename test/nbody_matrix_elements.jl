@@ -213,4 +213,37 @@
         @test E1 == E2
         @test occursin("[ Info: Generating energy expression\n", err)
     end
+
+    @testset "Transformations" begin
+        n = zero(NBodyTerm)
+        zme = transform(identity, n)
+        @test zme isa NBodyMatrixElement
+        @test iszero(zme)
+
+        g = CoulombInteraction()
+        F12 = ome([1,2],g,[1,2])
+        F34 = ome([3,4],g,[3,4])
+        G12 = ome([1,2],g,[2,1])
+        G34 = ome([3,4],g,[4,3])
+
+        ab = 2F12*F34
+        ab2 = ab + F12
+        ref = 2*(F12*(F34-G34)-G12*(F34-G34))
+        ref2 = ref + (F12-G12)
+
+        E = sparse(NBodyMatrixElement[ab 0; 0 ab2])
+        Eref = sparse(NBodyMatrixElement[ref 0; 0 ref2])
+
+        trf = n -> n - ome(n.a, g, reverse(n.b))
+
+        @test transform(trf, ab) == ref
+        @test transform(trf, ab2) == ref2
+
+        val = nothing
+        err = @capture_err begin
+            val = transform(trf, E, verbosity=Inf)
+        end
+        @test val == Eref
+        @test occursin("[ Info: Transforming energy expression\n", err)
+    end
 end
