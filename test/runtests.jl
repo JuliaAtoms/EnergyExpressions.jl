@@ -8,7 +8,8 @@ import EnergyExpressions: @above_diagonal_loop, cofactor, nonzero_minors, find_d
     num_excitations, holes_mask, holes, particles_mask, particles,
     holes_particles_mask, holes_particles,
     relative_sign,
-    orbital_overlap_matrix, non_zero_cofactors
+    orbital_overlap_matrix, non_zero_cofactors,
+    pushifmissing!
 
 using SparseArrays
 using Combinatorics
@@ -86,4 +87,5 @@ end
 
     include("equations.jl")
     include("variations.jl")
+    include("multi_configurational_equations.jl")
 end

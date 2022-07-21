@@ -17,6 +17,12 @@ struct MCTerm{T,QO,O}
     integrals::Vector{Int}
 end
 
+Base.:(==)(a::MCTerm, b::MCTerm) =
+    a.i == b.i && a.j == b.j &&
+    a.coeff == b.coeff && a.operator == b.operator &&
+    a.source_orbital == b.source_orbital &&
+    sort(a.integrals) == sort(b.integrals)
+
 """
     OrbitalEquation(orbital, equation,
                     one_body, direct_terms, exchange_terms, source_terms)
@@ -31,6 +37,12 @@ struct OrbitalEquation{O,Equation}
     equation::Equation
     terms::Vector{Pair{Int,Vector{MCTerm}}}
 end
+
+Base.:(==)(a::OrbitalEquation, b::OrbitalEquation) =
+    a.orbital == b.orbital &&
+    a.equation == b.equation &&
+    a.terms == b.terms
+
 
 function Base.show(io::IO, oeq::OrbitalEquation)
     write(io, "OrbitalEquation($(oeq.orbital)): ")
@@ -154,6 +166,8 @@ efficient equation solving.
 function Base.diff(fun!::Function, E::EM, orbitals::VO; verbosity=0) where {EM<:EnergyExpression, O,VO<:AbstractVector{O}}
     # Vector of common integrals
     integrals = KeyTracker{Any}()
+
+    E = deepcopy(E)
 
     norb = length(orbitals)
     p = if verbosity > 0
