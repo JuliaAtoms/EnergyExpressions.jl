@@ -302,8 +302,13 @@ Base.zero(::NBodyMatrixElement) = zero(NBodyMatrixElement)
 Base.one(::Type{NBodyMatrixElement}) =
     NBodyMatrixElement([one(NBodyTerm)])
 
+Base.one(::NBodyMatrixElement) = one(NBodyMatrixElement)
+
 Base.iszero(nbme::NBodyMatrixElement) =
     isempty(nbme.terms) || all(iszero, nbme.terms)
+
+Base.isone(nbme::NBodyMatrixElement) =
+    nbme.terms == [one(NBodyTerm)]
 
 Base.convert(::Type{NBodyMatrixElement}, nbt::NBodyTerm) =
     NBodyMatrixElement([nbt])

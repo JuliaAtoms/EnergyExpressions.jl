@@ -2,6 +2,7 @@ using EnergyExpressions
 import EnergyExpressions: @above_diagonal_loop, cofactor, nonzero_minors, find_diagonal_blocks,
     detaxis, powneg1, permutation_sign, indexsum,
     NBodyTerm, NBodyMatrixElement, OrbitalMatrixElement,
+    contract,
     BitPattern, Orbitals, BitConfiguration,
     showbin, num_particles, orbital_numbers, get_orbitals,
     num_excitations, holes_mask, holes, particles_mask, particles,
@@ -18,9 +19,10 @@ using Test
 using DeepDiffs
 using Suppressor
 
-function strdisplay(o)
+function strdisplay(o; kwargs...)
     buf = IOBuffer()
-    show(buf, MIME"text/plain"(), o)
+    io = IOContext(buf, kwargs...)
+    show(io, MIME"text/plain"(), o)
     String(take!(buf))
 end
 
@@ -44,11 +46,12 @@ end
 ome(a, op, b) = OrbitalMatrixElement(a, op, b)
 ome(a::T, op, b::T) where {T<:Union{Symbol,<:Integer}} = ome([a], op, [b])
 c(a, op, b) = ContractedOperator(Tuple(e for e in a), op, Tuple(e for e in b))
-c(a::Symbol, op, b::Symbol) = c([a], op, [b])
+c(a::T, op, b::T) where {T<:Union{Symbol,<:Integer}} = c([a], op, [b])
 eq(orb, op, args...) = NBodyEquation(orb, op, args...)
 ceq(orb, op, args...) = eq(Conjugate(orb), op, args...)
 ov(a,b) = OrbitalOverlap(a,b)
-nbt(args...) = NBodyTerm([args...], 1)
+nbt(args...;f=1) = NBodyTerm([args...], f)
+nbme(args...) = NBodyMatrixElement(NBodyTerm[args...])
 
 function test_variations_equal(E, orbital, b)
     a = diff(E, orbital)
@@ -70,6 +73,7 @@ end
     include("locked_dict.jl")
 
     include("conjugate_orbitals.jl")
+    include("nbody_matrix_elements.jl")
     include("bit_configurations.jl")
     include("loop_macros.jl")
     include("minors.jl")
