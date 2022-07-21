@@ -589,7 +589,7 @@ end
                  ome([2,1], g, [1,2])))
     end
 
-    @testset "Multiconfigurational" begin
+    @testset "Multi-configurational" begin
         s = ov(2,5)
         bcs = BitConfigurations([[1,2,3],[1,5,6]], [s])
 
