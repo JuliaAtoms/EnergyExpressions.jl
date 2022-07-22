@@ -41,6 +41,8 @@ SlaterDeterminant(c::Configuration{<:SpinOrbital}) =
 Return the number of spin-orbitals in the Slater determinant.
 """
 Base.length(sd::SlaterDeterminant) = length(sd.orbitals)
+AtomicLevels.num_electrons(sd::SlaterDeterminant) = length(sd)
+AtomicLevels.orbitals(sd::SlaterDeterminant) = sd.orbitals
 
 Base.show(io::IO, sd::SlaterDeterminant) =
     write(io, "|",join(sd.orbitals, " "), "|")

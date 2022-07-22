@@ -91,6 +91,13 @@ struct OrbitalMatrixElement{N,A,O<:NBodyOperator{N},B} <: NBodyTermFactor
     a::Vector{A}
     o::O
     b::Vector{B}
+    function OrbitalMatrixElement(a::Vector{A}, o::O, b::Vector{B}) where {N,A,O<:NBodyOperator{N},B}
+        la = length(a)
+        lb = length(b)
+        la == lb == N ||
+            throw(ArgumentError("Number of orbitals $(la) and $(lb) do not agree with N = $N"))
+        new{N,A,O,B}(a, o, b)
+    end
 end
 
 Base.iszero(::OrbitalMatrixElement) = false
@@ -115,12 +122,12 @@ Contract `ome` over all coordinates `i...`. `length(i)` cannot be
 larger than `N`.
 """
 function contract(ome::OrbitalMatrixElement{N,A,O,B}, i::Integer...) where {N,A,O,B}
-    Q = N - length(i)
+    Q = length(i)
 
-    Q > 0 ||
+    Q ≤ N ||
         throw(ArgumentError("Cannot contract $(N)-body orbital matrix element over $(length(i)) coordinates"))
 
-    Q == N && return ome.o
+    iszero(Q) && return ome.o
 
     ContractedOperator(NTuple{Q,A}(ome.a[ii] for ii in i),
                        ome.o,
@@ -172,6 +179,12 @@ struct NBodyTerm
     coeff
 end
 
+Base.:(==)(a::NBodyTerm, b::NBodyTerm) =
+    compare_vectors(a.factors, b.factors) && a.coeff == b.coeff
+
+Base.hash(nbt::NBodyTerm, h::UInt) =
+    hash(hash(hash(nbt.factors), hash(nbt.coeff)), h)
+
 Base.one(::Type{NBodyTerm}) = NBodyTerm(NBodyTermFactor[], 1)
 Base.one(::NBodyTerm) = one(NBodyTerm)
 Base.isone(term::NBodyTerm) = isempty(term.factors) && isone(term.coeff)
@@ -196,6 +209,8 @@ Base.:(*)(a::NBodyTerm, b::Number) =
 Base.:(*)(a::Number, b::NBodyTerm) =
     NBodyTerm(b.factors, a*b.coeff)
 
+Base.:(-)(f::NBodyTerm) = (-1)*f
+
 Base.:(*)(a::NBodyTerm, b::NBodyTermFactor) =
     NBodyTerm(vcat(a.factors, b), a.coeff)
 
@@ -204,6 +219,15 @@ Base.:(*)(a::NBodyTermFactor, b::NBodyTerm) =
 
 Base.:(*)(a::NBodyTermFactor, b::NBodyTermFactor) =
     NBodyTerm([a, b], 1)
+
+Base.:(+)(a::NBodyTermFactor, b::NBodyTermFactor) =
+    convert(NBodyTerm, a) + convert(NBodyTerm, b)
+
+Base.:(+)(a::NBodyTerm, b::NBodyTermFactor) =
+    a + convert(NBodyTerm, b)
+
+Base.:(+)(a::NBodyTermFactor, b::NBodyTerm) =
+    convert(NBodyTerm, a) + b
 
 Base.:(*)(a::NBodyTermFactor, b::Number) =
     NBodyTerm([a], b)
@@ -278,8 +302,13 @@ Base.zero(::NBodyMatrixElement) = zero(NBodyMatrixElement)
 Base.one(::Type{NBodyMatrixElement}) =
     NBodyMatrixElement([one(NBodyTerm)])
 
+Base.one(::NBodyMatrixElement) = one(NBodyMatrixElement)
+
 Base.iszero(nbme::NBodyMatrixElement) =
     isempty(nbme.terms) || all(iszero, nbme.terms)
+
+Base.isone(nbme::NBodyMatrixElement) =
+    nbme.terms == [one(NBodyTerm)]
 
 Base.convert(::Type{NBodyMatrixElement}, nbt::NBodyTerm) =
     NBodyMatrixElement([nbt])
@@ -296,14 +325,33 @@ Base.:(+)(a::NBodyMatrixElement, b::NBodyTerm) =
 Base.:(+)(a::NBodyTerm, b::NBodyMatrixElement) =
     NBodyMatrixElement(vcat(a, b.terms))
 
-Base.:(+)(a::NBodyTerm, b::NBodyTerm) =
-    NBodyMatrixElement([a, b])
+Base.:(+)(a::NBodyMatrixElement, b::NBodyTermFactor) =
+    a + convert(NBodyTerm, b)
+
+Base.:(+)(a::NBodyTermFactor, b::NBodyMatrixElement) =
+    convert(NBodyTerm, a) + b
+
+function Base.:(+)(a::NBodyTerm, b::NBodyTerm)
+    if a.factors == b.factors
+        NBodyTerm(a.factors, a.coeff+b.coeff)
+    else
+        NBodyMatrixElement([a, b])
+    end
+end
+
+Base.:(-)(a::NBodyTerm, b::NBodyTerm) = a + (-b)
 
 Base.:(*)(a::NBodyMatrixElement, b::Union{Number,NBodyTerm,NBodyTermFactor}) =
     NBodyMatrixElement([b*t for t in a.terms])
 
 Base.:(*)(a::Union{Number,NBodyTerm,NBodyTermFactor}, b::NBodyMatrixElement) =
     NBodyMatrixElement([a*t for t in b.terms])
+
+Base.:(-)(f::NBodyMatrixElement) = (-1)*f
+
+Base.:(-)(a::Union{NBodyTerm,NBodyTermFactor,NBodyMatrixElement},
+          b::Union{NBodyTerm,NBodyTermFactor,NBodyMatrixElement}) =
+              a + (-b)
 
 Base.convert(::Type{T}, nbme::NBodyMatrixElement) where {T<:Number} =
     sum(t -> convert(T, t), nbme.terms)
@@ -366,6 +414,12 @@ comparison is performed by [`compare`](@ref).
 Base.:(==)(a::NBodyMatrixElement, b::NBodyMatrixElement) =
     compare(a, ==, b)
 
+Base.:(==)(a::NBodyMatrixElement, b::NBodyTerm) =
+    a == convert(NBodyMatrixElement, b)
+
+Base.:(==)(a::NBodyTerm, b::NBodyMatrixElement) =
+    convert(NBodyMatrixElement, a) == b
+
 """
     Base.isapprox(a::NBodyMatrixElement, b::NBodyMatrixElement; kwargs...)
 
@@ -376,6 +430,9 @@ approximately equal. The actual comparison is performed by
 """
 Base.isapprox(a::NBodyMatrixElement, b::NBodyMatrixElement; kwargs...) =
     compare(a, ≈, b; kwargs...)
+
+Base.hash(nbme::NBodyMatrixElement, h::UInt) =
+    hash(nbme.terms, h)
 
 # ** Determinant utilities
 
@@ -518,52 +575,51 @@ permutation_sign(p) =
 
 # ** N-body matrix construction
 
-@generated function NBodyMatrixElement(a, op::NBodyOperator{N}, b, nzcofactors) where N
+"""
+    distinct_permutations(fun::Function, ::NBodyOperator{N}, b)
+
+Generate all distinct permutations `p` of `b` (which is expected to be
+of length `N`), and call `fun(σ, b[p])` where `σ=(-1)^p` is the sign
+of the permutation `p`.
+"""
+@generated function distinct_permutations(fun::Function, ::NBodyOperator{N}, b) where N
     quote
-        length(a) == length(b) ||
-            throw(DimensionMismatch("Different number of orbitals"))
-
-        terms = NBodyTerm[]
-
-        akN = similar(a, $N)
-        blN = similar(b, $N)
-
-        iN = zeros(Int, $N)
         jN = zeros(Int, $N)
 
-        aiN = similar(a, $N)
-        bjN = similar(b, $N)
-
-        for (k,l,Dkl) in nzcofactors
-            iszero(Dkl) && continue
-
-            for d in eachindex(k)
-                akN[d] = a[k[d]]
-                blN[d] = b[l[d]]
-            end
-
-            # Generate all distinct permutations of the N first
-            # orbitals of the current total permutation.
-            @above_diagonal_loop $N i N begin
-                Base.Cartesian.@nexprs $N d -> iN[d] = i_d
-                si = permutation_sign(iN)
-                Base.Cartesian.@nexprs $N d -> aiN[d] = akN[i_d]
-
-                @anti_diagonal_loop $N j N begin
-                    Base.Cartesian.@nexprs $N d -> jN[d] = j_d
-                    sj = permutation_sign(jN)
-                    Base.Cartesian.@nexprs $N d -> bjN[d] = blN[j_d]
-
-                    me = OrbitalMatrixElement(copy(aiN), op, copy(bjN))
-                    iszero(me) && continue
-                    nbme = convert(NBodyMatrixElement, si*sj*Dkl*me)
-                    append!(terms, nbme.terms)
-                end
-            end
+        @anti_diagonal_loop $N j N begin
+            Base.Cartesian.@nexprs $N d -> jN[d] = j_d
+            fun(permutation_sign(jN), b[[jN...]])
         end
-
-        NBodyMatrixElement(terms)
     end
+end
+
+"""
+    NBodyMatrixElement(a, op, b, nzcofactors)
+
+Generate the matrix element of the N-body operator `op`, between the
+orbital sets `a` and `b`, where `nzcofactors` list all N-tuples for
+which the determinantal cofactor of the orbital overlap matrix is
+non-vanishing.
+"""
+function NBodyMatrixElement(a, op::NBodyOperator{N}, b, nzcofactors) where N
+    length(a) == length(b) ||
+        throw(DimensionMismatch("Different number of orbitals"))
+
+    terms = NBodyTerm[]
+
+    for (k,l,Dkl) in nzcofactors
+        iszero(Dkl) && continue
+
+        ak = a[k]
+        distinct_permutations(op, b[l]) do σ, bl
+            me = OrbitalMatrixElement(ak, op, bl)
+            iszero(me) && return
+            nbme = convert(NBodyMatrixElement, σ*Dkl*me)
+            append!(terms, nbme.terms)
+        end
+    end
+
+    NBodyMatrixElement(terms)
 end
 
 """
@@ -576,7 +632,7 @@ single-particle orbitals in the Slater determinants. If the orbitals
 are all orthogonal, the Löwdin rules collapse to the Slater–Condon
 rules.
 """
-function NBodyMatrixElement(a::SlaterDeterminant, op::NBodyOperator{N}, b::SlaterDeterminant, overlap) where N
+function NBodyMatrixElement(a::SlaterDeterminant, op::NBodyOperator{N}, b::SlaterDeterminant, overlap::AbstractMatrix) where N
     ks,ls = nonzero_minors(N, overlap)
     nzcofactors = zip(ks, ls, (cofactor(k, l, overlap) for (k,l) in zip(ks,ls)))
     NBodyMatrixElement(a.orbitals, op, b.orbitals, nzcofactors)
@@ -586,13 +642,13 @@ end
     NBodyMatrixElement(a, op, b, overlap)
 
 Generate the matrix element of `op`, a linear combination of
-[`NBodyOperator`](@ref), between the Slater determinants `a` and `b`,
-according to the Löwdin rules. The matrix `overlap` contains the
-mutual overlaps between all single-particle orbitals in the Slater
-determinants. If the orbitals are all orthogonal, the Löwdin rules
-collapse to the Slater–Condon rules.
+[`NBodyOperator`](@ref), between the configurations (e.g. Slater
+determinants) `a` and `b`, according to the Löwdin rules. The matrix
+`overlap` contains the mutual overlaps between all single-particle
+orbitals in the Slater determinants. If the orbitals are all
+orthogonal, the Löwdin rules collapse to the Slater–Condon rules.
 """
-function NBodyMatrixElement(a::SlaterDeterminant, op::LinearCombinationOperator, b::SlaterDeterminant, overlap)
+function NBodyMatrixElement(a::Cfg, op::LinearCombinationOperator, b::Cfg, overlap) where Cfg
     terms = NBodyTerm[]
     for (o,coeff) in op.operators
         iszero(coeff) && continue
@@ -618,10 +674,10 @@ end
 
 # * Overlap matrices
 
-function overlap_matrix!(S::AbstractSparseMatrix{<:NBodyTerm}, a::SlaterDeterminant, b::SlaterDeterminant)
-    length(a) == length(b) || throw(ArgumentError("Configurations not of same length: $a & $b"))
-    for (i,ao) in enumerate(a.orbitals)
-        for (j,bo) in enumerate(b.orbitals)
+function overlap_matrix!(S::AbstractSparseMatrix{<:NBodyTerm}, a::Cfg, b::Cfg) where Cfg
+    num_electrons(a) == num_electrons(b) || throw(ArgumentError("Configurations not of same length: $a & $b"))
+    for (i,ao) in enumerate(orbitals(a))
+        for (j,bo) in enumerate(orbitals(b))
             if ao == bo
                 S[i,j] = one(NBodyTerm)
             end
@@ -632,12 +688,12 @@ function overlap_matrix!(S::AbstractSparseMatrix{<:NBodyTerm}, a::SlaterDetermin
 end
 
 """
-    overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant[, overlaps=[]])
+    overlap_matrix(a::Cfg, b::Cfg[, overlaps=[]]) where Cfg
 
 Generate the single-particle orbital overlap matrix, between the
-orbitals in the Slater determinants `a` and `b`. All orbitals are
-assumed to be orthogonal, except for those which are given in
-`overlaps`.
+orbitals in the configurations (e.g. Slater determinants) `a` and
+`b`. All orbitals are assumed to be orthogonal, except for those which
+are given in `overlaps`.
 
 # Examples
 
@@ -680,15 +736,16 @@ julia> overlap_matrix(sa, sa, [OrbitalOverlap(:k̃,:k̃)])
 ```
 Notice that this overlap matrix was calculated between the Slater determinant `sa` and itself.
 """
-function overlap_matrix(a::SlaterDeterminant, b::SlaterDeterminant, overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[])
-    m = length(a)
-    S = spzeros(NBodyTerm, m, m)
+function overlap_matrix(a::Cfg, b::Cfg, overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]) where Cfg
+    m = length(orbitals(a))
+    n = length(orbitals(b))
+    S = spzeros(NBodyTerm, m, n)
     overlap_matrix!(S, a, b)
 
     add_overlap! = (oa, ob) -> begin
-        i = findfirst(isequal(oa), a.orbitals)
+        i = findfirst(isequal(oa), orbitals(a))
         isnothing(i) && return
-        j = findfirst(isequal(ob), b.orbitals)
+        j = findfirst(isequal(ob), orbitals(b))
         isnothing(j) && return
         S[i,j] = OrbitalOverlap(oa,ob)
     end
@@ -711,19 +768,19 @@ matrix, sandwiched between a vector of mixing coefficients: `E =
 c'H*c`, where `c` are the mixing coefficients and `H` the energy
 matrix.
 """
-const EnergyExpression = AbstractMatrix{NBodyMatrixElement}
+const EnergyExpression = SparseMatrixCSC{NBodyMatrixElement}
 
 """
     Matrix(a, op::QuantumOperator, b[, overlaps])
 
 Generate the matrix corresponding to the quantum operator `op`,
-between the [`SlaterDeterminant`](@ref)s `a` and `b`, i.e
-`⟨a|op|b⟩`. It is possible to specify non-orthogonalities between
-single-particle orbitals in `overlaps`.
+between the configurations (e.g. [`SlaterDeterminant`](@ref)s) `a` and
+`b`, i.e `⟨a|op|b⟩`. It is possible to specify non-orthogonalities
+between single-particle orbitals in `overlaps`.
 """
-function Base.Matrix(as::VSD, op::QuantumOperator, bs::VSD,
+function Base.Matrix(as::CFGs, op::QuantumOperator, bs::CFGs,
                      overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[];
-                     verbosity=0) where {VSD<:AbstractVector{<:SlaterDeterminant}}
+                     verbosity=0) where {CFGs<:AbstractVector}
     m,n = length(as),length(bs)
 
     I = [Int[] for i in 1:Threads.nthreads()]
@@ -768,9 +825,9 @@ Generate the matrix corresponding to the quantum operator `op`,
 between the different `slater_determinants`. It is possible to specify
 non-orthogonalities between single-particle orbitals in `overlaps`.
 """
-Base.Matrix(op::QuantumOperator, slater_determinants::VSD,
-            overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]) where {VSD<:AbstractVector{<:SlaterDeterminant}} =
-                Matrix(slater_determinants, op, slater_determinants, overlaps)
+Base.Matrix(op::QuantumOperator, cfgs::CFGs,
+            overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]; kwargs...) where {CFGs<:AbstractVector} =
+                Matrix(cfgs, op, cfgs, overlaps; kwargs...)
 
 function transform(fun::Function, E::EnergyExpression; verbosity=0)
     m,n = size(E)

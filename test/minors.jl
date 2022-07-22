@@ -1,7 +1,3 @@
-import EnergyExpressions: @above_diagonal_loop, cofactor, nonzero_minors, find_diagonal_blocks, NBodyMatrixElement
-using SparseArrays
-using Combinatorics
-
 # Used to generate reference data to test the linear complexity
 # algorithm against; the naïve algorithm is correct, but is of
 # factorial complexity and cannot be used for more than ~20 orbitals.
@@ -88,6 +84,34 @@ function test_cofactors(N, ii, jj)
 end
 
 @testset "Minor determinants" begin
+    @testset "Minor axes" begin
+        @test detaxis([1], 5) == 2:5
+        @test detaxis([2,4], 5) == [1,3,5]
+        @test detaxis((1,), 5) == 2:5
+        @test detaxis((2,4), 5) == [1,3,5]
+        @test detaxis(CartesianIndex(1,), 5) == 2:5
+        @test detaxis(CartesianIndex(2,4), 5) == [1,3,5]
+        @test detaxis(1, 5) == 2:5
+    end
+
+    @testset "Signatures" begin
+        for i = 0:2:10
+            @test powneg1(i) == 1
+            @test powneg1(i+1) == -1
+        end
+
+        @test permutation_sign(1:10) == 1
+        @test permutation_sign([2,1,3,4]) == -1
+        @test permutation_sign([2,1,4,3]) == 1
+
+        @test indexsum(1, 1) == 2
+        @test indexsum((1,), (1,)) == 2
+        @test indexsum((1,2), (1,2)) == 6
+        @test indexsum((1,2), (1,3)) == 7
+        @test indexsum([1,2], [1,3]) == 7
+        @test indexsum(CartesianIndex(1,2), CartesianIndex(1,3)) == 7
+    end
+
     @testset "Find diagonal blocks" begin
         find_diagonal_blocks_test_case((sparse([3,1,2], 1:3, ones(Int, 3))), [1:3])
         find_diagonal_blocks_test_case((sparse([1,4,2,3], 1:4, ones(Int, 4))), [1:1, 2:4])

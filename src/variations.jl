@@ -23,23 +23,27 @@ Base.diff(ab::OrbitalOverlap, o::Conjugate{O}) where O =
 """
     diff(ome::OrbitalMatrixElement, o::O)
 
-Vary the orbital overlap ⟨abc...|Ω|xyz...⟩ with respect to |o⟩.
+Vary the orbital matrix element ⟨abc...|Ω|xyz...⟩ with respect to |o⟩.
 """
 function Base.diff(ome::OrbitalMatrixElement{N}, o::O) where {N,O}
-    i = findfirst(isequal(o), ome.b)
-    (isnothing(i) || iszero(ome)) && return 0
-    NBodyEquation(Conjugate(ome.a[i]), contract(ome, complement(N, i)...))
+    is = findall(isequal(o), ome.b)
+    (isempty(is) || iszero(ome)) && return 0
+
+    sum(NBodyEquation(Conjugate(ome.a[i]), contract(ome, complement(N, i)...))
+        for i in is)
 end
 
 """
     diff(ome::OrbitalMatrixElement, o::Conjugate{O})
 
-Vary the orbital overlap ⟨abc...|Ω|xyz...⟩ with respect to ⟨o|.
+Vary the orbital matrix element ⟨abc...|Ω|xyz...⟩ with respect to ⟨o|.
 """
 function Base.diff(ome::OrbitalMatrixElement{N}, o::Conjugate{O}) where {N,O}
-    i = findfirst(isequal(conj(o)), ome.a)
-    (isnothing(i) || iszero(ome)) && return 0
-    NBodyEquation(ome.b[i], contract(ome, complement(N, i)...))
+    is = findall(isequal(conj(o)), ome.a)
+    (isempty(is) || iszero(ome)) && return 0
+
+    sum(NBodyEquation(ome.b[i], contract(ome, complement(N, i)...))
+        for i in is)
 end
 
 # * Variation of NBodyMatrixElements
@@ -57,8 +61,8 @@ function Base.diff(me::NBodyMatrixElement, o::O) where O
             iszero(v) && continue
             v = v * NBodyTerm(vcat(t.factors[1:(i-1)]...,
                                    t.factors[(i+1):end]...),
-                                   t.coeff)
-            push!(equations, v)
+                              t.coeff)
+            add_equations!(equations, v)
         end
     end
     LinearCombinationEquation(equations)

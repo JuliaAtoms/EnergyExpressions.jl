@@ -20,7 +20,8 @@ makedocs(
             "Common N-body operators" => "common_operators.md",
             "N-body equations" => "equations.md",
             "Variation" => "variations.md",
-            "System of equations" => "system_of_equations.md"
+            "System of equations" => "system_of_equations.md",
+            "Miscellaneous" => "misc.md"
         ]
     ],
     format = Documenter.HTML(
