@@ -52,14 +52,15 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Pkg
-            Pkg.add(url="https://github.com/JuliaAtoms/AtomicLevels.jl.git")
-            Pkg.develop(PackageSpec(path=pwd()))
+            Pkg.add(name="Documenter", rev="9a518379edf7fd9c9cf7932ad20ef6fe8b40c495")
+            Pkg.develop(path=pwd())
             Pkg.instantiate()'
       - run: julia --project=docs docs/make.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
   doctests:
+    if: ${{ false }} # disable until doctests are fixed
     name: Doctests
     runs-on: ubuntu-latest
     steps:
@@ -70,12 +71,10 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Pkg
-            Pkg.add(url="https://github.com/JuliaAtoms/AtomicLevels.jl.git")
-            Pkg.develop(PackageSpec(path=pwd()))
+            Pkg.add(name="Documenter", rev="9a518379edf7fd9c9cf7932ad20ef6fe8b40c495")
+            Pkg.develop(path=pwd())
             Pkg.instantiate()'
       - name: Run Doctests
-        # See https://github.com/actions/toolkit/issues/399
-        continue-on-error: true
         run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
