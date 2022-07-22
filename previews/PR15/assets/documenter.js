@@ -4,10 +4,9 @@ requirejs.config({
     'highlight-julia': 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/languages/julia.min',
     'headroom': 'https://cdnjs.cloudflare.com/ajax/libs/headroom/0.12.0/headroom.min',
     'jqueryui': 'https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min',
-    'katex-auto-render': 'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/contrib/auto-render.min',
     'jquery': 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min',
+    'mathjax': 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_HTML',
     'headroom-jquery': 'https://cdnjs.cloudflare.com/ajax/libs/headroom/0.12.0/jQuery.headroom.min',
-    'katex': 'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min',
     'highlight': 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min',
     'highlight-julia-repl': 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/languages/julia-repl.min',
   },
@@ -17,10 +16,8 @@ requirejs.config({
       "highlight"
     ]
   },
-  "katex-auto-render": {
-    "deps": [
-      "katex"
-    ]
+  "mathjax": {
+    "exports": "MathJax"
   },
   "headroom-jquery": {
     "deps": [
@@ -36,32 +33,113 @@ requirejs.config({
 }
 });
 ////////////////////////////////////////////////////////////////////////////////
-require(['jquery', 'katex', 'katex-auto-render'], function($, katex, renderMathInElement) {
-$(document).ready(function() {
-  renderMathInElement(
-    document.body,
-    {
-  "delimiters": [
-    {
-      "left": "$",
-      "right": "$",
-      "display": false
-    },
-    {
-      "left": "$$",
-      "right": "$$",
-      "display": true
-    },
-    {
-      "left": "\\[",
-      "right": "\\]",
-      "display": true
+require(['mathjax'], function(MathJax) {
+MathJax.Hub.Config({
+  "jax": [
+    "input/TeX",
+    "output/HTML-CSS",
+    "output/NativeMML"
+  ],
+  "TeX": {
+    "Macros": {
+      "vary": [
+        "\\delta_{#1}",
+        1
+      ],
+      "ket": [
+        "|#1\\rangle",
+        1
+      ],
+      "defd": "≝",
+      "mat": [
+        "\\mathsf{#1}",
+        1
+      ],
+      "hamiltonian": "\\operator{h}",
+      "conj": [
+        "#1^*",
+        1
+      ],
+      "bra": [
+        "\\langle#1|",
+        1
+      ],
+      "im": "\\mathrm{i}",
+      "Hamiltonian": "\\operator{H}",
+      "direct": [
+        "{\\operator{J}_{#1}}",
+        1
+      ],
+      "operator": [
+        "\\mathfrak{#1}",
+        1
+      ],
+      "vec": [
+        "\\mathbf{#1}",
+        1
+      ],
+      "onebody": [
+        "(#1|#2)",
+        2
+      ],
+      "twobody": [
+        "[#1|#2]",
+        2
+      ],
+      "twobodydx": [
+        "[#1||#2]",
+        2
+      ],
+      "lagrange": [
+        "\\epsilon_{#1}",
+        1
+      ],
+      "exchange": [
+        "{\\operator{K}_{#1}}",
+        1
+      ],
+      "diff": [
+        "\\mathrm{d}#1\\,",
+        1
+      ],
+      "fock": "\\operator{f}",
+      "braket": [
+        "\\langle#1|#2\\rangle",
+        2
+      ],
+      "matrixel": [
+        "\\langle#1|#2|#3\\rangle",
+        3
+      ],
+      "Lagrangian": "\\operator{L}"
     }
+  },
+  "tex2jax": {
+    "inlineMath": [
+      [
+        "$",
+        "$"
+      ],
+      [
+        "\\(",
+        "\\)"
+      ]
+    ],
+    "processEscapes": true
+  },
+  "config": [
+    "MMLorHTML.js"
+  ],
+  "extensions": [
+    "MathMenu.js",
+    "MathZoom.js",
+    "TeX/AMSmath.js",
+    "TeX/AMSsymbols.js",
+    "TeX/autobold.js",
+    "TeX/autoload-all.js"
   ]
 }
-
-  );
-})
+);
 
 })
 ////////////////////////////////////////////////////////////////////////////////
