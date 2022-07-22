@@ -189,6 +189,34 @@ end
 
 # * BitConfigurations
 
+"""
+    BitConfigurations(orbitals, configurations)
+
+Represent collection of `configurations` as bit vectors, where `true`
+values indicate that specific `orbitals` are occupied.
+
+# Example
+
+```julia-repl
+julia> bcs = BitConfigurations([[:a,:b,:c], [:x,:b,:c], [:a,:y,:c], [:a,:b,:z]])
+6-orbital 4-configuration BitConfigurations
+
+1: a b c
+2: a -> x
+3: b -> y
+4: c -> z
+
+julia> h = FieldFreeOneBodyHamiltonian()
+ĥ₀
+
+julia> Matrix(bcs, h)
+4×4 SparseMatrixCSC{NBodyMatrixElement, Int64} with 10 stored entries:
+ (a|a) + (b|b) + (c|c)  (a|x)                  - (b|y)                (c|z)
+ (x|a)                  (b|b) + (c|c) + (x|x)  ⋅                      ⋅
+ - (y|b)                ⋅                      (a|a) + (c|c) + (y|y)  ⋅
+ (z|c)                  ⋅                      ⋅                      (a|a) + (b|b) + (z|z)
+```
+"""
 struct BitConfigurations{Orbitals}
     orbitals::Orbitals
     configurations::BitMatrix

@@ -44,6 +44,9 @@ NBodyMatrixElement
 isdependent
 transform
 overlap_matrix
+EnergyExpressions.compare
+Base.:(==)(::EnergyExpressions.NBodyMatrixElement, ::EnergyExpressions.NBodyMatrixElement)
+Base.isapprox(::EnergyExpressions.NBodyMatrixElement, ::EnergyExpressions.NBodyMatrixElement)
 EnergyExpression
 Matrix
 ```
@@ -112,11 +115,38 @@ detaxis
 detminor
 # indexsum
 cofactor
+EnergyExpressions.distinct_permutations
 det
 permutation_sign
 powneg1
 EnergyExpressions.@above_diagonal_loop
 EnergyExpressions.@anti_diagonal_loop
+```
+
+
+## Occupation number representation
+
+As an alternative to [`SlaterDeterminant`](@ref), we also provide an
+implementation of the occupation number representation (i.e. second
+quantization). Every configuration is thus represented as a bit
+vector, indicating the occupation of a specific orbital by a `true`
+value. Excitations between two configurations are easily computed
+using bitwise operations. The present implementation is inspired by
+
+- Scemama, A., & Giner, E. (2013). An efficient implementation of
+  Slater–Condon rules. CoRR,
+  [arXiv:1311.6244](https://arxiv.org/abs/1311.6244),
+
+but extends upon it by also supporting non-orthogonal orbitals.
+
+The benefit of this approach is much more efficient identification of
+which cofactors in $\eqref{eqn:matrix-element-expansion}$ are
+non-zero, than the approach taken in [`nonzero_minors`](@ref).
+
+```@docs
+BitConfigurations
+EnergyExpressions.Orbitals
+EnergyExpressions.non_zero_cofactors
 ```
 
 ```@meta

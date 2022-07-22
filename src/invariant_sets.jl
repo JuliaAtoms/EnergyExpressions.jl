@@ -27,6 +27,27 @@ function coupled_states(E::AbstractSparseMatrix; i₀=1)
     visited
 end
 
+"""
+    invariant_sets(E)
+
+Generate a list of all invariant sets, i.e. configurations that are
+coupled through the matrix elements of `E`.
+
+# Example
+
+```julia-repl
+julia> E = sparse([1 1 0; 1 1 0; 0 0 1])
+3×3 SparseMatrixCSC{Int64, Int64} with 5 stored entries:
+ 1  1  ⋅
+ 1  1  ⋅
+ ⋅  ⋅  1
+
+julia> invariant_sets(E)
+2-element Vector{Vector{Int64}}:
+ [1, 2]
+ [3]
+```
+"""
 function invariant_sets(E::AbstractSparseMatrix)
     m = size(E,1)
     visited = falses(m)
