@@ -25,6 +25,7 @@ makedocs(
     ],
     format = Documenter.HTML(
         mathengine = MathJax2(Dict(:TeX => Dict(
+            :equationNumbers => Dict(:autoNumber => "AMS"),
             :Macros => Dict(
                 :defd => "≝",
                 :ket => ["|#1\\rangle",1],
