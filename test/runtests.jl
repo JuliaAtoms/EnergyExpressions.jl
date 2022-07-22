@@ -71,6 +71,7 @@ end
 @testset "EnergyExpressions" verbose=true begin
     include("key_tracker.jl")
     include("locked_dict.jl")
+    include("invariant_sets.jl")
 
     include("conjugate_orbitals.jl")
     include("nbody_matrix_elements.jl")
