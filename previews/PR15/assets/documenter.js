@@ -41,6 +41,9 @@ MathJax.Hub.Config({
     "output/NativeMML"
   ],
   "TeX": {
+    "equationNumbers": {
+      "autoNumber": "AMS"
+    },
     "Macros": {
       "vary": [
         "\\delta_{#1}",
