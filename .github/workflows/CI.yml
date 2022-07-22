@@ -52,8 +52,8 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Pkg
-            Pkg.develop(path=pwd())
             Pkg.add(name="Documenter", rev="9a518379edf7fd9c9cf7932ad20ef6fe8b40c495")
+            Pkg.develop(path=pwd())
             Pkg.instantiate()'
       - run: julia --project=docs docs/make.jl
         env:
@@ -70,8 +70,8 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Pkg
-            Pkg.develop(path=pwd())
             Pkg.add(name="Documenter", rev="9a518379edf7fd9c9cf7932ad20ef6fe8b40c495")
+            Pkg.develop(path=pwd())
             Pkg.instantiate()'
       - name: Run Doctests
         run: |
