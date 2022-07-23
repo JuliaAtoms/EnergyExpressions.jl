@@ -40,7 +40,14 @@ OrbitalOverlap
 OrbitalMatrixElement
 numbodies
 NBodyTerm
-NBodyMatrixElement
+```
+
+```@autodocs
+Modules = [EnergyExpressions]
+Filter = t -> (t === EnergyExpressions.NBodyMatrixElement)
+```
+
+```@docs
 isdependent
 transform
 overlap_matrix
