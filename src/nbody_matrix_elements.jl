@@ -387,6 +387,7 @@ an expression with a reference, generated otherwise. It may not be
 performant. It may also fail on edge cases.
 """
 function compare(a::NBodyMatrixElement, op, b::NBodyMatrixElement; kwargs...)
+    iszero(a) && iszero(b) && return op(0, 0)
     ad,bd = map((a,b)) do o
         od = Dict{Vector{NBodyTermFactor},Number}()
         for term in o.terms
