@@ -85,12 +85,18 @@
     @testset "NBodyMatrixElement" begin
         o = one(NBodyMatrixElement)
         z = zero(NBodyMatrixElement)
+        az = convert(NBodyMatrixElement, 0)
+        bz = 0convert(NBodyMatrixElement, 1)
 
         @test o == one(z)
         @test isone(o)
 
         @test z == zero(o)
         @test iszero(z)
+        @test z == az
+        @test z == bz
+        @test z ≈ az
+        @test z ≈ bz
 
 
         h = FieldFreeOneBodyHamiltonian()
