@@ -1,7 +1,7 @@
 name = "EnergyExpressions"
 uuid = "f4b57a2e-27c7-11e9-0cb0-edd185b706f6"
 authors = ["Stefanos Carlström <stefanos.carlstrom@gmail.com>"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 AtomicLevels = "10933b4c-d60f-11e8-1fc6-bd9035a249a1"
