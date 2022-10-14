@@ -536,9 +536,9 @@ function Base.Matrix(bcs::BitConfigurations, rows, op::QuantumOperator, cols; ve
            reduce(vcat, V), m, n)
 end
 
-function Base.Matrix(bcs::BitConfigurations, op::QuantumOperator; kwargs...)
-    m = length(bcs)
-    Matrix(bcs, 1:m, op, 1:m; kwargs...)
+function Base.Matrix(bcs::BitConfigurations, op::QuantumOperator; left=Colon(), right=Colon(), kwargs...)
+    ms = 1:length(bcs)
+    Matrix(bcs, ms[left], op, ms[right]; kwargs...)
 end
 
 export BitConfigurations

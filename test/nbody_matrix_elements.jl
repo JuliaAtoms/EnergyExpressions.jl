@@ -80,6 +80,10 @@
         n = nbt(m, s)
         @test n == nbt(m, s)
         @test n == convert(NBodyTerm, m)*convert(NBodyTerm, s)
+
+        # This is rather contrived, but just to make sure the printing
+        # does not crash if NBodyTerm::coeff is not a number.
+        @test string(NBodyTerm(Vector{EnergyExpressions.NBodyTermFactor}(),OrbitalOverlap(:a,:b))) == "⟨a|b⟩"
     end
 
     @testset "NBodyMatrixElement" begin
@@ -90,6 +94,7 @@
 
         @test o == one(z)
         @test isone(o)
+        @test o == NBodyMatrixElement(one(NBodyTerm))
 
         @test z == zero(o)
         @test iszero(z)
