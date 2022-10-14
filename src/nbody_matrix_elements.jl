@@ -294,6 +294,8 @@ struct NBodyMatrixElement
     terms::Vector{NBodyTerm}
 end
 
+NBodyMatrixElement(term::NBodyTerm) = NBodyMatrixElement([term])
+
 Base.zero(::Type{NBodyMatrixElement}) =
     NBodyMatrixElement(NBodyTerm[])
 

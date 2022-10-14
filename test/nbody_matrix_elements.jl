@@ -94,6 +94,7 @@
 
         @test o == one(z)
         @test isone(o)
+        @test o == NBodyMatrixElement(one(NBodyTerm))
 
         @test z == zero(o)
         @test iszero(z)
