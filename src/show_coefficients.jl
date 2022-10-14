@@ -25,3 +25,8 @@ function showcoeff(io::IO, n::Number, show_sign::Bool, show_one::Bool=false)
         write(io, "1")
     end
 end
+
+function showcoeff(io::IO, n, show_sign::Bool, _)
+    show_sign && write(io, "+ ")
+    print(io, n)
+end
