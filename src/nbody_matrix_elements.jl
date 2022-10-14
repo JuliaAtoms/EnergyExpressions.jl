@@ -832,7 +832,7 @@ Base.Matrix(op::QuantumOperator, cfgs::CFGs,
             overlaps::Vector{<:OrbitalOverlap}=OrbitalOverlap[]; kwargs...) where {CFGs<:AbstractVector} =
                 Matrix(cfgs, op, cfgs, overlaps; kwargs...)
 
-function transform(fun::Function, E::EnergyExpression; verbosity=0)
+function transform(fun::Function, E::EnergyExpression; verbosity=0, kwargs...)
     m,n = size(E)
 
     I = Int[]

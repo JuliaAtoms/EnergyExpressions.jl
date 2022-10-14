@@ -602,5 +602,8 @@ end
         @test val ==  [ome(1, h, 1) + ome(2, h, 2) + ome(3, h, 3) ome(3, h, 6)*s
                        ome(6, h, 3)*s' ome(1, h, 1) + ome(5, h, 5) + ome(6, h, 6)]
         @test occursin("[ Info: Generating energy expression\n", err)
+
+        @test Matrix(bcs, h, left=1, right=2) == reshape([ome(3, h, 6)*s],1,1)
+        @test Matrix(bcs, h, left=1, right=1:2) == reshape([ome(1, h, 1) + ome(2, h, 2) + ome(3, h, 3),ome(3, h, 6)*s],1,2)
     end
 end
