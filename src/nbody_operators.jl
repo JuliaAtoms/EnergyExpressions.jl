@@ -60,6 +60,27 @@ struct IdentityOperator{N} <: NBodyOperator{N} end
 Base.show(io::IO, ::IdentityOperator{N}) where N =
     write(io, to_boldface("I"), to_subscript(N))
 
+LinearAlgebra.adjoint(I::IdentityOperator) = I
+
+# * Adjoint operator
+
+struct AdjointOperator{N,O<:NBodyOperator{N}} <: NBodyOperator{N}
+    o::O
+end
+
+Base.parent(ao::AdjointOperator) = ao.o
+
+Base.hash(ao::AdjointOperator, h::UInt) = hash(parent(ao), hash(0x123, h))
+numbodies(ao::AdjointOperator) = numbodies(parent(ao))
+
+LinearAlgebra.adjoint(o::QuantumOperator) = AdjointOperator(o)
+LinearAlgebra.adjoint(ao::AdjointOperator) = parent(ao)
+
+function Base.show(io::IO, ao::AdjointOperator)
+    show(io, parent(ao))
+    write(io, "†")
+end
+
 # * Linear combination
 
 """
@@ -78,6 +99,9 @@ Base.zero(::Type{LinearCombinationOperator}) =
 
 Base.iszero(op::LinearCombinationOperator) =
     isempty(op.operators)
+
+LinearAlgebra.adjoint(op::LinearCombinationOperator) =
+    sum(adjoint(o)*conj(c) for (o,c) in op.operators)
 
 Base.:(==)(a::LinearCombinationOperator,b::LinearCombinationOperator) =
     a.operators == b.operators
@@ -136,6 +160,8 @@ Base.:(*)(a::Number, b::NBodyOperator) =
     LinearCombinationOperator([b=>a])
 Base.:(*)(a::NBodyOperator, b::Number) =
     LinearCombinationOperator([a=>b])
+
+Base.:(-)(op::QuantumOperator) = -1op
 
 Base.:(*)(a::Number, b::LinearCombinationOperator) =
     LinearCombinationOperator(Pair{<:NBodyOperator,<:Number}[op=>a*c for (op,c) in b.operators])
@@ -210,6 +236,6 @@ function Base.show(io::IO, o::ContractedOperator{N}) where N
     write(io, join(string.(o.b), " "), "⟩")
 end
 
-export QuantumOperator, NBodyOperator, numbodies,
+export QuantumOperator, NBodyOperator, AdjointOperator, numbodies,
     ZeroBodyOperator, OneBodyOperator, TwoBodyOperator,
     IdentityOperator, ContractedOperator

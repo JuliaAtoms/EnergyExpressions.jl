@@ -108,6 +108,8 @@ Base.:(==)(a::OrbitalMatrixElement, b::OrbitalMatrixElement) =
 Base.hash(ome::OrbitalMatrixElement, h::UInt) =
     hash(hash(hash(hash(ome.a), hash(ome.o)), hash(ome.b)), h)
 
+Base.adjoint(ome::OrbitalMatrixElement) = OrbitalMatrixElement(ome.b, adjoint(ome.o), ome.a)
+
 """
     numbodies(::OrbitalMatrixElement{N})
 
@@ -193,6 +195,8 @@ isminusone(term::NBodyTerm) = isempty(term.factors) && isone(-term.coeff)
 Base.zero(::Type{NBodyTerm}) = NBodyTerm(NBodyTermFactor[], 0)
 Base.zero(::NBodyTerm) = zero(NBodyTerm)
 Base.iszero(term::NBodyTerm) = iszero(term.coeff) || any(iszero.(term.factors))
+
+LinearAlgebra.adjoint(nbt::NBodyTerm) = NBodyMatrixElement(conj(nbt.coeff)*prod(adjoint.(nbt.factors)))
 
 Base.convert(::Type{NBodyTerm}, f::NBodyTermFactor) =
     NBodyTerm([f], 1)
@@ -674,6 +678,8 @@ function transform(f::Function, nbme::NBodyMatrixElement)
     iszero(nbme) && return nbme
     sum(map(t -> transform(f, t), nbme.terms))
 end
+
+LinearAlgebra.adjoint(nbme::NBodyMatrixElement) = sum(adjoint.(nbme.terms))
 
 # * Overlap matrices
 

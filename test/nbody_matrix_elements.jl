@@ -81,6 +81,9 @@
         @test n == nbt(m, s)
         @test n == convert(NBodyTerm, m)*convert(NBodyTerm, s)
 
+        @test m' == ome(4,h',3)
+        @test string(m') == "⟨4|ĥ₀†|3⟩"
+
         # This is rather contrived, but just to make sure the printing
         # does not crash if NBodyTerm::coeff is not a number.
         @test string(NBodyTerm(Vector{EnergyExpressions.NBodyTermFactor}(),OrbitalOverlap(:a,:b))) == "⟨a|b⟩"
@@ -128,6 +131,13 @@
         me += me
         me += me
         @test strdisplay(me, limit=true) == "(3|4) + (3|4)⟨1|2⟩ + ⟨1|2⟩ + (3|4) + (3|4)⟨1|2⟩ + ⟨1|2⟩ + … + (3|4) + (3|4)⟨1|2⟩ + ⟨1|2⟩ + (3|4) + (3|4)⟨1|2⟩ + ⟨1|2⟩"
+
+        @test m' == ome(4,h',3)
+        @test (4im*m)' == -4im*(m')
+        @test n' == nbt(m', s')
+        @test nbme(m)' == nbme(m')
+        @test nbme(n)' == nbme(nbt(m', s'))
+        @test (m + n + s)' == m' + n' + s'
     end
 
     @testset "Arithmetic" begin
@@ -223,6 +233,8 @@
 
         @test E1 == E2
         @test occursin("[ Info: Generating energy expression\n", err)
+
+        @test (E1')' == E1'' == E1
     end
 
     @testset "Transformations" begin
