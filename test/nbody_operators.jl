@@ -35,6 +35,10 @@
         @test string(zero(L)) == "0"
 
         @test filter(Base.Fix2(isa, OneBodyOperator), L).operators == [I₁ => 1]
+
+        @test -I₁ == (-1)*I₁
+        @test -I₂ == (-1)*I₂
+        @test -L == -I₁ - I₂
     end
 
     @testset "ContractedOperator" begin

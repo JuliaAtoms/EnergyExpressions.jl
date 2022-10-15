@@ -137,6 +137,8 @@ Base.:(*)(a::Number, b::NBodyOperator) =
 Base.:(*)(a::NBodyOperator, b::Number) =
     LinearCombinationOperator([a=>b])
 
+Base.:(-)(op::QuantumOperator) = -1op
+
 Base.:(*)(a::Number, b::LinearCombinationOperator) =
     LinearCombinationOperator(Pair{<:NBodyOperator,<:Number}[op=>a*c for (op,c) in b.operators])
 Base.:(*)(a::LinearCombinationOperator, b::Number) =
