@@ -7,6 +7,16 @@
     I₂ = IdentityOperator{2}()
     @test I₂ isa TwoBodyOperator
 
+    @test adjoint(I₁) == I₁
+
+    h = FieldFreeOneBodyHamiltonian()
+    @test h' == AdjointOperator(h)
+    @test (h')' == h'' == h
+    @test string(h') == "ĥ₀†"
+
+    @test hash(h') == hash(AdjointOperator(h))
+    @test numbodies(h') == 1
+
     @testset "LinearCombinationOperator" begin
         L = I₁ + I₂
         @test !iszero(L)
@@ -39,6 +49,8 @@
         @test -I₁ == (-1)*I₁
         @test -I₂ == (-1)*I₂
         @test -L == -I₁ - I₂
+
+        @test adjoint(L) == L
     end
 
     @testset "ContractedOperator" begin
