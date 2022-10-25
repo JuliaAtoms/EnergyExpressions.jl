@@ -143,4 +143,19 @@
 
         @test occursin("[ Info: Deriving equations for $(norb) orbitals\n", err)
     end
+
+    @testset "Pretty-printing" begin
+        cfgs = spin_configurations(c"1s 2p")
+        bcs = BitConfigurations(cfgs)
+        h = FieldFreeOneBodyHamiltonian()
+        E = Matrix(bcs, h)
+        a,b = so"1s₀α",so"2p₀β"
+        mceqs = diff(E, conj([a,b]))
+
+        @test string(mceqs) == "2-equation MCEquationSystem, 2 non-zero equations, 0 common integrals"
+        test_value_and_output(nothing, "2-equation MCEquationSystem, 2 non-zero equations, 0 common integrals
+- 1: $(mceqs.equations[1])- 2: $(mceqs.equations[2])") do
+            show(stdout, "text/plain", mceqs)
+        end
+    end
 end

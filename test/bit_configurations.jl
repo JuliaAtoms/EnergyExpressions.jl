@@ -605,5 +605,7 @@ end
 
         @test Matrix(bcs, h, left=1, right=2) == reshape([ome(3, h, 6)*s],1,1)
         @test Matrix(bcs, h, left=1, right=1:2) == reshape([ome(1, h, 1) + ome(2, h, 2) + ome(3, h, 3),ome(3, h, 6)*s],1,2)
+
+        @test Matrix(bcs, h, left=1, right=2, my_kwarg=1) == reshape([ome(3, h, 6)*s],1,1)
     end
 end

@@ -50,6 +50,8 @@ function Base.show(io::IO, oeq::OrbitalEquation)
     write(io, "\n")
 end
 
+Base.iszero(oeq::OrbitalEquation) = iszero(oeq.equation)
+
 """
     MCEquationSystem(equations, integrals)
 
@@ -62,6 +64,25 @@ need only be computed once per iteration, for efficiency.
 struct MCEquationSystem
     equations
     integrals
+end
+
+function Base.show(io::IO, mceqs::MCEquationSystem)
+    neq = length(mceqs.equations)
+    nnzeq = count(!iszero, mceqs.equations)
+    nint = length(mceqs.integrals)
+
+    write(io, "$(neq)-equation MCEquationSystem, $(nnzeq) non-zero equations, $(nint) common integrals")
+end
+
+function Base.show(io::IO, mime::MIME"text/plain", mceqs::MCEquationSystem)
+    show(io, mceqs)
+    println(io)
+    nd = length(digits(length(mceqs.equations)))
+    for (i,eq) in enumerate(mceqs.equations)
+        iszero(eq) && continue
+        printfmt(io, "- {1:>$(nd)d}: ", i)
+        show(io, mime, eq)
+    end
 end
 
 """
