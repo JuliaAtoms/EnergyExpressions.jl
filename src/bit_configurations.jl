@@ -503,7 +503,7 @@ function NBodyMatrixElement(bcs::BitConfigurations, op::LinearCombinationOperato
     NBodyMatrixElement(terms)
 end
 
-function Base.Matrix(bcs::BitConfigurations, rows, op::QuantumOperator, cols; verbosity=0)
+function Base.Matrix(bcs::BitConfigurations, rows, op::QuantumOperator, cols; verbosity=0, kwargs...)
     m,n = length(rows), length(cols)
 
     I = [Int[] for i in 1:Threads.nthreads()]
