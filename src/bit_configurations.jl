@@ -506,18 +506,21 @@ end
 function Base.Matrix(bcs::BitConfigurations, rows, op::QuantumOperator, cols; verbosity=0, kwargs...)
     m,n = length(rows), length(cols)
 
-    I = [Int[] for i in 1:Threads.nthreads()]
-    J = [Int[] for i in 1:Threads.nthreads()]
-    V = [NBodyMatrixElement[] for i in 1:Threads.nthreads()]
+    # https://discourse.julialang.org/t/threading-race-condition-when-pushing-to-arrays/99567/3
+    Is = Channel{Vector{Int}}(m)
+    Js = Channel{Vector{Int}}(m)
+    Vs = Channel{Vector{NBodyMatrixElement}}(m)
 
     p = if verbosity > 0
-        @info "Generating energy expression"
+        @info "Generating energy expression" op
         Progress(m*n)
     end
 
     Threads.@threads for i in eachindex(rows)
         r = rows[i]
-        tid = Threads.threadid()
+        I = Int[]
+        J = Int[]
+        V = NBodyMatrixElement[]
         for (j,c) in enumerate(cols)
             me = NBodyMatrixElement(bcs, op, r, c)
 
@@ -525,15 +528,19 @@ function Base.Matrix(bcs::BitConfigurations, rows, op::QuantumOperator, cols; ve
 
             iszero(me) && continue
 
-            push!(I[tid], i)
-            push!(J[tid], j)
-            push!(V[tid], me)
+            push!(I, i)
+            push!(J, j)
+            push!(V, me)
         end
+        put!(Is, I)
+        put!(Js, J)
+        put!(Vs, V)
     end
+    close(Is); close(Js); close(Vs)
 
-    sparse(reduce(vcat, I),
-           reduce(vcat, J),
-           reduce(vcat, V), m, n)
+    sparse(reduce(vcat, Is),
+           reduce(vcat, Js),
+           reduce(vcat, Vs), m, n)
 end
 
 function Base.Matrix(bcs::BitConfigurations, op::QuantumOperator; left=Colon(), right=Colon(), kwargs...)
