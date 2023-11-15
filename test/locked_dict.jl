@@ -4,7 +4,7 @@
 
     Threads.@threads for i = 1:1_000
         n = mod(i, 10)
-        @test get!(ld, n, n) == n
+        @test get!(ld, n, () -> n) == n
     end
 
     for (k,v) in ld

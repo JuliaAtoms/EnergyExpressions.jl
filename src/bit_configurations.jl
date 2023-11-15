@@ -507,6 +507,7 @@ function Base.Matrix(bcs::BitConfigurations, rows, op::QuantumOperator, cols; ve
     m,n = length(rows), length(cols)
 
     # https://discourse.julialang.org/t/threading-race-condition-when-pushing-to-arrays/99567/3
+    # Allocate channels for m rows.
     Is = Channel{Vector{Int}}(m)
     Js = Channel{Vector{Int}}(m)
     Vs = Channel{Vector{NBodyMatrixElement}}(m)

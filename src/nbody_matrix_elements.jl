@@ -792,9 +792,11 @@ function Base.Matrix(as::CFGs, op::QuantumOperator, bs::CFGs,
                      verbosity=0) where {CFGs<:AbstractVector}
     m,n = length(as),length(bs)
 
-    I = [Int[] for i in 1:Threads.nthreads()]
-    J = [Int[] for i in 1:Threads.nthreads()]
-    V = [NBodyMatrixElement[] for i in 1:Threads.nthreads()]
+    # https://discourse.julialang.org/t/threading-race-condition-when-pushing-to-arrays/99567/3
+    # Allocate channels for m rows.
+    Is = Channel{Vector{Int}}(m)
+    Js = Channel{Vector{Int}}(m)
+    Vs = Channel{Vector{NBodyMatrixElement}}(m)
 
     p = if verbosity > 0
         @info "Generating energy expression"
@@ -802,10 +804,12 @@ function Base.Matrix(as::CFGs, op::QuantumOperator, bs::CFGs,
     end
 
     Threads.@threads for i in eachindex(as)
-        tid = Threads.threadid()
         a = as[i]
         aoverlaps = filter(o -> o.a ∈ a.orbitals || o.b ∈ a.orbitals,
                            overlaps)
+        I = Int[]
+        J = Int[]
+        V = NBodyMatrixElement[]
         for (j,b) in enumerate(bs)
             aboverlaps = filter(o -> o.a ∈ b.orbitals || o.b ∈ b.orbitals,
                                 aoverlaps)
@@ -816,15 +820,19 @@ function Base.Matrix(as::CFGs, op::QuantumOperator, bs::CFGs,
 
             iszero(me) && continue
 
-            push!(I[tid], i)
-            push!(J[tid], j)
-            push!(V[tid], me)
+            push!(I, i)
+            push!(J, j)
+            push!(V, me)
         end
+        put!(Is, I)
+        put!(Js, J)
+        put!(Vs, V)
     end
+    close(Is); close(Js); close(Vs)
 
-    sparse(reduce(vcat, I),
-           reduce(vcat, J),
-           reduce(vcat, V), m, n)
+    sparse(reduce(vcat, Is),
+           reduce(vcat, Js),
+           reduce(vcat, Vs), m, n)
 end
 
 """

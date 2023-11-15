@@ -150,7 +150,7 @@ gathers information on which integrals are common to all equations,
 for efficient equation solving.
 """
 function Base.diff(E::EM, orbitals::VO; verbosity=0) where {EM<:EnergyExpression, O,VO<:AbstractVector{O}}
-    # Vector of common integrals
+    # Vector of common integrals; LockedDict makes it thread-safe.
     integrals = KeyTracker(LockedDict{Any,Int}())
 
     norb = length(orbitals)
@@ -159,15 +159,16 @@ function Base.diff(E::EM, orbitals::VO; verbosity=0) where {EM<:EnergyExpression
         Progress(norb)
     end
 
-    equations = [OrbitalEquation[] for i in 1:Threads.nthreads()]
-    for i = 1:length(orbitals)
-        tid = Threads.threadid()
-        orbital = orbitals[i]
+    equations = tmapreduce(vcat, orbitals) do orbital
         eq = orbital_equation(E, orbital, integrals)
         isnothing(p) || ProgressMeter.next!(p)
-        push!(equations[tid], eq)
+        eq
     end
-    equations = reduce(vcat, equations)
+
+    vd = collect(values(integrals.data))
+    verbosity > 3 && @info "Integrals" integrals.data filter(∉(1:length(integrals.data)), vd)
+    @assert allunique(vd)
+    @assert all(∈(1:length(integrals.data)), vd)
 
     MCEquationSystem(equations, keys(integrals))
 end
@@ -193,14 +194,24 @@ function Base.diff(fun!::Function, E::EM, orbitals::VO; verbosity=0) where {EM<:
     norb = length(orbitals)
     p = if verbosity > 0
         @info "Deriving equations for $(norb) orbitals"
-        Progress(norb)
+        Progress(norb, desc="Der.eq.2")
     end
+    # This map MAY NOT be parallelized, since the gradual modification
+    # of the underlying energy expression is not thread-safe. This is
+    # used e.g. when setting up observables, where double-counting of
+    # orbital contributions needs to be avoided (see
+    # AtomicStructure.jl).
     equations = map(orbitals) do orbital
         eq = orbital_equation(E, orbital, integrals)
         fun!(E, orbital)
         isnothing(p) || ProgressMeter.next!(p)
         eq
     end
+
+    vd = collect(values(integrals.data))
+    verbosity > 3 && @info "Integrals" integrals.data filter(∉(1:length(integrals.data)), vd)
+    @assert allunique(vd)
+    @assert all(∈(1:length(integrals.data)), vd)
 
     MCEquationSystem(equations, keys(integrals))
 end

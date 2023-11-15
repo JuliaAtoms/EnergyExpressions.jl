@@ -9,6 +9,7 @@ using Formatting
 using ProgressMeter
 
 include("key_tracker.jl")
+include("threading.jl")
 include("conjugate_orbitals.jl")
 include("slater_determinants.jl")
 include("show_coefficients.jl")
