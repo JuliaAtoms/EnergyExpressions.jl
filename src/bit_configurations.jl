@@ -506,42 +506,9 @@ end
 function Base.Matrix(bcs::BitConfigurations, rows, op::QuantumOperator, cols; verbosity=0, kwargs...)
     m,n = length(rows), length(cols)
 
-    # https://discourse.julialang.org/t/threading-race-condition-when-pushing-to-arrays/99567/3
-    # Allocate channels for m rows.
-    Is = Channel{Vector{Int}}(m)
-    Js = Channel{Vector{Int}}(m)
-    Vs = Channel{Vector{NBodyMatrixElement}}(m)
-
-    p = if verbosity > 0
-        @info "Generating energy expression" op
-        Progress(m*n)
+    threaded_sparse_builder(NBodyMatrixElement, m, n; verbosity=verbosity) do i,j,_
+        NBodyMatrixElement(bcs, op, rows[i], cols[j])
     end
-
-    Threads.@threads for i in eachindex(rows)
-        r = rows[i]
-        I = Int[]
-        J = Int[]
-        V = NBodyMatrixElement[]
-        for (j,c) in enumerate(cols)
-            me = NBodyMatrixElement(bcs, op, r, c)
-
-            !isnothing(p) && ProgressMeter.next!(p)
-
-            iszero(me) && continue
-
-            push!(I, i)
-            push!(J, j)
-            push!(V, me)
-        end
-        put!(Is, I)
-        put!(Js, J)
-        put!(Vs, V)
-    end
-    close(Is); close(Js); close(Vs)
-
-    sparse(reduce(vcat, Is),
-           reduce(vcat, Js),
-           reduce(vcat, Vs), m, n)
 end
 
 function Base.Matrix(bcs::BitConfigurations, op::QuantumOperator; left=Colon(), right=Colon(), kwargs...)

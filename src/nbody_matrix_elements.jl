@@ -847,35 +847,10 @@ Base.Matrix(op::QuantumOperator, cfgs::CFGs,
                 Matrix(cfgs, op, cfgs, overlaps; kwargs...)
 
 function transform(fun::Function, E::EnergyExpression; verbosity=0, kwargs...)
-    m,n = size(E)
-
-    I = Int[]
-    J = Int[]
-    V = NBodyMatrixElement[]
-    rows = rowvals(E)
-    vals = nonzeros(E)
-
-    p = if verbosity > 0
-        @info "Transforming energy expression"
-        Progress(nnz(E))
+    verbosity > 0 && @info "Transforming energy expression"
+    threaded_sparse_map(NBodyMatrixElement, E; verbosity=verbosity) do v, _
+        transform(fun, v)
     end
-
-    for j = 1:n
-        for ind in nzrange(E, j)
-            i = rows[ind]
-            me = transform(fun, vals[ind])
-
-            !isnothing(p) && ProgressMeter.next!(p)
-
-            iszero(me) && continue
-
-            push!(I, i)
-            push!(J, j)
-            push!(V, me)
-        end
-    end
-
-    sparse(I, J, V, m, n)
 end
 
 export OrbitalOverlap, numbodies, overlap_matrix, transform, EnergyExpression, isdependent

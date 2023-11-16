@@ -194,7 +194,7 @@ function Base.diff(fun!::Function, E::EM, orbitals::VO; verbosity=0) where {EM<:
     norb = length(orbitals)
     p = if verbosity > 0
         @info "Deriving equations for $(norb) orbitals"
-        Progress(norb, desc="Der.eq.2")
+        Progress(norb)
     end
     # This map MAY NOT be parallelized, since the gradual modification
     # of the underlying energy expression is not thread-safe. This is
