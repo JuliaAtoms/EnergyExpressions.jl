@@ -1,13 +1,18 @@
-function showcoeff(io::IO, n::Number, show_sign::Bool, show_one::Bool=false)
-    isimag(n) = !iszero(n) && isreal(im*n)
-    isneg(n) = n < 0
+const RealOrComplex{T<:Real} = Union{T,Complex{T}}
 
+isimag(::Real) = false
+isimag(n) = !iszero(n) && !isreal(n) && isreal(1im*n)
+isneg(n::Real) = n < 0
+
+function showcoeff(io::IO, n::Number, show_sign::Bool, show_one::Bool=false)
     if isreal(n) && isneg(real(n)) || isimag(n) && isneg(imag(n))
         write(io, "- ")
     else
         show_sign && write(io, "+ ")
     end
-    n = round(n, digits=6)
+    printable(n::RealOrComplex{<:AbstractFloat}) = round(n, digits=6)
+    printable(n) = n
+    n = printable(n)
     if !(isone(n) || isone(-n))
         if !(isreal(n) || isimag(n))
             write(io, "($n)")
