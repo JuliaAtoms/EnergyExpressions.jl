@@ -353,6 +353,9 @@ Base.:(*)(a::NBodyMatrixElement, b::Union{Number,NBodyTerm,NBodyTermFactor}) =
 Base.:(*)(a::Union{Number,NBodyTerm,NBodyTermFactor}, b::NBodyMatrixElement) =
     NBodyMatrixElement([a*t for t in b.terms])
 
+Base.:(*)(a::NBodyMatrixElement, b::NBodyMatrixElement) =
+    NBodyMatrixElement(vec(map(prod, Iterators.product(a.terms, b.terms))))
+
 Base.:(-)(f::NBodyMatrixElement) = (-1)*f
 
 Base.:(-)(a::Union{NBodyTerm,NBodyTermFactor,NBodyMatrixElement},
